@@ -5,11 +5,13 @@
 ### Step 1: Delete Old Scripts (OR Let the Script Do It!)
 The new script will **automatically clean up** old LinkedLeaderboard scripts!
 
-But if you want to manually check, they're located deep inside tycoon models:
-- `Workspace > SpidermanTycoon > Spiderman tycoon > Tycoons > Cinnamoroll > LinkedLeaderboard`
-- `Workspace > SpidermanTycoon > Spiderman tycoon > Tycoons > HelloKitty > LinkedLeaderboard`
-- `Workspace > Venom Tycoon > [tycoon name] > Tycoons > [plot name] > LinkedLeaderboard`
-- And any other LinkedLeaderboard scripts buried in tycoon plots
+The old scripts are located at the tycoon kit level (NOT inside the Tycoons folder):
+- `Workspace > SpidermanTycoon > Spiderman tycoon > LinkedLeaderboard` (First copy - has Cinnamoroll)
+- `Workspace > SpidermanTycoon > Spiderman tycoon > LinkedLeaderboard` (Second copy - has HelloKitty)
+- `Workspace > Venom Tycoon > Zednov's Tycoon Kit [OPEN!] > LinkedLeaderboard`
+- `Workspace > Zednov's Tycoon Kit > LinkedLeaderboard`
+
+Note: You have DUPLICATE SpidermanTycoon models, each with their own scripts!
 
 ### Step 2: Install New Script
 1. Copy all code from `FINAL_UnifiedLeaderboard.lua`
@@ -63,3 +65,12 @@ local money = _G.GetPlayerMoney("PlayerName")
 - Check if player name matches exactly
 
 That's it! Much simpler than managing 4 separate scripts hidden deep in models!
+
+## Important Note About Duplicate Tycoons
+
+You have TWO complete SpidermanTycoon models in your workspace:
+1. One with Cinnamoroll in its Tycoons folder
+2. One with HelloKitty in its Tycoons folder
+
+Each has its own complete set of scripts (LinkedLeaderboard, Core_Handler, DevProductHandler, Settings).
+This unified script replaces ALL of them with just ONE script in ServerScriptService!

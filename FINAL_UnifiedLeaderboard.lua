@@ -9,34 +9,53 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 
--- Clean up old LinkedLeaderboard scripts
+-- Clean up old LinkedLeaderboard scripts from tycoon kits
 local function cleanupOldScripts()
     local removedCount = 0
+    local foundLocations = {}
     
-    -- Search through workspace for any LinkedLeaderboard scripts
-    for _, descendant in pairs(workspace:GetDescendants()) do
-        if descendant:IsA("Script") and descendant.Name == "LinkedLeaderboard" then
-            print("Found old LinkedLeaderboard at:", descendant:GetFullName())
-            descendant:Destroy()
-            removedCount = removedCount + 1
+    -- Look for tycoon kits in workspace
+    for _, child in pairs(workspace:GetChildren()) do
+        if child:IsA("Model") then
+            -- Check if this looks like a tycoon kit (has the structure we expect)
+            local innerModel = child:FindFirstChild(child.Name:gsub("Tycoon", " tycoon")) or 
+                              child:FindFirstChild("Zednov's Tycoon Kit [OPEN!]") or
+                              child:FindFirstChild("Spiderman tycoon")
+            
+            if innerModel then
+                local linkedScript = innerModel:FindFirstChild("LinkedLeaderboard")
+                if linkedScript and linkedScript:IsA("Script") then
+                    table.insert(foundLocations, linkedScript:GetFullName())
+                    linkedScript:Destroy()
+                    removedCount = removedCount + 1
+                end
+            end
         end
     end
     
-    -- Also check ServerScriptService
+    -- Also check ServerScriptService for any that already moved there
     for _, child in pairs(game.ServerScriptService:GetChildren()) do
         if child:IsA("Script") and child.Name == "LinkedLeaderboard" and child ~= script then
-            print("Found old LinkedLeaderboard in ServerScriptService")
+            table.insert(foundLocations, "ServerScriptService.LinkedLeaderboard")
             child:Destroy()
             removedCount = removedCount + 1
         end
     end
     
     if removedCount > 0 then
-        print("Cleaned up", removedCount, "old LinkedLeaderboard scripts")
+        print("=== CLEANUP REPORT ===")
+        print("Removed", removedCount, "old LinkedLeaderboard scripts from:")
+        for _, location in ipairs(foundLocations) do
+            print("  -", location)
+        end
+        print("=====================")
+    else
+        print("No old LinkedLeaderboard scripts found to clean up")
     end
 end
 
--- Run cleanup
+-- Run cleanup after a short delay to ensure all scripts have loaded
+wait(0.1)
 cleanupOldScripts()
 
 -- Variables
