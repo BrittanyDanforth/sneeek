@@ -2,7 +2,8 @@
 -- This script handles both CTF (Capture The Flag) and regular game modes
 -- with kills, deaths, and currency tracking
 
-local Settings = require(script.Parent.Settings)
+local Settings = require(game.ServerScriptService.Settings)
+-- Script will auto-parent to ServerScriptService (remove line below if already there)
 script.Parent = game.ServerScriptService
 
 -- Global variables
