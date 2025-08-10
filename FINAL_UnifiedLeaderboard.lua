@@ -9,6 +9,36 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 
+-- Clean up old LinkedLeaderboard scripts
+local function cleanupOldScripts()
+    local removedCount = 0
+    
+    -- Search through workspace for any LinkedLeaderboard scripts
+    for _, descendant in pairs(workspace:GetDescendants()) do
+        if descendant:IsA("Script") and descendant.Name == "LinkedLeaderboard" then
+            print("Found old LinkedLeaderboard at:", descendant:GetFullName())
+            descendant:Destroy()
+            removedCount = removedCount + 1
+        end
+    end
+    
+    -- Also check ServerScriptService
+    for _, child in pairs(game.ServerScriptService:GetChildren()) do
+        if child:IsA("Script") and child.Name == "LinkedLeaderboard" and child ~= script then
+            print("Found old LinkedLeaderboard in ServerScriptService")
+            child:Destroy()
+            removedCount = removedCount + 1
+        end
+    end
+    
+    if removedCount > 0 then
+        print("Cleaned up", removedCount, "old LinkedLeaderboard scripts")
+    end
+end
+
+-- Run cleanup
+cleanupOldScripts()
+
 -- Variables
 local stands = {}
 local CTF_mode = false
@@ -18,30 +48,42 @@ local loadedSettings = false
 -- Track if we already created stats for players (prevents duplicates)
 local processedPlayers = {}
 
--- Look for Settings module in all known tycoon locations
+-- Look for Settings module in all tycoon kit locations
 local function findAndLoadSettings()
-    local possibleLocations = {
-        "Workspace.SpidermanTycoon.Spiderman tycoon.Settings",
-        "Workspace.Venom Tycoon.Zednov's Tycoon Kit [OPEN!].Settings",
-        "Workspace.Zednov's Tycoon Kit.Settings",
-        "ServerScriptService.Settings", -- In case you moved it here
+    -- First check common locations
+    local commonLocations = {
+        game.ServerScriptService:FindFirstChild("Settings"),
     }
     
-    for _, path in ipairs(possibleLocations) do
-        local success, result = pcall(function()
-            local current = game
-            for part in string.gmatch(path, "[^.]+") do
-                current = current[part]
-            end
-            return current
-        end)
-        
-        if success and result and result:IsA("ModuleScript") then
-            local loadSuccess, module = pcall(require, result)
-            if loadSuccess then
+    for _, settingsModule in ipairs(commonLocations) do
+        if settingsModule and settingsModule:IsA("ModuleScript") then
+            local success, module = pcall(require, settingsModule)
+            if success then
                 Settings = module
-                print("Loaded Settings from:", path)
+                print("Loaded Settings from ServerScriptService")
                 return true
+            end
+        end
+    end
+    
+    -- Now search for Settings in tycoon kits
+    local tycoonKits = {
+        workspace:FindFirstChild("SpidermanTycoon"),
+        workspace:FindFirstChild("Venom Tycoon"),
+        workspace:FindFirstChild("Zednov's Tycoon Kit"),
+    }
+    
+    for _, kit in ipairs(tycoonKits) do
+        if kit then
+            -- Look for Settings at the kit level
+            local settingsAtRoot = kit:FindFirstChild("Settings", true)
+            if settingsAtRoot and settingsAtRoot:IsA("ModuleScript") then
+                local success, module = pcall(require, settingsAtRoot)
+                if success then
+                    Settings = module
+                    print("Loaded Settings from:", kit.Name)
+                    return true
+                end
             end
         end
     end

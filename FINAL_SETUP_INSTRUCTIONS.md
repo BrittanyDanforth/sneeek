@@ -2,12 +2,14 @@
 
 ## Quick Setup (2 minutes)
 
-### Step 1: Delete Old Scripts
-Go to each location and DELETE the LinkedLeaderboard scripts:
-- `Workspace.SpidermanTycoon.Spiderman tycoon.LinkedLeaderboard` 
-- `Workspace.Venom Tycoon.Zednov's Tycoon Kit [OPEN!].LinkedLeaderboard`
-- `Workspace.Zednov's Tycoon Kit.LinkedLeaderboard`
-- Any duplicate LinkedLeaderboard scripts
+### Step 1: Delete Old Scripts (OR Let the Script Do It!)
+The new script will **automatically clean up** old LinkedLeaderboard scripts!
+
+But if you want to manually check, they're located deep inside tycoon models:
+- `Workspace > SpidermanTycoon > Spiderman tycoon > Tycoons > Cinnamoroll > LinkedLeaderboard`
+- `Workspace > SpidermanTycoon > Spiderman tycoon > Tycoons > HelloKitty > LinkedLeaderboard`
+- `Workspace > Venom Tycoon > [tycoon name] > Tycoons > [plot name] > LinkedLeaderboard`
+- And any other LinkedLeaderboard scripts buried in tycoon plots
 
 ### Step 2: Install New Script
 1. Copy all code from `FINAL_UnifiedLeaderboard.lua`
@@ -21,16 +23,20 @@ Go to each location and DELETE the LinkedLeaderboard scripts:
 
 ✅ **No more duplicate stats** - Only one script handling all players
 ✅ **No more errors** - Fixed the setupCurrencyTracking bug
-✅ **Easier to manage** - ONE script instead of 4
-✅ **Works with deep tycoons** - Automatically finds Settings in any tycoon
+✅ **Easier to manage** - ONE script instead of multiple buried in each tycoon plot
+✅ **Auto-cleanup** - Automatically removes old LinkedLeaderboard scripts
+✅ **Works with tycoon kits** - Handles scripts deep inside Tycoons > Plot folders
 ✅ **Better performance** - No duplicate processing
+✅ **Works for ALL tycoons** - Cinnamoroll, HelloKitty, and any future tycoons
 
 ## How It Works
 
-1. The script automatically searches for Settings modules in all your tycoons
-2. Creates PlayerMoney folder in ServerStorage if needed
-3. Prevents duplicate stats by tracking processed players
-4. Handles both KillsName and KillsNames (fixes the typo issue)
+1. **Auto-cleanup** - Removes all old LinkedLeaderboard scripts on startup
+2. **Smart Settings search** - Looks for Settings modules in tycoon kits
+3. **Single source of truth** - One script manages ALL tycoon leaderboards
+4. **No more buried scripts** - Everything runs from ServerScriptService
+5. **Prevents duplicate stats** - Tracks which players already have stats
+6. **Handles typos** - Works with both KillsName and KillsNames
 
 ## For Shops
 
