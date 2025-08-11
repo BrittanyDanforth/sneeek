@@ -77,7 +77,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://4580655175" -- Kawaii Star
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(1, 1, 1) -- Scale for star
+	mesh.Scale = Vector3.new(2, 2, 2) -- Scale for star
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -166,11 +166,11 @@ while true do
 	star.Parent = PartStorage
 	
 	-- Spawn animation
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1, 1, 1)}
+		{Scale = Vector3.new(2, 2, 2)}
 	):Play()
 	
 	-- Flash effect

@@ -77,7 +77,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://16511869836" -- Strawberry Cake Slice
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale for cake
+	mesh.Scale = Vector3.new(1.5, 1.5, 1.5) -- Scale for cake
 	mesh.Parent = cake
 	
 	-- Frosting shine
@@ -166,11 +166,11 @@ while true do
 	cake.Parent = PartStorage
 	
 	-- Spawn animation
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
+	mesh.Scale = Vector3.new(0.3, 0.3, 0.3)
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.5, 0.5, 0.5)}
+		{Scale = Vector3.new(1.5, 1.5, 1.5)}
 	):Play()
 	
 	-- Flash effect

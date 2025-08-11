@@ -124,7 +124,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://20170940" -- Kawaii Cupcake from catalog
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(0.02, 0.02, 0.02) -- Scale for cupcake
+	mesh.Scale = Vector3.new(1, 1, 1) -- Proper scale for cupcake
 	mesh.Parent = orb
 
 	-- COLLISION: On for world, off for players
@@ -181,10 +181,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(0.01, 0.01, 0.01)
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.02, 0.02, 0.02)}
+		{Scale = Vector3.new(1, 1, 1)}
 	)
 	spawnTween:Play()
 
