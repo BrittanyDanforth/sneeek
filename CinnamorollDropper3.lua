@@ -148,24 +148,7 @@ while true do
 	pointLight.Color = Color3.fromRGB(125, 186, 230)  -- Softer light sky blue glow
 	pointLight.Parent = orb
 
-	-- POLISH: Multi-layer premium effect
-	-- Inner glass core
-	local innerCore = Instance.new("Part")
-	innerCore.Name = "InnerCore"
-	innerCore.Shape = Enum.PartType.Ball
-	innerCore.Material = Enum.Material.Glass
-	innerCore.Size = Vector3.new(1.2, 1.2, 1.2)
-	innerCore.Color = Color3.fromRGB(100, 149, 237)  -- Darker blue core
-	innerCore.Transparency = 0.4
-	innerCore.Reflectance = 0.5
-	innerCore.CanCollide = false
-	innerCore.Massless = true
-	innerCore.Parent = orb
-	
-	local weld1 = Instance.new("WeldConstraint")
-	weld1.Part0 = orb
-	weld1.Part1 = innerCore
-	weld1.Parent = orb
+	-- POLISH: Multi-layer premium effect (removed inner core - was causing patterns)
 	
 	-- Outer aura
 	local outerAura = Instance.new("Part")
