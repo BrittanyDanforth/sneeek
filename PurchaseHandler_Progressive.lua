@@ -199,20 +199,47 @@ local function updateButtonVisibility()
         if head then
             local buttonNum = button.Name:match("%d+")
             
-            if buttonNum and not purchasedItems[buttonNum] then
-                if hasRequirements(buttonNum) then
-                    -- Show button
-                    head.Transparency = 0
-                    head.CanCollide = true
-                    local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
-                    if gui then gui.Enabled = true end
-                else
-                    -- Hide button - requirements not met
+            if buttonNum then
+                -- Already purchased - hide it
+                if purchasedItems[buttonNum] then
                     head.Transparency = 1
                     head.CanCollide = false
                     local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
                     if gui then gui.Enabled = false end
+                    
+                -- Not purchased - check if it should be visible
+                else
+                    local data = PROGRESSION_DATA[buttonNum]
+                    
+                    -- Special case: Only button 1 starts visible
+                    if buttonNum == "1" and next(purchasedItems) == nil then
+                        head.Transparency = 0
+                        head.CanCollide = true
+                        local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
+                        if gui then gui.Enabled = true end
+                        
+                    -- Check if this button has data and requirements are met
+                    elseif data and hasRequirements(buttonNum) then
+                        -- Show button
+                        head.Transparency = 0
+                        head.CanCollide = true
+                        local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
+                        if gui then gui.Enabled = true end
+                        
+                    else
+                        -- Hide button - not in progression data or requirements not met
+                        head.Transparency = 1
+                        head.CanCollide = false
+                        local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
+                        if gui then gui.Enabled = false end
+                    end
                 end
+            else
+                -- No number in button name - hide it
+                head.Transparency = 1
+                head.CanCollide = false
+                local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
+                if gui then gui.Enabled = false end
             end
         end
     end
@@ -382,28 +409,11 @@ for _, button in ipairs(buttons:GetChildren()) do
 			return
 		end
 
-		-- Handle dependencies (keep existing functionality)
+		-- Handle dependencies (keep existing functionality but respect progression)
 		local dependency = button:FindFirstChild("Dependency")
 		if dependency then
-			head.CanCollide = false
-			head.Transparency = 1
-
-			-- Wait for dependency
-			purchasedObjects:WaitForChild(dependency.Value)
-
-			-- Check if progression requirements are also met
-			local buttonNum = button.Name:match("%d+")
-			if buttonNum and hasRequirements(buttonNum) then
-				-- Fade in button smoothly
-				if Settings.ButtonsFadeIn then
-					local tween = TweenService:Create(head, fadeInInfo, {Transparency = 0})
-					tween:Play()
-					tween.Completed:Wait()
-				end
-
-				head.CanCollide = true
-				head.Transparency = 0
-			end
+			-- Skip dependency handling - let progression system control visibility
+			-- This prevents buttons from showing up just because their dependency exists
 		end
 
 		-- Handle button touches
@@ -582,5 +592,35 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
+
+-- Debug function to see button states
+local function debugButtonStates()
+    print("=== BUTTON VISIBILITY DEBUG ===")
+    local buttons = script.Parent:WaitForChild("Buttons")
+    
+    for _, button in pairs(buttons:GetChildren()) do
+        local head = button:FindFirstChild("Head")
+        if head then
+            local visible = head.Transparency == 0 and head.CanCollide
+            local buttonNum = button.Name:match("%d+")
+            local status = visible and "VISIBLE" or "HIDDEN"
+            
+            if visible then
+                print("Button " .. button.Name .. " is " .. status)
+                if buttonNum and PROGRESSION_DATA[buttonNum] then
+                    local data = PROGRESSION_DATA[buttonNum]
+                    if data.requires then
+                        print("  Requires: " .. table.concat(data.requires, ", "))
+                    end
+                end
+            end
+        end
+    end
+    print("===============================")
+end
+
+-- Call debug after initial setup
+task.wait(2)
+debugButtonStates()
 
 print("✅ Updated Purchase Handler with Progression loaded successfully!")
