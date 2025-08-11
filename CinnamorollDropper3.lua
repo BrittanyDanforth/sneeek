@@ -24,13 +24,13 @@ local dropPart = script.Parent:WaitForChild("Drop")
 print("Drop part found at:", dropPart:GetFullName())
 print("Drop part position:", dropPart.Position)
 
--- Premium Cinnamoroll palette
+-- Premium Cinnamoroll palette (Blue-themed)
 local COLORS = {
-	Color3.fromRGB(255, 255, 255),    -- Pure white
-	Color3.fromRGB(255, 240, 250),    -- Lavender blush
-	Color3.fromRGB(240, 248, 255),    -- Alice blue
-	Color3.fromRGB(255, 250, 240),    -- Floral white
-	Color3.fromRGB(250, 240, 255),    -- Ghost white with pink
+	Color3.fromRGB(135, 206, 250),    -- Light sky blue
+	Color3.fromRGB(173, 216, 230),    -- Light blue
+	Color3.fromRGB(100, 149, 237),    -- Cornflower blue
+	Color3.fromRGB(70, 130, 180),     -- Steel blue
+	Color3.fromRGB(176, 224, 230),    -- Powder blue
 }
 
 -- Smart positioning
@@ -144,7 +144,7 @@ while true do
 	local pointLight = Instance.new("PointLight")
 	pointLight.Brightness = 2
 	pointLight.Range = 10
-	pointLight.Color = Color3.fromRGB(220, 240, 255)
+	pointLight.Color = Color3.fromRGB(135, 206, 250)  -- Light sky blue glow
 	pointLight.Parent = orb
 	
 	-- Inner star core
@@ -153,7 +153,7 @@ while true do
 	core.Shape = Enum.PartType.Ball
 	core.Material = Enum.Material.Neon
 	core.Size = Vector3.new(1, 1, 1)
-	core.Color = Color3.fromRGB(255, 220, 240) -- Soft pink core
+	core.Color = Color3.fromRGB(100, 149, 237) -- Cornflower blue core
 	core.Transparency = 0.3
 	core.CanCollide = false
 	core.Massless = true
@@ -164,7 +164,7 @@ while true do
 	weld.Part1 = core
 	weld.Parent = orb
 	
-	-- White sparkles (as requested)
+	-- Blue sparkles (as requested)
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 	sparkle.Rate = 20  -- Good amount of sparkles
@@ -178,7 +178,7 @@ while true do
 		NumberSequenceKeypoint.new(0.5, 0.4),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))  -- Pure white sparkles
+	sparkle.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250))  -- Light sky blue sparkles
 	sparkle.VelocityInheritance = 0.2
 	sparkle.Parent = orb
 	
@@ -191,7 +191,7 @@ while true do
 	shimmer.SpreadAngle = Vector2.new(180, 180)
 	shimmer.LightEmission = 1
 	shimmer.Size = NumberSequence.new(0.2)
-	shimmer.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))  -- White shimmer
+	shimmer.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230))  -- Light blue shimmer
 	shimmer.Parent = orb
 	
 	-- Heart particles
@@ -203,7 +203,7 @@ while true do
 	hearts.SpreadAngle = Vector2.new(180, 180)
 	hearts.LightEmission = 0.5
 	hearts.Size = NumberSequence.new(0.3)
-	hearts.Color = ColorSequence.new(Color3.fromRGB(255, 182, 193)) -- Light pink
+	hearts.Color = ColorSequence.new(Color3.fromRGB(176, 224, 230)) -- Powder blue
 	hearts.Parent = orb
 	
 	-- Smart positioning
