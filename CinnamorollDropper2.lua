@@ -81,7 +81,7 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.ForceField  -- Changed from Neon for softer look
+	orb.Material = Enum.Material.SmoothPlastic  -- Solid material, not see-through
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth

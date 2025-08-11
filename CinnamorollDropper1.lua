@@ -114,7 +114,7 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollOrb_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.ForceField  -- Changed from Neon to ForceField for softer glow
+	orb.Material = Enum.Material.SmoothPlastic  -- Solid material with nice look
 	orb.Size = Vector3.new(1.4, 1.4, 1.4)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
