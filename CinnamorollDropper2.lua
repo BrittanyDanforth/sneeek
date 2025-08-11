@@ -1,6 +1,6 @@
 --[[
-	Cinnamoroll Dropper 2 - Cloud Kawaii Dropper
-	Drops cute cloud-shaped items with Cinnamoroll colors
+	Cinnamoroll Dropper 2 - Enhanced Cloud Style
+	Ball orbs with cloud-like effects and particles
 	NO CLEANUP - Items stay until collected
 --]]
 
@@ -63,26 +63,32 @@ while true do
 	task.wait(0.8) -- Slightly faster than Dropper 1
 	cloudCount = cloudCount + 1
 	
-	-- Create cloud base
+	-- Create cloud ball
 	local cloud = Instance.new("Part")
-	cloud.Name = "FluffyCloudDrop"
-	cloud.Size = Vector3.new(2.5, 2.5, 2.5) -- Fluffy size
-	cloud.Material = Enum.Material.ForceField
+	cloud.Name = "CloudOrb_" .. cloudCount
+	cloud.Shape = Enum.PartType.Ball
+	cloud.Material = Enum.Material.ForceField -- Cloud-like material
+	cloud.Size = Vector3.new(1.8, 1.8, 1.8) -- Bigger than basic
 	cloud.Color = COLORS[math.random(1, #COLORS)]
-	cloud.Transparency = 0.1
+	cloud.Transparency = 0.2 -- Slightly see-through like clouds
 	cloud.TopSurface = Enum.SurfaceType.Smooth
 	cloud.BottomSurface = Enum.SurfaceType.Smooth
 	cloud.CanCollide = true
 	cloud.CanTouch = true
 	cloud.CanQuery = true
 	
-	-- Add fluffy cloud mesh
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://1098272" -- Little Fluffy Cloud
-	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale appropriately
-	mesh.Parent = cloud
+	-- Set collision group
+	pcall(function()
+		cloud.CollisionGroup = ORB_GROUP
+	end)
+	
+	-- Floating physics
+	cloud.CustomPhysicalProperties = PhysicalProperties.new(
+		0.1, -- Very light like a cloud
+		0.3, -- Low friction
+		0.8, -- High bounce
+		1, 1
+	)
 	
 	-- Cloud mist particles
 	local mist = Instance.new("ParticleEmitter")
@@ -136,40 +142,33 @@ while true do
 	-- Cash value
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	cash.Value = 3 -- Medium value
+	cash.Value = 30 -- Higher than basic
 	cash.Parent = cloud
-	
-	-- Set collision group
-	cloud.CollisionGroup = "CinnamorollOrbs"
 	
 	-- Position at dropper
 	cloud.CFrame = dropPart.CFrame * CFrame.new(0, -2, 0)
 	
-	-- Floating physics
-	cloud.CustomPhysicalProperties = PhysicalProperties.new(
-		0.1, -- Very light
-		0.3, -- Low friction
-		0.8, -- High bounce
-		1, 1
-	)
-	
 	-- Gentle float down
-	cloud.AssemblyLinearVelocity = Vector3.new(0, -5, 0)
-	
-	-- Spawn animation
-	cloud.Transparency = 1
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
-	
-	TweenService:Create(cloud,
-		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Transparency = 0.1}
-	):Play()
-	
-	TweenService:Create(mesh,
-		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.5, 0.5, 0.5)}
-	):Play()
+	cloud.AssemblyLinearVelocity = Vector3.new(0, -5, 0) -- Slower fall
 	
 	-- Parent to workspace
 	cloud.Parent = PartStorage
+	
+	-- Spawn animation
+	cloud.Size = Vector3.new(0.5, 0.5, 0.5)
+	cloud.Transparency = 0.8
+	
+	TweenService:Create(cloud,
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Size = Vector3.new(1.8, 1.8, 1.8), Transparency = 0.2}
+	):Play()
+	
+	-- Flash effect
+	glow.Brightness = 2
+	TweenService:Create(glow,
+		TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.8}
+	):Play()
+	
+	-- NO CLEANUP - Clouds stay until collected!
 end
