@@ -156,7 +156,7 @@ while true do
 	local selection = Instance.new("SelectionSphere")
 	selection.Adornee = orb
 	selection.Color3 = Color3.fromRGB(70, 130, 180)  -- Darker blue for premium
-	selection.SurfaceTransparency = 0.8  -- Mostly transparent surface
+	selection.SurfaceTransparency = 1  -- COMPLETELY transparent surface (no texture!)
 	selection.Transparency = 0.2  -- More solid outline for premium
 	selection.Parent = orb
 
