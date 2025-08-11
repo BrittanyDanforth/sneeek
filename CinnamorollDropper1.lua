@@ -13,10 +13,10 @@ local Players = game:GetService("Players")
 
 -- Configuration
 local DROP_INTERVAL = 1.2 -- Basic drop rate
-local ORB_LIFETIME = 60 -- Much longer! Orbs stay until collected
+local ORB_LIFETIME = 300 -- 5 minutes - plenty of time for conveyor
 local DROP_PART_NAME = "Drop"
 local CASH_VALUE = 10
-local MAX_CACHE_SIZE = 50 -- Increased cache size
+local MAX_CACHE_SIZE = 20 -- Keep cache reasonable
 
 -- Wait for dependencies
 task.wait(2)
@@ -188,6 +188,8 @@ while true do
 	
 	task.delay(ORB_LIFETIME, function()
 		if orb and orb.Parent then
+			-- Wait for death animation to complete
+			task.wait(0.5)
 			returnOrbToCache(orb)
 		end
 	end)
