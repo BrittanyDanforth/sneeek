@@ -1,6 +1,6 @@
 --[[
 	Cinnamoroll Dropper 4 - Strawberry Cake Style
-	Ball orbs with cake and strawberry effects
+	Uses Strawberry Cake Slice mesh with sweet effects
 	NO CLEANUP - Items stay until collected
 --]]
 
@@ -63,21 +63,30 @@ while true do
 	task.wait(0.9) -- Medium-fast drop rate
 	cakeCount = cakeCount + 1
 	
-	-- Create cake ball
+	-- Create cake slice part
 	local cake = Instance.new("Part")
-	cake.Name = "CakeOrb_" .. cakeCount
-	cake.Shape = Enum.PartType.Ball
+	cake.Name = "StrawberryCake_" .. cakeCount
+	cake.Size = Vector3.new(2, 2, 2) -- Base size for mesh
 	cake.Material = Enum.Material.SmoothPlastic
-	cake.Size = Vector3.new(1.6, 1.6, 1.6) -- Medium size
 	cake.Color = COLORS[math.random(1, #COLORS)]
 	cake.TopSurface = Enum.SurfaceType.Smooth
 	cake.BottomSurface = Enum.SurfaceType.Smooth
-	cake.CanCollide = true
-	cake.CanTouch = true
-	cake.CanQuery = true
+	
+	-- Add strawberry cake slice mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://16511869836" -- Strawberry Cake Slice
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale for cake
+	mesh.Parent = cake
 	
 	-- Frosting shine
 	cake.Reflectance = 0.2
+	
+	-- COLLISION
+	cake.CanCollide = true
+	cake.CanTouch = true
+	cake.CanQuery = true
 	
 	-- Set collision group
 	pcall(function()
@@ -141,35 +150,6 @@ while true do
 	selection.LineThickness = 0.05
 	selection.Parent = cake
 	
-	-- Add sprinkles (small parts)
-	for i = 1, 3 do
-		local sprinkle = Instance.new("Part")
-		sprinkle.Name = "Sprinkle"
-		sprinkle.Size = Vector3.new(0.1, 0.1, 0.2)
-		sprinkle.Material = Enum.Material.Neon
-		sprinkle.BrickColor = BrickColor.random()
-		sprinkle.CanCollide = false
-		sprinkle.Massless = true
-		sprinkle.Parent = cake
-		
-		-- Weld sprinkle
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = cake
-		weld.Part1 = sprinkle
-		weld.Parent = cake
-		
-		-- Random position on cake
-		sprinkle.CFrame = cake.CFrame * CFrame.new(
-			math.random(-5, 5) * 0.1,
-			0.8,
-			math.random(-5, 5) * 0.1
-		) * CFrame.Angles(
-			math.rad(math.random(0, 360)),
-			math.rad(math.random(0, 360)),
-			math.rad(math.random(0, 360))
-		)
-	end
-	
 	-- Cash value
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
@@ -177,7 +157,7 @@ while true do
 	cash.Parent = cake
 	
 	-- Position at dropper
-	cake.CFrame = dropPart.CFrame * CFrame.new(0, -2, 0)
+	cake.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0)
 	
 	-- Drop
 	cake.AssemblyLinearVelocity = Vector3.new(0, -8, 0)
@@ -186,12 +166,11 @@ while true do
 	cake.Parent = PartStorage
 	
 	-- Spawn animation
-	cake.Size = Vector3.new(0.4, 0.4, 0.4)
-	cake.Transparency = 0.5
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
 	
-	TweenService:Create(cake,
+	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.6, 1.6, 1.6), Transparency = 0}
+		{Scale = Vector3.new(0.5, 0.5, 0.5)}
 	):Play()
 	
 	-- Flash effect
@@ -200,6 +179,25 @@ while true do
 		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{Brightness = 0.6}
 	):Play()
+	
+	-- Cake spawn puff
+	local puff = Instance.new("ParticleEmitter")
+	puff.Texture = "rbxassetid://262979222" -- Ring texture
+	puff.Rate = 0
+	puff.Speed = NumberRange.new(0)
+	puff.Lifetime = NumberRange.new(0.3)
+	puff.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(1, 2)
+	})
+	puff.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 1)
+	})
+	puff.Color = ColorSequence.new(Color3.fromRGB(255, 182, 193))
+	puff.Parent = cake
+	puff:Emit(1)
+	Debris:AddItem(puff, 1)
 	
 	-- NO CLEANUP - Cakes stay until collected!
 end

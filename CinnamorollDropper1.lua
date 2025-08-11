@@ -110,15 +110,22 @@ while true do
 	orbCount = orbCount + 1
 	print("\n--- Creating Orb #" .. orbCount .. " ---")
 
-	-- Create cute orb (BASIC - it's free!)
+	-- Create cute cupcake part (BASIC - it's free!)
 	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollOrb_" .. orbCount
-	orb.Shape = Enum.PartType.Ball
+	orb.Name = "CinnamorollCupcake_" .. orbCount
+	orb.Size = Vector3.new(1, 1, 1) -- Base size for mesh
 	orb.Material = Enum.Material.SmoothPlastic  -- Basic material
-	orb.Size = Vector3.new(1.4, 1.4, 1.4)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
+	
+	-- Add kawaii cupcake mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://20170940" -- Kawaii Cupcake from catalog
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(0.02, 0.02, 0.02) -- Scale for cupcake
+	mesh.Parent = orb
 
 	-- COLLISION: On for world, off for players
 	orb.CanCollide = true -- CHANGED: Now collides with conveyor!
@@ -174,10 +181,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	orb.Size = Vector3.new(0.7, 0.7, 0.7)
-	local spawnTween = TweenService:Create(orb,
+	mesh.Scale = Vector3.new(0.01, 0.01, 0.01)
+	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.4, 1.4, 1.4)}
+		{Scale = Vector3.new(0.02, 0.02, 0.02)}
 	)
 	spawnTween:Play()
 

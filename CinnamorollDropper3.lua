@@ -1,6 +1,6 @@
 --[[
 	Cinnamoroll Dropper 3 - Premium Star Style
-	Ball orbs with star effects and soft rainbow
+	Uses Kawaii Star mesh with rainbow effects
 	NO CLEANUP - Items stay until collected
 --]]
 
@@ -62,16 +62,25 @@ while true do
 	task.wait(0.6) -- Fast drop rate for premium
 	starCount = starCount + 1
 	
-	-- Create star ball
+	-- Create star part
 	local star = Instance.new("Part")
-	star.Name = "StarOrb_" .. starCount
-	star.Shape = Enum.PartType.Ball
-	star.Material = Enum.Material.ForceField -- Softer than Neon
-	star.Size = Vector3.new(2, 2, 2) -- Biggest orb
+	star.Name = "PremiumStar_" .. starCount
+	star.Size = Vector3.new(2, 2, 2) -- Base size for mesh
+	star.Material = Enum.Material.Neon -- Premium glow
 	star.Color = getRainbowColor(tick())
-	star.Transparency = 0.1
 	star.TopSurface = Enum.SurfaceType.Smooth
 	star.BottomSurface = Enum.SurfaceType.Smooth
+	star.Transparency = 0
+	
+	-- Add kawaii star mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://4580655175" -- Kawaii Star
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(1, 1, 1) -- Scale for star
+	mesh.Parent = star
+	
+	-- COLLISION
 	star.CanCollide = true
 	star.CanTouch = true
 	star.CanQuery = true
@@ -89,7 +98,7 @@ while true do
 		1, 1
 	)
 	
-	-- Soft glow
+	-- Premium glow
 	local glow = Instance.new("PointLight")
 	glow.Brightness = 1
 	glow.Range = 10
@@ -104,7 +113,7 @@ while true do
 	selection.Transparency = 0.5
 	selection.Parent = star
 	
-	-- Star sparkles
+	-- Rainbow sparkles
 	local sparkles = Instance.new("ParticleEmitter")
 	sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 	sparkles.Rate = 25
@@ -127,7 +136,7 @@ while true do
 	
 	-- Star pattern particles
 	local starParticles = Instance.new("ParticleEmitter")
-	starParticles.Texture = "rbxasset://textures/particles/star.png"
+	starParticles.Texture = "rbxasset://textures/particles/star.dds"
 	starParticles.Rate = 10
 	starParticles.Lifetime = NumberRange.new(2, 3)
 	starParticles.Speed = NumberRange.new(1)
@@ -147,7 +156,7 @@ while true do
 	cash.Parent = star
 	
 	-- Position at dropper
-	star.CFrame = dropPart.CFrame * CFrame.new(0, -2, 0)
+	star.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0)
 	
 	-- Drop with slight spin
 	star.AssemblyLinearVelocity = Vector3.new(0, -10, 0)
@@ -157,15 +166,21 @@ while true do
 	star.Parent = PartStorage
 	
 	-- Spawn animation
-	star.Size = Vector3.new(0.5, 0.5, 0.5)
-	star.Transparency = 0.8
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
 	
-	TweenService:Create(star,
+	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Size = Vector3.new(2, 2, 2), Transparency = 0.1}
+		{Scale = Vector3.new(1, 1, 1)}
 	):Play()
 	
-	-- Simple spawn ring effect
+	-- Flash effect
+	glow.Brightness = 2
+	TweenService:Create(glow,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 1}
+	):Play()
+	
+	-- Premium spawn ring effect
 	local spawnRing = Instance.new("Part")
 	spawnRing.Name = "SpawnEffect"
 	spawnRing.Shape = Enum.PartType.Cylinder
