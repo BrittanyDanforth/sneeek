@@ -32,11 +32,13 @@ screenGui.IgnoreGuiInset = true
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Create dark overlay (hidden by default)
-local overlay = Instance.new("Frame")
+local overlay = Instance.new("TextButton")
 overlay.Name = "Overlay"
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 overlay.BackgroundTransparency = 1
+overlay.Text = ""
+overlay.AutoButtonColor = false
 overlay.ZIndex = 1
 overlay.Parent = screenGui
 
