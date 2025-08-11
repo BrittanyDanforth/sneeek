@@ -8,10 +8,10 @@ local player = Players.LocalPlayer
 
 -- Product IDs with your actual IDs
 local products = {
-	{id = 3366419712, amount = 1000, icon = "💵", color = Color3.fromRGB(134, 239, 172)},
-	{id = 3366420012, amount = 5000, icon = "💰", color = Color3.fromRGB(147, 197, 253)},
-	{id = 3366420478, amount = 10000, icon = "💎", color = Color3.fromRGB(196, 167, 231)},
-	{id = 3366420800, amount = 25000, icon = "👑", color = Color3.fromRGB(252, 211, 77)},
+	{id = 3366419712, amount = 1000, icon = "$", color = Color3.fromRGB(134, 239, 172)},
+	{id = 3366420012, amount = 5000, icon = "$$", color = Color3.fromRGB(147, 197, 253)},
+	{id = 3366420478, amount = 10000, icon = "$$$", color = Color3.fromRGB(196, 167, 231)},
+	{id = 3366420800, amount = 25000, icon = "MAX", color = Color3.fromRGB(252, 211, 77)},
 }
 
 -- Format numbers with commas
@@ -39,6 +39,8 @@ overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 overlay.BackgroundTransparency = 1
 overlay.Text = ""
 overlay.AutoButtonColor = false
+overlay.Visible = false -- Hidden by default
+overlay.Modal = false -- Don't block input when invisible
 overlay.Parent = screenGui
 
 -- Main shop frame
@@ -77,7 +79,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -60, 1, 0)
 title.Position = UDim2.new(0, 30, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "💰 CASH SHOP"
+title.Text = "CASH SHOP"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 28
@@ -102,7 +104,7 @@ closeBtn.Name = "CloseButton"
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
 closeBtn.Position = UDim2.new(1, -50, 0, 20)
 closeBtn.BackgroundColor3 = Color3.fromRGB(55, 65, 81)
-closeBtn.Text = "✕"
+closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(156, 163, 175)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 20
@@ -233,7 +235,7 @@ toggleBtn.Name = "ToggleButton"
 toggleBtn.Size = UDim2.new(0, 70, 0, 70)
 toggleBtn.Position = UDim2.new(0, 20, 1, -90)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
-toggleBtn.Text = "💰"
+toggleBtn.Text = "$"
 toggleBtn.TextSize = 35
 toggleBtn.Font = Enum.Font.Gotham
 toggleBtn.AutoButtonColor = false
@@ -259,6 +261,7 @@ toggleShadow.Parent = toggleBtn
 
 -- Animation functions
 local function showShop()
+	overlay.Visible = true
 	mainFrame.Visible = true
 	mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
 	mainFrame.Size = UDim2.new(0, 400, 0, 450)
@@ -276,9 +279,15 @@ end
 
 local function hideShop()
 	-- Fade out overlay
-	TweenService:Create(overlay, TweenInfo.new(0.2), {
+	local overlayTween = TweenService:Create(overlay, TweenInfo.new(0.2), {
 		BackgroundTransparency = 1
-	}):Play()
+	})
+	
+	overlayTween.Completed:Connect(function()
+		overlay.Visible = false -- Hide overlay when fade completes
+	end)
+	
+	overlayTween:Play()
 	
 	-- Animate main frame
 	local tween = TweenService:Create(mainFrame, TweenInfo.new(0.2), {
