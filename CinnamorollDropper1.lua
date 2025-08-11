@@ -13,10 +13,10 @@ local Players = game:GetService("Players")
 
 -- Configuration
 local DROP_INTERVAL = 1.2 -- Basic drop rate
-local ORB_LIFETIME = 20
+local ORB_LIFETIME = 60 -- Much longer! Orbs stay until collected
 local DROP_PART_NAME = "Drop"
 local CASH_VALUE = 10
-local MAX_CACHE_SIZE = 25 -- Smaller cache for basic dropper
+local MAX_CACHE_SIZE = 50 -- Increased cache size
 
 -- Wait for dependencies
 task.wait(2)
