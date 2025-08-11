@@ -158,39 +158,6 @@ while true do
 	orb.Anchored = false
 	orb.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
 	
-	-- Cleanup
-	task.delay(ORB_LIFETIME - 2, function()
-		if orb and orb.Parent then
-			-- Simple pop effect
-			local popParticle = Instance.new("ParticleEmitter")
-			popParticle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-			popParticle.Rate = 0
-			popParticle.Speed = NumberRange.new(3, 5)
-			popParticle.SpreadAngle = Vector2.new(360, 360)
-			popParticle.Lifetime = NumberRange.new(0.5)
-			popParticle.Size = NumberSequence.new(0.3)
-			popParticle.Color = ColorSequence.new(orb.Color)
-			popParticle.Parent = orb
-			popParticle:Emit(8)
-			
-			-- Shrink and fade
-			TweenService:Create(orb,
-				TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
-				{Size = Vector3.new(0, 0, 0), Transparency = 0.5}
-			):Play()
-			
-			TweenService:Create(orb.PointLight,
-				TweenInfo.new(0.3, Enum.EasingStyle.Linear),
-				{Brightness = 0, Range = 0}
-			):Play()
-		end
-	end)
-	
-	task.delay(ORB_LIFETIME, function()
-		if orb and orb.Parent then
-			-- Wait for death animation to complete
-			task.wait(0.5)
-			returnOrbToCache(orb)
-		end
-	end)
+	-- NO AUTOMATIC CLEANUP - Orbs stay until collected!
+	-- The game/tycoon system should handle cleanup when collected
 end

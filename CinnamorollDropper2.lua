@@ -240,52 +240,6 @@ while true do
 		offset.Z * 2
 	)
 	
-	-- Cleanup
-	task.delay(ORB_LIFETIME - 2, function()
-		if orb and orb.Parent then
-			orb.Sparkle.Enabled = false
-			orb.Stars.Enabled = false
-			
-			-- Cloud pop animation
-			orb.Sparkle:Emit(10)
-			
-			-- Cloud dissipate effect
-			local cloudPop = Instance.new("ParticleEmitter")
-			cloudPop.Texture = "rbxasset://textures/particles/smoke_main.dds"
-			cloudPop.Rate = 0
-			cloudPop.Speed = NumberRange.new(2, 4)
-			cloudPop.SpreadAngle = Vector2.new(360, 360)
-			cloudPop.Lifetime = NumberRange.new(0.6)
-			cloudPop.Size = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.5),
-				NumberSequenceKeypoint.new(1, 1.5)
-			})
-			cloudPop.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.5),
-				NumberSequenceKeypoint.new(1, 1)
-			})
-			cloudPop.Color = ColorSequence.new(orb.Color)
-			cloudPop.Parent = orb
-			cloudPop:Emit(6)
-			
-			-- Shrink and fade
-			TweenService:Create(orb,
-				TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.In),
-				{Size = Vector3.new(0.1, 0.1, 0.1), Transparency = 0.7}
-			):Play()
-			
-			TweenService:Create(pointLight,
-				TweenInfo.new(0.4, Enum.EasingStyle.Linear),
-				{Brightness = 0, Range = 0}
-			):Play()
-		end
-	end)
-	
-	task.delay(ORB_LIFETIME, function()
-		if orb and orb.Parent then
-			-- Wait for death animation to complete
-			task.wait(0.5)
-			returnOrbToCache(orb)
-		end
-	end)
+	-- NO AUTOMATIC CLEANUP - Orbs stay until collected!
+	-- The game/tycoon system should handle cleanup when collected
 end
