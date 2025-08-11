@@ -123,9 +123,10 @@ while true do
 	-- POLISH: Cinnamoroll-style highlight (blue like the eyes!)
 	local highlight = Instance.new("Highlight")
 	highlight.FillColor = Color3.fromRGB(255, 250, 250)
-	highlight.FillTransparency = 0.85  -- Very subtle
+	highlight.FillTransparency = 0.9  -- More transparent fill
 	highlight.OutlineColor = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
-	highlight.OutlineTransparency = 0.4
+	highlight.OutlineTransparency = 0.3  -- More solid outline
+	highlight.DepthMode = Enum.HighlightDepthMode.Occluded  -- This might help!
 	highlight.Parent = orb
 
 	-- ENHANCED sparkles with color
