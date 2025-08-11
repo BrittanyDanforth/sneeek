@@ -82,11 +82,12 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.Neon  -- SOLID GLOW, NOT SEE THROUGH
+	orb.Material = Enum.Material.Plastic  -- Changed back to solid material
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
+	orb.Reflectance = 0.3  -- Add some shine to make it less bland
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor

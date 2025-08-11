@@ -167,22 +167,7 @@ while true do
 	weld1.Part1 = innerCore
 	weld1.Parent = orb
 	
-	-- Outer aura
-	local outerAura = Instance.new("Part")
-	outerAura.Name = "OuterAura"
-	outerAura.Shape = Enum.PartType.Ball
-	outerAura.Material = Enum.Material.ForceField
-	outerAura.Size = Vector3.new(2.2, 2.2, 2.2)
-	outerAura.Color = Color3.fromRGB(173, 216, 230)
-	outerAura.Transparency = 0.8
-	outerAura.CanCollide = false
-	outerAura.Massless = true
-	outerAura.Parent = orb
-	
-	local weld2 = Instance.new("WeldConstraint")
-	weld2.Part0 = orb
-	weld2.Part1 = outerAura
-	weld2.Parent = orb
+	-- Removed outer aura - was causing see-through issues
 	
 	-- Highlight for extra pop
 	local highlight = Instance.new("Highlight")
