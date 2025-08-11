@@ -116,15 +116,14 @@ local function getOrb()
 end
 
 local function returnOrbToCache(orb)
-	if #orbCache >= MAX_CACHE_SIZE then
-		orb:Destroy()
-		return
+	-- Only cache if there's room, otherwise just leave it alone
+	if #orbCache < MAX_CACHE_SIZE then
+		orb.Transparency = 1
+		orb.Anchored = true
+		orb.Parent = PartStorage
+		table.insert(orbCache, orb)
 	end
-	
-	orb.Transparency = 1
-	orb.Anchored = true
-	orb.Parent = PartStorage
-	table.insert(orbCache, orb)
+	-- If cache is full, do nothing - let the orb exist!
 end
 
 -- Main Loop
