@@ -15,14 +15,7 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
 
--- Strawberry cake colors
-local COLORS = {
-	Color3.fromRGB(255, 182, 193), -- Strawberry Pink
-	Color3.fromRGB(255, 239, 213), -- Cream
-	Color3.fromRGB(255, 204, 204), -- Light Pink
-	Color3.fromRGB(255, 228, 225), -- Misty Rose
-	Color3.fromRGB(250, 235, 215), -- Antique White
-}
+-- No colors needed - using white heart!
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -63,21 +56,21 @@ while true do
 	task.wait(0.9) -- Medium-fast drop rate
 	cakeCount = cakeCount + 1
 	
-	-- Create cake slice part
+	-- Create white heart part
 	local cake = Instance.new("Part")
-	cake.Name = "StrawberryCake_" .. cakeCount
+	cake.Name = "WhiteHeart_" .. cakeCount
 	cake.Size = Vector3.new(2, 2, 2) -- Base size for mesh
 	cake.Material = Enum.Material.SmoothPlastic
-	cake.Color = COLORS[math.random(1, #COLORS)]
+	cake.BrickColor = BrickColor.new("Institutional white") -- Pure white heart
 	cake.TopSurface = Enum.SurfaceType.Smooth
 	cake.BottomSurface = Enum.SurfaceType.Smooth
 	
-	-- Add strawberry cake slice mesh
+	-- Add white heart mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://6858831279" -- Macaron (more visible sweet)
-	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(3, 3, 3) -- Scale for cake
+	mesh.MeshId = "rbxassetid://601198887" -- White Heart mesh
+	mesh.TextureId = "" -- No texture needed
+	mesh.Scale = Vector3.new(1, 1, 1) -- Start with normal scale
 	mesh.Parent = cake
 	
 	-- Frosting shine
@@ -142,13 +135,7 @@ while true do
 	cream.LightEmission = 0.3
 	cream.Parent = cake
 	
-	-- Soft outline
-	local selection = Instance.new("SelectionBox")
-	selection.Adornee = cake
-	selection.Color3 = Color3.fromRGB(255, 182, 193)
-	selection.Transparency = 0.6
-	selection.LineThickness = 0.05
-	selection.Parent = cake
+	-- No outline needed - just the mesh!
 	
 	-- Cash value
 	local cash = Instance.new("IntValue")
@@ -165,12 +152,12 @@ while true do
 	-- Parent to workspace
 	cake.Parent = PartStorage
 	
-	-- Spawn animation
-	mesh.Scale = Vector3.new(1, 1, 1)
+	-- Spawn animation - start small, grow to normal
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(3, 3, 3)}
+		{Scale = Vector3.new(1, 1, 1)}
 	):Play()
 	
 	-- Flash effect
