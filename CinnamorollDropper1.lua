@@ -124,7 +124,7 @@ while true do
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://9434530930" -- ACTUAL Cinnamoroll mesh from Handle
-	mesh.TextureId = "" -- Use part color for now
+	mesh.TextureId = "rbxassetid://9434566192" -- Cinnamoroll texture!
 	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale for Cinnamoroll
 	mesh.Parent = orb
 	
