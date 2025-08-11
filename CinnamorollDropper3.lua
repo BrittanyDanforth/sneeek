@@ -77,7 +77,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://1652187761" -- Cat mesh
 	mesh.TextureId = "rbxassetid://1652088642" -- Cat texture
-	mesh.Scale = Vector3.new(0.8, 0.8, 0.8) -- Smaller scale for cat
+	mesh.Scale = Vector3.new(0.3, 0.3, 0.3) -- Much smaller scale for cat
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -164,7 +164,7 @@ while true do
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.8, 0.8, 0.8)}
+		{Scale = Vector3.new(0.3, 0.3, 0.3)}
 	):Play()
 	
 	-- Flash effect
