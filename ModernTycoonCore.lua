@@ -11,7 +11,28 @@ local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 
 -- Configuration
-local Settings = require(script.Parent.Parent.Parent.Settings)
+-- Try to find Settings module in various locations
+local Settings
+local settingsLocations = {
+	script.Parent.Parent.Parent:FindFirstChild("Settings"),
+	script.Parent.Parent:FindFirstChild("Settings"),
+	game.ServerScriptService:FindFirstChild("Settings"),
+	game.ServerStorage:FindFirstChild("Settings")
+}
+
+for _, location in ipairs(settingsLocations) do
+	if location and location:IsA("ModuleScript") then
+		Settings = require(location)
+		print("[TYCOON] Found Settings at:", location:GetFullName())
+		break
+	end
+end
+
+if not Settings then
+	warn("[TYCOON] Settings module not found! Using defaults.")
+	Settings = require(script:FindFirstChild("DefaultSettings") or error("No settings found!"))
+end
+
 local TeamColor = script.Parent.TeamColor.Value
 local Money = script.Parent.CurrencyToCollect
 local Owner = script.Parent.Owner

@@ -52,7 +52,17 @@ local function updateCashDisplay(player, amount)
 		local cashDisplay = leaderstats:FindFirstChild("Cash")
 		if cashDisplay then
 			-- Get Settings module if available
-			local Settings = require(game.ServerScriptService:FindFirstChild("Settings") or {
+			local Settings
+			pcall(function()
+				local settingsModule = game.ServerScriptService:FindFirstChild("Settings") 
+					or game.ServerStorage:FindFirstChild("Settings")
+					or workspace:FindFirstChild("Settings", true)
+				if settingsModule then
+					Settings = require(settingsModule)
+				end
+			end)
+			
+			Settings = Settings or {
 				LeaderboardSettings = {ShowShortCurrency = true},
 				ConvertShort = function(self, value)
 					value = tonumber(value) or 0

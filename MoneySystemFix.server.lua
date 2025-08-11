@@ -20,10 +20,20 @@ if not playerMoneyFolder then
 end
 
 -- Get Settings for formatting
-local Settings
-pcall(function()
-	Settings = require(game.ServerScriptService:FindFirstChild("Settings"))
-end)
+local Settings = _G.Settings
+
+if not Settings then
+	-- Try to load it
+	pcall(function()
+		local settingsModule = game.ServerScriptService:FindFirstChild("Settings") 
+			or game.ServerStorage:FindFirstChild("Settings")
+			or workspace:FindFirstChild("Settings", true)
+		if settingsModule then
+			Settings = require(settingsModule)
+			_G.Settings = Settings
+		end
+	end)
+end
 
 if not Settings then
 	-- Default settings if not found
