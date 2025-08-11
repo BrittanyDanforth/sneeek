@@ -24,13 +24,13 @@ print("Full path:", script:GetFullName())
 local dropPart = script.Parent:WaitForChild("Drop")
 print("Drop part found at:", dropPart:GetFullName())
 
--- Cinnamoroll palette (WHITE with PINK accents - actual Cinnamoroll colors)
+-- Cinnamoroll palette (TONED DOWN whites for Neon - actual Cinnamoroll colors)
 local COLORS = {
-	Color3.fromRGB(255, 255, 255),    -- Pure white (main color)
-	Color3.fromRGB(255, 250, 250),    -- Snow white
-	Color3.fromRGB(255, 245, 250),    -- White with tiny pink tint
-	Color3.fromRGB(255, 240, 245),    -- Lavender blush (very light pink)
-	Color3.fromRGB(250, 240, 255),    -- White with hint of blue
+	Color3.fromRGB(240, 240, 255),    -- Soft blue-white (not pure white for Neon)
+	Color3.fromRGB(255, 230, 240),    -- Pink-tinted white
+	Color3.fromRGB(230, 240, 255),    -- Blue-tinted white
+	Color3.fromRGB(255, 220, 230),    -- Light pink
+	Color3.fromRGB(240, 230, 255),    -- Lavender white
 }
 
 -- Pattern for anti-stacking
@@ -82,12 +82,11 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.Plastic  -- Changed back to solid material
+	orb.Material = Enum.Material.Neon  -- BACK TO NEON
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
-	orb.Reflectance = 0.3  -- Add some shine to make it less bland
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor

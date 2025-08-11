@@ -175,6 +175,8 @@ while true do
 	highlight.FillTransparency = 0.7
 	highlight.OutlineColor = Color3.fromRGB(70, 130, 180)
 	highlight.OutlineTransparency = 0.3
+	-- Make sure it doesn't render on top
+	highlight.Adornee = orb
 	highlight.Parent = orb
 
 	-- REDUCED Blue sparkles (as requested but toned down)
