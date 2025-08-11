@@ -13,6 +13,9 @@ local Players = game:GetService("Players")
 wait(2)
 workspace:WaitForChild("PartStorage")
 
+-- Find the Drop part
+local dropperPart = script.Parent:WaitForChild("Drop")
+
 -- Variables for orb creation
 local orbCount = 0
 
