@@ -1,14 +1,27 @@
 --[[
 	Cinnamoroll Dropper 2 - Enhanced Kawaii Style
-	Fluffy cloud orbs with sparkles, no collision
+	Fixed: Collides with conveyor/ground but not players
+	WITH DEBUG PRINTS
 --]]
 
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
+local PhysicsService = game:GetService("PhysicsService")
 
 -- Wait for PartStorage
 task.wait(2)
 local PartStorage = workspace:WaitForChild("PartStorage")
+
+-- DEBUG: Print script location
+print("=== CINNAMOROLL DROPPER 2 DEBUG ===")
+print("Script location:", script:GetFullName())
+print("Script parent:", script.Parent.Name, "Class:", script.Parent.ClassName)
+print("Script grandparent:", script.Parent.Parent and script.Parent.Parent.Name or "nil")
+print("Full path:", script:GetFullName())
+
+-- Find the Drop part
+local dropPart = script.Parent:WaitForChild("Drop")
+print("Drop part found at:", dropPart:GetFullName())
 
 -- Cinnamoroll palette
 local COLORS = {
@@ -21,12 +34,51 @@ local COLORS = {
 -- Pattern for anti-stacking
 local dropPattern = 1
 
+-- Create collision groups
+local ORB_GROUP = "CinnamorollOrbs"
+local PLAYER_GROUP = "Players"
+
+pcall(function()
+	PhysicsService:CreateCollisionGroup(ORB_GROUP)
+	PhysicsService:CreateCollisionGroup(PLAYER_GROUP)
+	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, PLAYER_GROUP, false)
+	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, ORB_GROUP, false)
+	print("Collision groups set up for Dropper 2")
+end)
+
+-- Setup player collision groups
+local function setupPlayer(character)
+	task.wait(0.1)
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			pcall(function()
+				PhysicsService:SetPartCollisionGroup(part, PLAYER_GROUP)
+			end)
+		end
+	end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(setupPlayer)
+end)
+
+for _, player in ipairs(game.Players:GetPlayers()) do
+	if player.Character then
+		setupPlayer(player.Character)
+	end
+end
+
+local orbCount = 0
+
 while true do
 	task.wait(1) -- Faster drops
 	
+	orbCount = orbCount + 1
+	print("\n--- Dropper 2: Creating Orb #" .. orbCount .. " ---")
+	
 	-- Create fluffy orb
 	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollCloud"
+	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
 	orb.Material = Enum.Material.Neon
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
@@ -34,10 +86,16 @@ while true do
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	
-	-- NO COLLISION!
-	orb.CanCollide = false
+	-- COLLISION FIXED!
+	orb.CanCollide = true -- Now collides with conveyor
 	orb.CanTouch = true
-	orb.CanQuery = false
+	orb.CanQuery = true
+	
+	-- Set collision group
+	pcall(function()
+		PhysicsService:SetPartCollisionGroup(orb, ORB_GROUP)
+		print("Orb", orbCount, "collision group set")
+	end)
 	
 	-- Fluffy physics
 	orb.CustomPhysicalProperties = PhysicalProperties.new(
@@ -85,7 +143,6 @@ while true do
 	sparkle.Parent = orb
 	
 	-- Pattern positioning
-	local dropPart = script.Parent:WaitForChild("Drop")
 	local patterns = {
 		Vector3.new(0.2, 0, 0.2),
 		Vector3.new(-0.2, 0, 0.2),
@@ -97,6 +154,7 @@ while true do
 	dropPattern = (dropPattern % #patterns) + 1
 	
 	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
+	print("Orb", orbCount, "spawned at:", orb.Position)
 	
 	-- Float down gently
 	orb.AssemblyLinearVelocity = Vector3.new(
@@ -132,6 +190,20 @@ while true do
 	task.delay(1, function()
 		if spin.Parent then
 			spin:Destroy()
+		end
+	end)
+	
+	-- Track orb briefly
+	task.spawn(function()
+		task.wait(1)
+		if orb.Parent then
+			local touching = orb:GetTouchingParts()
+			if #touching > 0 then
+				print("Orb", orbCount, "landed on:")
+				for _, part in ipairs(touching) do
+					print("  -", part.Name)
+				end
+			end
 		end
 	end)
 	

@@ -1,14 +1,28 @@
 --[[
 	Cinnamoroll Dropper 3 - Premium Kawaii Style
-	Dreamy cloud orbs with rainbow sparkles and hearts
+	Fixed: Collides with conveyor/ground but not players
+	WITH DEBUG PRINTS
 --]]
 
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
+local PhysicsService = game:GetService("PhysicsService")
 
 -- Wait for PartStorage
 task.wait(2)
 local PartStorage = workspace:WaitForChild("PartStorage")
+
+-- DEBUG: Print script location
+print("=== CINNAMOROLL DROPPER 3 (PREMIUM) DEBUG ===")
+print("Script location:", script:GetFullName())
+print("Script parent:", script.Parent.Name, "Class:", script.Parent.ClassName)
+print("Script grandparent:", script.Parent.Parent and script.Parent.Parent.Name or "nil")
+print("Script great-grandparent:", script.Parent.Parent and script.Parent.Parent.Parent and script.Parent.Parent.Parent.Name or "nil")
+
+-- Find the Drop part
+local dropPart = script.Parent:WaitForChild("Drop")
+print("Drop part found at:", dropPart:GetFullName())
+print("Drop part position:", dropPart.Position)
 
 -- Premium Cinnamoroll palette
 local COLORS = {
@@ -22,6 +36,40 @@ local COLORS = {
 -- Smart positioning
 local recentPositions = {}
 local MAX_MEMORY = 3
+
+-- Create collision groups
+local ORB_GROUP = "CinnamorollOrbs"
+local PLAYER_GROUP = "Players"
+
+pcall(function()
+	PhysicsService:CreateCollisionGroup(ORB_GROUP)
+	PhysicsService:CreateCollisionGroup(PLAYER_GROUP)
+	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, PLAYER_GROUP, false)
+	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, ORB_GROUP, false)
+	print("Premium collision groups configured")
+end)
+
+-- Setup player collision groups
+local function setupPlayer(character)
+	task.wait(0.1)
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			pcall(function()
+				PhysicsService:SetPartCollisionGroup(part, PLAYER_GROUP)
+			end)
+		end
+	end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(setupPlayer)
+end)
+
+for _, player in ipairs(game.Players:GetPlayers()) do
+	if player.Character then
+		setupPlayer(player.Character)
+	end
+end
 
 local function getSmartOffset()
 	local offset = Vector3.new(
@@ -49,12 +97,17 @@ local function getSmartOffset()
 	return offset
 end
 
+local orbCount = 0
+
 while true do
 	task.wait(0.8) -- Premium faster drops
 	
+	orbCount = orbCount + 1
+	print("\n--- Premium Dropper 3: Creating Dream Orb #" .. orbCount .. " ---")
+	
 	-- Create dreamy orb
 	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollDream"
+	orb.Name = "CinnamorollDream_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
 	orb.Material = Enum.Material.Neon
 	orb.Size = Vector3.new(1.8, 1.8, 1.8)
@@ -62,10 +115,16 @@ while true do
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	
-	-- NO COLLISION - Float like clouds!
-	orb.CanCollide = false
+	-- COLLISION FIXED - Collides with world but not players!
+	orb.CanCollide = true -- CHANGED!
 	orb.CanTouch = true
-	orb.CanQuery = false
+	orb.CanQuery = true
+	
+	-- Set collision group
+	pcall(function()
+		PhysicsService:SetPartCollisionGroup(orb, ORB_GROUP)
+		print("Premium orb", orbCount, "collision group set")
+	end)
 	
 	-- Dream-like physics
 	orb.CustomPhysicalProperties = PhysicalProperties.new(
@@ -141,9 +200,9 @@ while true do
 	hearts.Parent = orb
 	
 	-- Smart positioning
-	local dropPart = script.Parent:WaitForChild("Drop")
 	local offset = getSmartOffset()
 	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
+	print("Premium orb", orbCount, "spawned at:", orb.Position, "with offset:", offset)
 	
 	-- Dreamy float
 	local angle = math.random() * math.pi * 2
@@ -161,6 +220,7 @@ while true do
 	
 	-- Parent to storage
 	orb.Parent = PartStorage
+	print("Orb parented to:", PartStorage:GetFullName())
 	
 	-- Magical entrance
 	orb.Size = Vector3.new(0.2, 0.2, 0.2)
@@ -207,6 +267,24 @@ while true do
 	task.delay(1.5, function()
 		if spin.Parent then
 			spin:Destroy()
+		end
+	end)
+	
+	-- Track premium orb
+	task.spawn(function()
+		task.wait(1.5)
+		if orb.Parent then
+			local touching = orb:GetTouchingParts()
+			if #touching > 0 then
+				print("Premium orb", orbCount, "landed on", #touching, "parts")
+				for i, part in ipairs(touching) do
+					if i <= 3 then -- Only print first 3
+						print("  -", part.Name)
+					end
+				end
+			else
+				print("Premium orb", orbCount, "still floating")
+			end
 		end
 	end)
 	
