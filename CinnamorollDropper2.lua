@@ -71,21 +71,23 @@ while true do
 	orbCount = orbCount + 1
 	print("\n--- Dropper 2: Creating Orb #" .. orbCount .. " ---")
 
-	-- Create MeshPart instead of regular Part
-	local orb = Instance.new("MeshPart")
+	-- Create regular Part with SpecialMesh
+	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollMesh_" .. orbCount
-	orb.Size = Vector3.new(2, 2, 2) -- Will be overridden by mesh
+	orb.Size = Vector3.new(2, 2, 2) -- Base size
 	orb.Material = Enum.Material.SmoothPlastic  -- Clean material
+	orb.TopSurface = Enum.SurfaceType.Smooth
+	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = Color3.new(1, 1, 1) -- White to show texture properly
+	orb.Transparency = 0 -- Fully visible
 	
-	-- Set the mesh and texture
-	orb.MeshId = "rbxassetid://10253958526"
-	orb.TextureID = "rbxassetid://10253959770"
-	orb.RenderFidelity = Enum.RenderFidelity.Precise
-	
-	-- Scale the mesh if needed
-	local meshScale = 2
-	orb.Size = orb.Size * meshScale
+	-- Add mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://10253958526"
+	mesh.TextureId = "rbxassetid://10253959770"
+	mesh.Scale = Vector3.new(2, 2, 2) -- Adjust scale as needed
+	mesh.Parent = orb
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor
@@ -186,12 +188,11 @@ while true do
 	-- Parent to storage
 	orb.Parent = PartStorage
 
-	-- Bounce spawn animation (scale the entire MeshPart)
-	local originalSize = orb.Size
-	orb.Size = originalSize * 0.3
-	local spawnTween = TweenService:Create(orb,
+	-- Bounce spawn animation
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
+	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Size = originalSize}
+		{Scale = Vector3.new(2, 2, 2)}
 	)
 	spawnTween:Play()
 
