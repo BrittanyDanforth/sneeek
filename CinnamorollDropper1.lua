@@ -57,13 +57,7 @@ local function findConveyor()
 end
 findConveyor()
 
--- Cinnamoroll colors (TONED DOWN - less saturated for less eye strain)
-local COLORS = {
-	Color3.fromRGB(153, 196, 210),    -- Muted light blue
-	Color3.fromRGB(125, 186, 215),    -- Softer sky blue
-	Color3.fromRGB(156, 204, 210),    -- Gentle powder blue
-	Color3.fromRGB(100, 139, 207),    -- Softer cornflower blue
-}
+-- No colors needed - using textured mesh!
 
 -- Create collision groups if they don't exist
 local ORB_GROUP = "CinnamorollOrbs"
@@ -114,10 +108,10 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollBackpack_" .. orbCount
 	orb.Size = Vector3.new(2, 2, 2) -- Smaller collision box
-	orb.Material = Enum.Material.Neon  -- Glowing material
+	orb.Material = Enum.Material.SmoothPlastic  -- Clean material
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
-	orb.Color = COLORS[math.random(1, #COLORS)]
+	orb.Color = Color3.new(1, 1, 1) -- White base (texture will show)
 	orb.Transparency = 0 -- FULLY VISIBLE
 
 	-- Add Cinnamoroll BACKPACK mesh!
@@ -128,11 +122,11 @@ while true do
 	mesh.Scale = Vector3.new(2, 2, 2) -- BIGGER scale for visibility
 	mesh.Parent = orb
 	
-	-- Add a soft glow
+	-- Add a soft white glow
 	local light = Instance.new("PointLight")
 	light.Brightness = 0.5
 	light.Range = 10
-	light.Color = orb.Color
+	light.Color = Color3.new(1, 1, 1) -- White light
 	light.Parent = orb
 
 	-- COLLISION: On for world, off for players
@@ -218,7 +212,7 @@ while true do
 		NumberSequenceKeypoint.new(0.5, 0.6),
 		NumberSequenceKeypoint.new(1, 1) -- Fades out
 	})
-	spawnRing.Color = ColorSequence.new(orb.Color)
+	spawnRing.Color = ColorSequence.new(Color3.new(1, 1, 1)) -- White ring
 	spawnRing.Parent = orb
 	spawnRing:Emit(1) -- Emit one ring
 	Debris:AddItem(spawnRing, 1) -- Clean it up
