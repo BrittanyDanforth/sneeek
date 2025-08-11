@@ -169,15 +169,7 @@ while true do
 	
 	-- Removed outer aura - was causing see-through issues
 	
-	-- Highlight for extra pop
-	local highlight = Instance.new("Highlight")
-	highlight.FillColor = Color3.fromRGB(135, 206, 250)
-	highlight.FillTransparency = 0.7
-	highlight.OutlineColor = Color3.fromRGB(70, 130, 180)
-	highlight.OutlineTransparency = 0.3
-	-- Make sure it doesn't render on top
-	highlight.Adornee = orb
-	highlight.Parent = orb
+	-- REMOVED Highlight - was causing see-through conveyor issues
 
 	-- REDUCED Blue sparkles (as requested but toned down)
 	local sparkle = Instance.new("ParticleEmitter")
