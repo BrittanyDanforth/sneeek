@@ -110,16 +110,15 @@ while true do
 	orbCount = orbCount + 1
 	print("\n--- Creating Orb #" .. orbCount .. " ---")
 
-	-- Create cute orb
+	-- Create cute orb (BASIC - it's free!)
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollOrb_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.Glass  -- Shiny glass material with refraction
+	orb.Material = Enum.Material.SmoothPlastic  -- Basic material
 	orb.Size = Vector3.new(1.4, 1.4, 1.4)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
-	orb.Reflectance = 0.3  -- Add some shine
 
 	-- COLLISION: On for world, off for players
 	orb.CanCollide = true -- CHANGED: Now collides with conveyor!
@@ -152,14 +151,6 @@ while true do
 	pointLight.Range = 3         -- Reduced from 5
 	pointLight.Color = Color3.fromRGB(180, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
-
-	-- POLISH: Add glow outline effect
-	local selection = Instance.new("SelectionBox")
-	selection.Adornee = orb
-	selection.Color3 = Color3.fromRGB(200, 230, 255)
-	selection.LineThickness = 0.05
-	selection.Transparency = 0.3
-	selection.Parent = orb
 
 	-- Position with small offset
 	local offsetX = math.random(-2, 2) * 0.1
