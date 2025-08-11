@@ -148,6 +148,13 @@ while true do
 	pointLight.Color = Color3.fromRGB(125, 186, 230)  -- Softer light sky blue glow
 	pointLight.Parent = orb
 
+	-- POLISH: Premium crystal sheen
+	local appearance = Instance.new("SurfaceAppearance")
+	appearance.AlphaMode = Enum.AlphaMode.Transparency
+	appearance.ColorMap = "rbxassetid://248553221"  -- Soft cloudy texture
+	appearance.MetalnessMap = "rbxassetid://10497334942"  -- Metallic shine
+	appearance.Parent = orb
+
 	-- REMOVED INNER CORE FOR PERFORMANCE
 
 	-- REDUCED Blue sparkles (as requested but toned down)
@@ -213,6 +220,34 @@ while true do
 		{Size = Vector3.new(1.8, 1.8, 1.8), Transparency = 0}
 	):Play()
 
+	-- POLISH: Premium spawn flash
+	pointLight.Brightness = 3 -- Bright magical flash
+	TweenService:Create(pointLight,
+		TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.8} -- Back to normal
+	):Play()
+
+	-- POLISH: Dream ring spawn effect
+	local spawnRing = Instance.new("ParticleEmitter")
+	spawnRing.Texture = "rbxassetid://262979222" -- Ring texture
+	spawnRing.Rate = 0
+	spawnRing.Speed = NumberRange.new(0)
+	spawnRing.Lifetime = NumberRange.new(0.5)
+	spawnRing.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(1, 3.5) -- Premium larger ring
+	})
+	spawnRing.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(0.5, 0.4),
+		NumberSequenceKeypoint.new(1, 1)
+	})
+	spawnRing.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250)) -- Light sky blue
+	spawnRing.LightEmission = 0.5
+	spawnRing.Parent = orb
+	spawnRing:Emit(2) -- Double ring for premium
+	Debris:AddItem(spawnRing, 1)
+
 	-- REMOVED spinning effect for performance
 
 	-- REMOVED core pulse animation
@@ -244,13 +279,38 @@ while true do
 			sparkle.Enabled = false
 			hearts.Enabled = false
 
+			-- POLISH: Premium dream burst death
+			-- Emit final particles
+			sparkle:Emit(15)
+			hearts:Emit(5)
+			
+			-- Create dream burst effect
+			local dreamBurst = Instance.new("ParticleEmitter")
+			dreamBurst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			dreamBurst.Rate = 0
+			dreamBurst.Speed = NumberRange.new(5, 8)
+			dreamBurst.SpreadAngle = Vector2.new(360, 360)
+			dreamBurst.Lifetime = NumberRange.new(0.8)
+			dreamBurst.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.5),
+				NumberSequenceKeypoint.new(0.5, 0.3),
+				NumberSequenceKeypoint.new(1, 0)
+			})
+			dreamBurst.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250))
+			dreamBurst.LightEmission = 1
+			dreamBurst.Parent = orb
+			dreamBurst:Emit(20)
+			
+			-- Shrink with twist
 			TweenService:Create(orb,
-				TweenInfo.new(3, Enum.EasingStyle.Quad),
-				{Transparency = 0.9}
+				TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+				{Size = Vector3.new(0, 0, 0), Transparency = 0.3}
 			):Play()
-
+			
+			-- Flash then fade light
+			pointLight.Brightness = 2
 			TweenService:Create(pointLight,
-				TweenInfo.new(3, Enum.EasingStyle.Linear),
+				TweenInfo.new(0.5, Enum.EasingStyle.Quad),
 				{Brightness = 0, Range = 0}
 			):Play()
 		end

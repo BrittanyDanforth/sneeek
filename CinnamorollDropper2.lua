@@ -119,6 +119,13 @@ while true do
 	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
+	-- POLISH: Add crystal sheen
+	local appearance = Instance.new("SurfaceAppearance")
+	appearance.AlphaMode = Enum.AlphaMode.Transparency
+	appearance.ColorMap = "rbxassetid://248553221"  -- Soft cloudy texture
+	appearance.MetalnessMap = "rbxassetid://10497334942"  -- Metallic shine
+	appearance.Parent = orb
+
 	-- REDUCED sparkles for performance
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
@@ -173,6 +180,33 @@ while true do
 	)
 	spawnTween:Play()
 
+	-- POLISH: Magical spawn flash
+	pointLight.Brightness = 2 -- Bright flash
+	TweenService:Create(pointLight,
+		TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.6} -- Back to normal
+	):Play()
+
+	-- POLISH: Cloud puff spawn effect
+	local spawnPuff = Instance.new("ParticleEmitter")
+	spawnPuff.Texture = "rbxassetid://262979222" -- Ring texture
+	spawnPuff.Rate = 0
+	spawnPuff.Speed = NumberRange.new(0)
+	spawnPuff.Lifetime = NumberRange.new(0.4)
+	spawnPuff.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 2.5) -- Larger for cloud effect
+	})
+	spawnPuff.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(0.5, 0.5),
+		NumberSequenceKeypoint.new(1, 1)
+	})
+	spawnPuff.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255)) -- White cloud
+	spawnPuff.Parent = orb
+	spawnPuff:Emit(2) -- Two puffs
+	Debris:AddItem(spawnPuff, 1)
+
 	-- Track orb briefly
 	task.spawn(function()
 		task.wait(1)
@@ -194,9 +228,39 @@ while true do
 	task.delay(20, function()
 		if orb.Parent then
 			sparkle.Enabled = false
+			
+			-- POLISH: Cloud pop animation
+			sparkle:Emit(10) -- Burst of sparkles
+			
+			-- Create cloud dissipate effect
+			local cloudPop = Instance.new("ParticleEmitter")
+			cloudPop.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			cloudPop.Rate = 0
+			cloudPop.Speed = NumberRange.new(2, 4)
+			cloudPop.SpreadAngle = Vector2.new(360, 360)
+			cloudPop.Lifetime = NumberRange.new(0.6)
+			cloudPop.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.5),
+				NumberSequenceKeypoint.new(1, 1.5)
+			})
+			cloudPop.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.5),
+				NumberSequenceKeypoint.new(1, 1)
+			})
+			cloudPop.Color = ColorSequence.new(orb.Color)
+			cloudPop.Parent = orb
+			cloudPop:Emit(6)
+			
+			-- Shrink and fade
 			TweenService:Create(orb,
-				TweenInfo.new(2, Enum.EasingStyle.Linear),
-				{Transparency = 0.8}
+				TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.In),
+				{Size = Vector3.new(0.1, 0.1, 0.1), Transparency = 0.7}
+			):Play()
+			
+			-- Quick light fade
+			TweenService:Create(pointLight,
+				TweenInfo.new(0.4, Enum.EasingStyle.Linear),
+				{Brightness = 0, Range = 0}
 			):Play()
 		end
 	end)

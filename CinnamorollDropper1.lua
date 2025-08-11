@@ -152,6 +152,13 @@ while true do
 	pointLight.Color = Color3.fromRGB(180, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
+	-- POLISH: Add subtle crystal sheen
+	local appearance = Instance.new("SurfaceAppearance")
+	appearance.AlphaMode = Enum.AlphaMode.Transparency
+	appearance.ColorMap = "rbxassetid://248553221"  -- Soft cloudy texture
+	appearance.MetalnessMap = "rbxassetid://10497334942"  -- Metallic shine
+	appearance.Parent = orb
+
 	-- Position with small offset
 	local offsetX = math.random(-2, 2) * 0.1
 	local offsetZ = math.random(-2, 2) * 0.1
@@ -181,6 +188,33 @@ while true do
 	)
 	spawnTween:Play()
 
+	-- POLISH: Add spawn flash
+	pointLight.Brightness = 1.5 -- Temporarily bright
+	TweenService:Create(pointLight,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.4} -- Fade back to normal
+	):Play()
+
+	-- POLISH: Add spawn ring effect
+	local spawnRing = Instance.new("ParticleEmitter")
+	spawnRing.Texture = "rbxassetid://262979222" -- Ring texture
+	spawnRing.Rate = 0
+	spawnRing.Speed = NumberRange.new(0)
+	spawnRing.Lifetime = NumberRange.new(0.3)
+	spawnRing.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(1, 2) -- Expands outwards
+	})
+	spawnRing.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(0.5, 0.6),
+		NumberSequenceKeypoint.new(1, 1) -- Fades out
+	})
+	spawnRing.Color = ColorSequence.new(orb.Color)
+	spawnRing.Parent = orb
+	spawnRing:Emit(1) -- Emit one ring
+	Debris:AddItem(spawnRing, 1) -- Clean it up
+
 	-- Track orb for 2 seconds
 	local startY = orb.Position.Y
 	task.spawn(function()
@@ -208,4 +242,33 @@ while true do
 
 	-- Cleanup
 	Debris:AddItem(orb, 20)
+
+	-- POLISH: Pop death animation
+	task.delay(18, function()
+		if orb.Parent then
+			-- Create pop effect
+			local popParticle = Instance.new("ParticleEmitter")
+			popParticle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			popParticle.Rate = 0
+			popParticle.Speed = NumberRange.new(3, 5)
+			popParticle.SpreadAngle = Vector2.new(360, 360)
+			popParticle.Lifetime = NumberRange.new(0.5)
+			popParticle.Size = NumberSequence.new(0.3)
+			popParticle.Color = ColorSequence.new(orb.Color)
+			popParticle.Parent = orb
+			popParticle:Emit(8)
+
+			-- Shrink and pop
+			TweenService:Create(orb,
+				TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+				{Size = Vector3.new(0, 0, 0), Transparency = 0.5}
+			):Play()
+
+			-- Fade light
+			TweenService:Create(pointLight,
+				TweenInfo.new(0.3, Enum.EasingStyle.Linear),
+				{Brightness = 0, Range = 0}
+			):Play()
+		end
+	end)
 end
