@@ -24,13 +24,13 @@ print("Full path:", script:GetFullName())
 local dropPart = script.Parent:WaitForChild("Drop")
 print("Drop part found at:", dropPart:GetFullName())
 
--- Cinnamoroll palette (PINK/PURPLE TONES - different from Dropper 1)
+-- Cinnamoroll palette (WHITE with PINK accents - actual Cinnamoroll colors)
 local COLORS = {
-	Color3.fromRGB(255, 182, 193),    -- Light pink
-	Color3.fromRGB(221, 160, 221),    -- Plum
-	Color3.fromRGB(216, 191, 216),    -- Thistle
-	Color3.fromRGB(255, 218, 185),    -- Peach puff
-	Color3.fromRGB(255, 192, 203),    -- Pink
+	Color3.fromRGB(255, 255, 255),    -- Pure white (main color)
+	Color3.fromRGB(255, 250, 250),    -- Snow white
+	Color3.fromRGB(255, 245, 250),    -- White with tiny pink tint
+	Color3.fromRGB(255, 240, 245),    -- Lavender blush (very light pink)
+	Color3.fromRGB(250, 240, 255),    -- White with hint of blue
 }
 
 -- Pattern for anti-stacking
@@ -120,12 +120,12 @@ while true do
 	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- POLISH: Simple highlight for a bit of pop
+	-- POLISH: Cinnamoroll-style highlight (blue like the eyes!)
 	local highlight = Instance.new("Highlight")
-	highlight.FillColor = Color3.fromRGB(255, 255, 255)
+	highlight.FillColor = Color3.fromRGB(255, 250, 250)
 	highlight.FillTransparency = 0.85  -- Very subtle
-	highlight.OutlineColor = Color3.fromRGB(200, 230, 255)
-	highlight.OutlineTransparency = 0.5
+	highlight.OutlineColor = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
+	highlight.OutlineTransparency = 0.4
 	highlight.Parent = orb
 
 	-- ENHANCED sparkles with color
