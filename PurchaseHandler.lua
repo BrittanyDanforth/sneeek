@@ -212,11 +212,19 @@ function PurchaseHandler.new(tycoon)
     self.purchasedItems = {}
     self.buttons = {}
     self.playerMoney = 0
+    self.connections = {} -- Store button connections for cleanup
+    self.isInitialized = false
     
     return self
 end
 
 function PurchaseHandler:Initialize()
+    -- Prevent double initialization
+    if self.isInitialized then
+        warn("PurchaseHandler already initialized for this tycoon")
+        return
+    end
+    
     -- Find all purchase buttons in the tycoon
     self:FindAllButtons()
     
@@ -228,6 +236,26 @@ function PurchaseHandler:Initialize()
     
     -- Set up button connections
     self:SetupButtonConnections()
+    
+    self.isInitialized = true
+end
+
+function PurchaseHandler:Cleanup()
+    -- Disconnect all button connections
+    for _, connection in pairs(self.connections) do
+        if connection then
+            connection:Disconnect()
+        end
+    end
+    self.connections = {}
+    
+    -- Reset state
+    self.isInitialized = false
+    self.purchasedItems = {}
+    self.playerMoney = 0
+    
+    -- Hide all buttons
+    self:HideAllButtons()
 end
 
 function PurchaseHandler:FindAllButtons()
@@ -372,14 +400,92 @@ function PurchaseHandler:Purchase(itemName)
 end
 
 function PurchaseHandler:SpawnPurchasedItem(itemName)
-    -- This would spawn the actual dropper/item in the tycoon
-    -- Implementation depends on your tycoon structure
+    -- Spawn the actual dropper/item in the tycoon
     local purchasedObjects = self.tycoon:FindFirstChild("PurchasedObjects")
-    if purchasedObjects then
-        local item = purchasedObjects:FindFirstChild(itemName)
-        if item then
-            item.Parent = self.tycoon
+    if not purchasedObjects then
+        warn("No PurchasedObjects folder found in tycoon")
+        return
+    end
+    
+    -- Look for the item to spawn
+    local item = purchasedObjects:FindFirstChild(itemName)
+    if not item then
+        -- Try without brackets price (in case names don't match exactly)
+        for _, child in pairs(purchasedObjects:GetChildren()) do
+            if child.Name:match(itemName:match("^[^%[]+")) then
+                item = child
+                break
+            end
         end
+    end
+    
+    if item then
+        -- Move item to tycoon
+        item.Parent = self.tycoon
+        
+        -- Make all parts visible
+        for _, part in pairs(item:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+                part.CanCollide = true
+            elseif part:IsA("Decal") or part:IsA("Texture") then
+                part.Transparency = 0
+            end
+        end
+        
+        -- Special handling for droppers
+        if itemName:match("Dropper") then
+            self:SetupDropper(item)
+        end
+        
+        print("Spawned: " .. itemName)
+    else
+        warn("Could not find item to spawn: " .. itemName)
+    end
+end
+
+function PurchaseHandler:SetupDropper(dropper)
+    -- Set up dropper functionality
+    if dropper:FindFirstChild("DropperScript") then
+        dropper.DropperScript.Enabled = true
+    else
+        -- Create a basic dropper script if none exists
+        local dropperScript = Instance.new("Script")
+        dropperScript.Name = "DropperScript"
+        dropperScript.Source = [[
+local dropper = script.Parent
+local dropPart = dropper:FindFirstChild("Drop") or dropper:FindFirstChild("DropPart")
+if not dropPart then return end
+
+local tycoon = dropper.Parent
+local baseValue = 10
+local dropRate = 3
+
+-- Determine drop value based on dropper type
+if dropper.Name:match("MEGA") then
+    baseValue = 100
+    dropRate = 2
+elseif dropper.Name:match("Super") then
+    baseValue = 250
+    dropRate = 2.5
+elseif dropper.Name:match("Omega") then
+    baseValue = 500
+    dropRate = 2
+elseif dropper.Name:match("POWER") then
+    baseValue = 150
+    dropRate = 2.5
+elseif dropper.Name:match("CORE") then
+    baseValue = 75
+    dropRate = 3
+end
+
+-- Register with tycoon system
+if _G.RegisterDropper then
+    _G.RegisterDropper(tycoon, dropper, dropPart, dropRate, baseValue)
+end
+]]
+        dropperScript.Parent = dropper
+        dropperScript.Enabled = true
     end
 end
 
@@ -394,8 +500,16 @@ function PurchaseHandler:SetupButtonConnections()
                 clickDetector.Parent = head
             end
             
-            clickDetector.MouseClick:Connect(function(player)
-                if player == self.tycoon.Owner.Value then
+            -- Disconnect any existing connections to prevent duplicates
+            if self.connections[itemName] then
+                self.connections[itemName]:Disconnect()
+            end
+            
+            -- Store connection for cleanup
+            self.connections[itemName] = clickDetector.MouseClick:Connect(function(player)
+                -- Verify this is the tycoon owner
+                local owner = self.tycoon:FindFirstChild("Owner")
+                if owner and owner.Value == player then
                     self:Purchase(itemName)
                 end
             end)
