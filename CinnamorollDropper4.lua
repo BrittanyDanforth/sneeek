@@ -1,13 +1,12 @@
 --[[
-	Cinnamoroll Dropper 4 - Customizable Color Dropper
-	Uses parent's DropColor and MaterialValue
+	Cinnamoroll Dropper 4 - Pastel Kawaii Style
+	Drops soft pastel Cinnamoroll orbs
 	NO CLEANUP - Orbs stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local PhysicsService = game:GetService("PhysicsService")
-local RunService = game:GetService("RunService")
 
 -- Wait for PartStorage
 task.wait(2)
@@ -16,10 +15,14 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
 
--- Get parent values
-local parentModel = script.Parent.Parent.Parent
-local dropColorValue = parentModel:WaitForChild("DropColor")
-local materialValue = parentModel:WaitForChild("MaterialValue")
+-- Cinnamoroll pastel colors
+local COLORS = {
+	Color3.fromRGB(255, 230, 240),    -- Soft pink
+	Color3.fromRGB(230, 240, 255),    -- Soft blue
+	Color3.fromRGB(255, 240, 230),    -- Soft peach
+	Color3.fromRGB(240, 230, 255),    -- Soft lavender
+	Color3.fromRGB(230, 255, 240),    -- Soft mint
+}
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -54,18 +57,22 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
+local colorIndex = 1
+
 while true do
 	task.wait(1) -- Drop rate
 	
-	-- Create customizable orb
+	-- Create pastel orb
 	local orb = Instance.new("Part")
-	orb.Name = "CustomOrb"
-	orb.BrickColor = dropColorValue.Value
-	orb.Material = materialValue.Value
+	orb.Name = "PastelCinnamorollOrb"
 	orb.Shape = Enum.PartType.Ball
-	orb.Size = Vector3.new(1.7, 1.7, 1.7)
+	orb.Material = Enum.Material.ForceField -- Soft dreamy material
+	orb.Size = Vector3.new(1.5, 1.5, 1.5)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
+	orb.Color = COLORS[colorIndex]
+	
+	colorIndex = (colorIndex % #COLORS) + 1
 	
 	-- Collision settings
 	orb.CanCollide = true
@@ -79,9 +86,9 @@ while true do
 	
 	-- Physics
 	orb.CustomPhysicalProperties = PhysicalProperties.new(
-		0.4,  -- Medium density
+		0.3,  -- Light
 		0.5,  -- Medium friction
-		0.1,  -- Low bounce
+		0.2,  -- Small bounce
 		1, 1
 	)
 	
@@ -91,14 +98,33 @@ while true do
 	cash.Value = 30
 	cash.Parent = orb
 	
-	-- Adaptive glow based on material
-	if materialValue.Value == Enum.Material.Neon or materialValue.Value == Enum.Material.ForceField then
-		local pointLight = Instance.new("PointLight")
-		pointLight.Brightness = 0.8
-		pointLight.Range = 6
-		pointLight.Color = orb.Color
-		pointLight.Parent = orb
-	end
+	-- Soft pastel glow
+	local pointLight = Instance.new("PointLight")
+	pointLight.Brightness = 0.5
+	pointLight.Range = 5
+	pointLight.Color = orb.Color
+	pointLight.Parent = orb
+	
+	-- Subtle outline
+	local selection = Instance.new("SelectionBox")
+	selection.Adornee = orb
+	selection.Color3 = Color3.fromRGB(255, 255, 255) -- White outline
+	selection.LineThickness = 0.03
+	selection.Transparency = 0.5
+	selection.Parent = orb
+	
+	-- Soft sparkles
+	local sparkle = Instance.new("ParticleEmitter")
+	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparkle.Rate = 4
+	sparkle.Lifetime = NumberRange.new(0.5, 1)
+	sparkle.Speed = NumberRange.new(0.5, 1)
+	sparkle.SpreadAngle = Vector2.new(180, 180)
+	sparkle.Size = NumberSequence.new(0.2)
+	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	sparkle.LightEmission = 0.5
+	sparkle.VelocityInheritance = 0.3
+	sparkle.Parent = orb
 	
 	-- Position
 	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0)
@@ -106,29 +132,25 @@ while true do
 	-- Drop velocity
 	orb.AssemblyLinearVelocity = Vector3.new(0, -14, 0)
 	
+	-- Slightly transparent
+	orb.Transparency = 0.2
+	
 	-- Parent to storage
 	orb.Parent = PartStorage
 	
 	-- Spawn animation
 	orb.Size = Vector3.new(0.5, 0.5, 0.5)
-	local spawnTween = TweenService:Create(orb,
+	TweenService:Create(orb,
 		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.7, 1.7, 1.7)}
-	)
-	spawnTween:Play()
+		{Size = Vector3.new(1.5, 1.5, 1.5)}
+	):Play()
 	
-	-- Spawn particles
-	local spawnBurst = Instance.new("ParticleEmitter")
-	spawnBurst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	spawnBurst.Rate = 0
-	spawnBurst.Speed = NumberRange.new(2, 4)
-	spawnBurst.SpreadAngle = Vector2.new(360, 360)
-	spawnBurst.Lifetime = NumberRange.new(0.5)
-	spawnBurst.Size = NumberSequence.new(0.5)
-	spawnBurst.Color = ColorSequence.new(orb.Color)
-	spawnBurst.Parent = orb
-	spawnBurst:Emit(10)
-	Debris:AddItem(spawnBurst, 1)
+	-- Soft flash
+	pointLight.Brightness = 1
+	TweenService:Create(pointLight,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.5}
+	):Play()
 	
 	-- NO CLEANUP - Orbs stay until collected!
 end

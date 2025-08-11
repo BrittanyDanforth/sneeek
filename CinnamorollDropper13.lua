@@ -1,7 +1,7 @@
 --[[
-	Cinnamoroll Dropper 13 - ULTIMATE Paintball Gun Dropper
-	Drops legendary paintball guns with insane effects
-	NO CLEANUP - Guns stay until collected
+	Cinnamoroll Dropper 13 - ULTIMATE Magical Orb Style
+	Drops legendary Cinnamoroll magical orbs
+	NO CLEANUP - Orbs stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -14,10 +14,6 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
-
--- Mesh settings
-local meshID = "rbxasset://fonts/PaintballGun.mesh"
-local textureID = "rbxasset://textures/PaintballGunTex128.png"
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -60,237 +56,256 @@ while true do
 	task.wait(1.5) -- Drop rate
 	dropCount = dropCount + 1
 	
-	-- Create LEGENDARY paintball gun
-	local gun = Instance.new("Part")
-	gun.Name = "LegendaryPaintballGun"
-	gun.Size = Vector3.new(0.2, 0.2, 0.2)
-	gun.TopSurface = Enum.SurfaceType.Smooth
-	gun.BottomSurface = Enum.SurfaceType.Smooth
-	gun.Material = Enum.Material.Neon -- GLOWING!
-	gun.BrickColor = BrickColor.new("Institutional white")
+	-- Create LEGENDARY orb
+	local orb = Instance.new("Part")
+	orb.Name = "LegendaryMagicalOrb"
+	orb.Shape = Enum.PartType.Ball
+	orb.Size = Vector3.new(1.8, 1.8, 1.8)
+	orb.Material = Enum.Material.ForceField
+	orb.TopSurface = Enum.SurfaceType.Smooth
+	orb.BottomSurface = Enum.SurfaceType.Smooth
+	
+	-- Cinnamoroll signature colors
+	masterHue = (masterHue + 20) % 360
+	local primaryColor = Color3.fromHSV(0.55, 0.3, 1) -- Soft blue base
+	local accentColor = Color3.fromHSV((masterHue/360), 0.2, 1) -- Shifting pastels
+	orb.Color = primaryColor
 	
 	-- Collision settings
-	gun.CanCollide = true
-	gun.CanTouch = true
-	gun.CanQuery = true
+	orb.CanCollide = true
+	orb.CanTouch = true
+	orb.CanQuery = true
 	
 	-- Set collision group
 	pcall(function()
-		gun.CollisionGroup = ORB_GROUP
+		orb.CollisionGroup = ORB_GROUP
 	end)
 	
-	-- LEGENDARY gun mesh
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshId = meshID
-	mesh.TextureId = textureID
-	mesh.Scale = Vector3.new(1.2, 1.2, 1.2) -- BIGGEST!
-	mesh.Parent = gun
-	
-	-- Physics
-	gun.CustomPhysicalProperties = PhysicalProperties.new(
-		0.3,  -- Light for effects
-		0.8,  -- High friction
-		0.5,  -- Bouncy!
+	-- Magical physics
+	orb.CustomPhysicalProperties = PhysicalProperties.new(
+		0.1,  -- Ultra light
+		0.5,  -- Medium friction
+		0.5,  -- Magical bounce
 		1, 1
 	)
 	
-	-- Cash value (PREMIUM!)
+	-- Cash value (ULTIMATE!)
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	cash.Value = 100 -- Still 100 as requested
-	cash.Parent = gun
+	cash.Value = 100
+	cash.Parent = orb
 	
-	-- ULTIMATE rainbow core glow
-	masterHue = (masterHue + 20) % 360
-	local coreColor = Color3.fromHSV(masterHue/360, 1, 1)
-	
+	-- ULTIMATE magical glow
 	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 1.2
-	pointLight.Range = 15
-	pointLight.Color = coreColor
-	pointLight.Parent = gun
+	pointLight.Brightness = 1
+	pointLight.Range = 12
+	pointLight.Color = primaryColor
+	pointLight.Parent = orb
 	
-	-- Triple outline effect!
+	-- Triple magical sphere layers
 	for i = 1, 3 do
-		local outline = Instance.new("SelectionBox")
-		outline.Adornee = gun
-		outline.Color3 = Color3.fromHSV((masterHue/360 + i*0.33) % 1, 1, 1)
-		outline.LineThickness = 0.05 + (i * 0.05)
-		outline.Transparency = 0.2 + (i * 0.2)
-		outline.Parent = gun
+		local sphere = Instance.new("SelectionSphere")
+		sphere.Adornee = orb
+		sphere.Color3 = Color3.fromHSV((0.55 + i*0.1) % 1, 0.3 - i*0.1, 1)
+		sphere.SurfaceTransparency = 1
+		sphere.Transparency = 0.3 + (i * 0.2)
+		sphere.Parent = orb
 	end
 	
-	-- ULTIMATE paint system
-	local paintColors = {}
-	for i = 0, 5 do
-		table.insert(paintColors, ColorSequenceKeypoint.new(
-			i/5,
-			Color3.fromHSV((i/5), 1, 1)
-		))
+	-- Cinnamoroll ear attachments
+	local leftEar = Instance.new("Attachment")
+	leftEar.Position = Vector3.new(-0.6, 0.7, 0)
+	leftEar.Parent = orb
+	
+	local rightEar = Instance.new("Attachment")
+	rightEar.Position = Vector3.new(0.6, 0.7, 0)
+	rightEar.Parent = orb
+	
+	-- Magical ear particles
+	for _, ear in pairs({leftEar, rightEar}) do
+		local magic = Instance.new("ParticleEmitter")
+		magic.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		magic.Rate = 20
+		magic.Lifetime = NumberRange.new(0.5, 1)
+		magic.Speed = NumberRange.new(1, 2)
+		magic.SpreadAngle = Vector2.new(45, 45)
+		magic.Size = NumberSequence.new(0.3)
+		magic.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230)) -- Light blue
+		magic.LightEmission = 1
+		magic.Parent = ear
 	end
 	
-	-- Main paint emitter
-	local paint = Instance.new("ParticleEmitter")
-	paint.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	paint.Rate = 50 -- MAXIMUM PAINT!
-	paint.Lifetime = NumberRange.new(1, 2)
-	paint.Speed = NumberRange.new(5, 8)
-	paint.SpreadAngle = Vector2.new(120, 120)
-	paint.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.8),
-		NumberSequenceKeypoint.new(0.5, 0.5),
+	-- ULTIMATE particle system
+	local stars = Instance.new("ParticleEmitter")
+	stars.Texture = "rbxasset://textures/particles/star.dds"
+	stars.Rate = 30
+	stars.Lifetime = NumberRange.new(1, 2)
+	stars.Speed = NumberRange.new(2, 4)
+	stars.SpreadAngle = Vector2.new(360, 360)
+	stars.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(0.5, 0.7),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	paint.Color = ColorSequence.new(paintColors)
-	paint.LightEmission = 1
-	paint.VelocityInheritance = 0.5
-	paint.EmissionDirection = Enum.NormalId.Front
-	paint.Parent = gun
+	stars.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 250, 250)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(173, 216, 230)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 192, 203))
+	}
+	stars.LightEmission = 1
+	stars.VelocityInheritance = 0.3
+	stars.Parent = orb
 	
-	-- Secondary sparkle emitter
-	local sparkles = Instance.new("ParticleEmitter")
-	sparkles.Texture = "rbxasset://textures/particles/star.dds"
-	sparkles.Rate = 30
-	sparkles.Lifetime = NumberRange.new(0.5, 1.5)
-	sparkles.Speed = NumberRange.new(2, 4)
-	sparkles.SpreadAngle = Vector2.new(360, 360)
-	sparkles.Size = NumberSequence.new(0.5)
-	sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	sparkles.LightEmission = 1
-	sparkles.Parent = gun
+	-- Hearts and clouds
+	local hearts = Instance.new("ParticleEmitter")
+	hearts.Texture = "rbxasset://textures/particles/heart.dds"
+	hearts.Rate = 5
+	hearts.Lifetime = NumberRange.new(2, 3)
+	hearts.Speed = NumberRange.new(1)
+	hearts.SpreadAngle = Vector2.new(180, 180)
+	hearts.Size = NumberSequence.new(0.4)
+	hearts.Color = ColorSequence.new(Color3.fromRGB(255, 182, 193)) -- Light pink
+	hearts.LightEmission = 0.8
+	hearts.Parent = orb
 	
-	-- ULTIMATE trail system
-	local attachments = {}
-	for i = 1, 4 do
+	-- Magical trails
+	local centerAttach = Instance.new("Attachment")
+	centerAttach.Position = Vector3.new(0, 0, 0)
+	centerAttach.Parent = orb
+	
+	-- Create swirling beam crown
+	for i = 1, 6 do
+		local angle = (i-1) * 60
 		local attach = Instance.new("Attachment")
-		local angle = (i-1) * 90
 		attach.Position = Vector3.new(
-			math.cos(math.rad(angle)) * 0.1,
+			math.cos(math.rad(angle)) * 0.9,
 			0,
-			math.sin(math.rad(angle)) * 0.1
+			math.sin(math.rad(angle)) * 0.9
 		)
-		attach.Parent = gun
-		table.insert(attachments, attach)
-	end
-	
-	-- Create trails between all attachments
-	for i = 1, #attachments do
-		for j = i+1, #attachments do
-			local trail = Instance.new("Trail")
-			trail.Attachment0 = attachments[i]
-			trail.Attachment1 = attachments[j]
-			trail.Color = ColorSequence.new(coreColor)
-			trail.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0, 0.5),
-				NumberSequenceKeypoint.new(1, 1)
-			}
-			trail.Lifetime = 0.5
-			trail.MinLength = 0
-			trail.Parent = gun
-		end
-	end
-	
-	-- Beam crown effect
-	local crownAttach = Instance.new("Attachment")
-	crownAttach.Position = Vector3.new(0, 0.2, 0)
-	crownAttach.Parent = gun
-	
-	for i = 1, 4 do
+		attach.Parent = orb
+		
 		local beam = Instance.new("Beam")
-		beam.Attachment0 = crownAttach
-		beam.Attachment1 = attachments[i]
-		beam.Color = ColorSequence.new(Color3.fromHSV((masterHue/360 + i*0.25) % 1, 1, 1))
-		beam.Transparency = NumberSequence.new(0.7)
-		beam.Width0 = 0.5
+		beam.Attachment0 = centerAttach
+		beam.Attachment1 = attach
+		beam.Color = ColorSequence.new(Color3.fromHSV((0.55 + i*0.1) % 1, 0.3, 1))
+		beam.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0, 0.5),
+			NumberSequenceKeypoint.new(0.5, 0.3),
+			NumberSequenceKeypoint.new(1, 0.8)
+		}
+		beam.Width0 = 0.3
 		beam.Width1 = 0.1
-		beam.Parent = gun
+		beam.FaceCamera = true
+		beam.Parent = orb
 	end
 	
 	-- LEGENDARY spawn position
 	local spawnAngle = dropCount * 0.3
-	local spawnRadius = 0.8
-	gun.CFrame = dropPart.CFrame * 
-		CFrame.Angles(math.rad(-90), math.rad(masterHue), math.rad(45)) * 
-		CFrame.new(
-			math.cos(spawnAngle) * spawnRadius,
-			-5,
-			math.sin(spawnAngle) * spawnRadius
-		)
-	
-	-- ULTIMATE movement
-	gun.AssemblyLinearVelocity = Vector3.new(
-		math.random(-5, 5),
-		-10,
-		math.random(-5, 5)
+	local spawnRadius = 0.5
+	orb.CFrame = dropPart.CFrame * CFrame.new(
+		math.cos(spawnAngle) * spawnRadius,
+		-5,
+		math.sin(spawnAngle) * spawnRadius
 	)
-	gun.AssemblyAngularVelocity = Vector3.new(10, 20, 10) -- MAXIMUM SPIN!
+	
+	-- Magical float
+	orb.AssemblyLinearVelocity = Vector3.new(
+		math.sin(spawnAngle) * 2,
+		-8,
+		math.cos(spawnAngle) * 2
+	)
+	orb.AssemblyAngularVelocity = Vector3.new(0, 3, 0)
 	
 	-- Parent to storage
-	gun.Parent = PartStorage
+	orb.Parent = PartStorage
 	
 	-- LEGENDARY spawn animation
-	gun.Transparency = 1
-	mesh.Scale = Vector3.new(0, 0, 0)
+	orb.Transparency = 1
+	orb.Size = Vector3.new(0, 0, 0)
 	
-	-- Lightning spawn effect
-	local lightning = Instance.new("ParticleEmitter")
-	lightning.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	lightning.Rate = 0
-	lightning.Speed = NumberRange.new(10, 20)
-	lightning.SpreadAngle = Vector2.new(360, 360)
-	lightning.Lifetime = NumberRange.new(0.1, 0.3)
-	lightning.Size = NumberSequence.new{
+	-- Magical appearance
+	local spawnEffect = Instance.new("ParticleEmitter")
+	spawnEffect.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	spawnEffect.Rate = 0
+	spawnEffect.Speed = NumberRange.new(5, 10)
+	spawnEffect.SpreadAngle = Vector2.new(360, 360)
+	spawnEffect.Lifetime = NumberRange.new(0.5)
+	spawnEffect.Size = NumberSequence.new{
 		NumberSequenceKeypoint.new(0, 2),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	lightning.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	lightning.LightEmission = 1
-	lightning.Parent = gun
-	lightning:Emit(100)
-	Debris:AddItem(lightning, 1)
+	spawnEffect.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230))
+	spawnEffect.LightEmission = 1
+	spawnEffect.Parent = orb
+	spawnEffect:Emit(100)
+	Debris:AddItem(spawnEffect, 1)
 	
 	-- Epic materialization
-	TweenService:Create(gun,
+	TweenService:Create(orb,
 		TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Transparency = 0}
-	):Play()
-	
-	TweenService:Create(mesh,
-		TweenInfo.new(0.8, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1.2, 1.2, 1.2)}
+		{Transparency = 0, Size = Vector3.new(1.8, 1.8, 1.8)}
 	):Play()
 	
 	-- MEGA flash
-	pointLight.Brightness = 5
-	pointLight.Range = 30
+	pointLight.Brightness = 3
+	pointLight.Range = 25
 	TweenService:Create(pointLight,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Brightness = 1.2, Range = 15}
+		TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 1, Range = 12}
 	):Play()
-	
-	-- Paint EXPLOSION!
-	paint:Emit(200)
-	sparkles:Emit(100)
 	
 	-- Continuous ULTIMATE animations
 	task.spawn(function()
-		local localHue = masterHue
+		local localHue = 0.55
 		local pulseTime = 0
-		while gun.Parent do
-			-- Rainbow cycling
-			localHue = (localHue + 3) % 360
-			local newColor = Color3.fromHSV(localHue/360, 1, 1)
+		while orb.Parent do
+			-- Gentle color shift
+			localHue = (localHue + 0.001) % 1
+			local newColor = Color3.fromHSV(localHue, 0.3, 1)
 			pointLight.Color = newColor
 			
-			-- Pulsing
-			pulseTime = pulseTime + 0.1
-			local pulse = math.sin(pulseTime * 2) * 0.1 + 1
-			mesh.Scale = Vector3.new(1.2 * pulse, 1.2 * pulse, 1.2 * pulse)
-			pointLight.Brightness = 1.2 * pulse
+			-- Magical pulsing
+			pulseTime = pulseTime + 0.05
+			local pulse = math.sin(pulseTime) * 0.1 + 1
+			orb.Size = Vector3.new(1.8 * pulse, 1.8 * pulse, 1.8 * pulse)
+			pointLight.Brightness = 1 * pulse
+			
+			-- Slow magical rotation
+			orb.AssemblyAngularVelocity = Vector3.new(
+				math.sin(pulseTime * 0.5) * 2,
+				3,
+				math.cos(pulseTime * 0.5) * 2
+			)
 			
 			task.wait(0.05)
 		end
 	end)
 	
-	-- NO CLEANUP - LEGENDARY guns stay until collected!
+	-- Aura effect
+	task.spawn(function()
+		while orb.Parent do
+			local aura = Instance.new("ParticleEmitter")
+			aura.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			aura.Rate = 0
+			aura.Speed = NumberRange.new(1)
+			aura.SpreadAngle = Vector2.new(360, 360)
+			aura.Lifetime = NumberRange.new(1)
+			aura.Size = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 2),
+				NumberSequenceKeypoint.new(1, 3)
+			}
+			aura.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 0.9),
+				NumberSequenceKeypoint.new(1, 1)
+			}
+			aura.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230))
+			aura.VelocityInheritance = 0
+			aura.Parent = orb
+			aura:Emit(5)
+			Debris:AddItem(aura, 2)
+			task.wait(1)
+		end
+	end)
+	
+	-- NO CLEANUP - LEGENDARY orbs stay until collected!
 end

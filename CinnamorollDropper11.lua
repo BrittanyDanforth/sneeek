@@ -1,7 +1,7 @@
 --[[
-	Cinnamoroll Dropper 11 - Paintball Gun Dropper
-	Drops colorful paintball guns
-	NO CLEANUP - Guns stay until collected
+	Cinnamoroll Dropper 11 - Marshmallow Drop Style
+	Drops soft Cinnamoroll marshmallows
+	NO CLEANUP - Marshmallows stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -14,10 +14,6 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
-
--- Mesh settings
-local meshID = "rbxasset://fonts/PaintballGun.mesh"
-local textureID = "rbxasset://textures/PaintballGunTex128.png"
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -52,13 +48,12 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
--- Colors for variety
+-- Marshmallow colors
 local COLORS = {
-	Color3.fromRGB(255, 100, 100), -- Red
-	Color3.fromRGB(100, 100, 255), -- Blue
-	Color3.fromRGB(100, 255, 100), -- Green
-	Color3.fromRGB(255, 255, 100), -- Yellow
-	Color3.fromRGB(255, 100, 255), -- Magenta
+	Color3.fromRGB(255, 250, 250), -- White
+	Color3.fromRGB(255, 245, 250), -- Pink tint
+	Color3.fromRGB(250, 250, 255), -- Blue tint
+	Color3.fromRGB(255, 255, 250), -- Cream
 }
 
 local colorIndex = 1
@@ -66,37 +61,39 @@ local colorIndex = 1
 while true do
 	task.wait(1.5) -- Drop rate
 	
-	-- Create paintball gun
-	local gun = Instance.new("Part")
-	gun.Name = "PaintballGun"
-	gun.Size = Vector3.new(0.2, 0.2, 0.2) -- Small base size
-	gun.TopSurface = Enum.SurfaceType.Smooth
-	gun.BottomSurface = Enum.SurfaceType.Smooth
-	gun.Material = Enum.Material.Plastic
-	gun.BrickColor = BrickColor.new("Medium stone grey")
+	-- Create marshmallow
+	local marshmallow = Instance.new("Part")
+	marshmallow.Name = "Marshmallow"
+	marshmallow.Shape = Enum.PartType.Block
+	marshmallow.Size = Vector3.new(1.2, 1, 1.2)
+	marshmallow.Material = Enum.Material.SmoothPlastic
+	marshmallow.Color = COLORS[colorIndex]
+	marshmallow.TopSurface = Enum.SurfaceType.Smooth
+	marshmallow.BottomSurface = Enum.SurfaceType.Smooth
+	
+	colorIndex = (colorIndex % #COLORS) + 1
+	
+	-- Round the edges
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Brick
+	mesh.Scale = Vector3.new(1, 0.8, 1)
+	mesh.Parent = marshmallow
 	
 	-- Collision settings
-	gun.CanCollide = true
-	gun.CanTouch = true
-	gun.CanQuery = true
+	marshmallow.CanCollide = true
+	marshmallow.CanTouch = true
+	marshmallow.CanQuery = true
 	
 	-- Set collision group
 	pcall(function()
-		gun.CollisionGroup = ORB_GROUP
+		marshmallow.CollisionGroup = ORB_GROUP
 	end)
 	
-	-- Gun mesh
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshId = meshID
-	mesh.TextureId = textureID
-	mesh.Scale = Vector3.new(0.8, 0.8, 0.8)
-	mesh.Parent = gun
-	
-	-- Physics
-	gun.CustomPhysicalProperties = PhysicalProperties.new(
-		0.5,  -- Medium weight
-		0.6,  -- Good friction
-		0.2,  -- Small bounce
+	-- Soft physics
+	marshmallow.CustomPhysicalProperties = PhysicalProperties.new(
+		0.1,  -- Very light
+		0.8,  -- High friction (sticky)
+		0.4,  -- Bouncy
 		1, 1
 	)
 	
@@ -104,75 +101,63 @@ while true do
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
 	cash.Value = 100
-	cash.Parent = gun
+	cash.Parent = marshmallow
 	
-	-- Colorful glow
+	-- Soft glow
 	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 0.6
-	pointLight.Range = 8
-	pointLight.Color = COLORS[colorIndex]
-	pointLight.Parent = gun
+	pointLight.Brightness = 0.3
+	pointLight.Range = 5
+	pointLight.Color = Color3.fromRGB(255, 250, 240)
+	pointLight.Parent = marshmallow
 	
-	colorIndex = (colorIndex % #COLORS) + 1
+	-- Marshmallow transparency
+	marshmallow.Transparency = 0.1
 	
-	-- Paint splatter particles
-	local paint = Instance.new("ParticleEmitter")
-	paint.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	paint.Rate = 15
-	paint.Lifetime = NumberRange.new(0.3, 0.8)
-	paint.Speed = NumberRange.new(2, 4)
-	paint.SpreadAngle = Vector2.new(60, 60)
-	paint.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.3),
-		NumberSequenceKeypoint.new(1, 0.1)
-	}
-	paint.Color = ColorSequence.new(pointLight.Color)
-	paint.LightEmission = 0.5
-	paint.VelocityInheritance = 0.2
-	paint.EmissionDirection = Enum.NormalId.Front
-	paint.Parent = gun
+	-- Powdered sugar particles
+	local powder = Instance.new("ParticleEmitter")
+	powder.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	powder.Rate = 8
+	powder.Lifetime = NumberRange.new(0.5, 1)
+	powder.Speed = NumberRange.new(0.5, 1)
+	powder.SpreadAngle = Vector2.new(180, 180)
+	powder.Size = NumberSequence.new(0.1)
+	powder.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	powder.LightEmission = 0.3
+	powder.VelocityInheritance = 0.8
+	powder.Parent = marshmallow
 	
-	-- Position
-	gun.CFrame = dropPart.CFrame * CFrame.Angles(math.rad(-90), 0, 0) - Vector3.new(0, 5, 0)
+	-- Position with tumble
+	marshmallow.CFrame = dropPart.CFrame * CFrame.Angles(
+		math.rad(math.random(-20, 20)),
+		math.rad(math.random(0, 360)),
+		math.rad(math.random(-20, 20))
+	) - Vector3.new(0, 5, 0)
 	
 	-- Drop with tumble
-	gun.AssemblyLinearVelocity = Vector3.new(
-		math.random(-2, 2),
-		-15,
-		math.random(-2, 2)
+	marshmallow.AssemblyLinearVelocity = Vector3.new(
+		math.random(-1, 1),
+		-12,
+		math.random(-1, 1)
 	)
-	gun.AssemblyAngularVelocity = Vector3.new(
-		math.random(-3, 3),
-		math.random(-3, 3),
-		math.random(-3, 3)
+	marshmallow.AssemblyAngularVelocity = Vector3.new(
+		math.random(-2, 2),
+		math.random(-2, 2),
+		math.random(-2, 2)
 	)
 	
 	-- Parent to storage
-	gun.Parent = PartStorage
+	marshmallow.Parent = PartStorage
 	
-	-- Spawn animation
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
-	gun.Transparency = 0.5
+	-- Spawn animation (squish and bounce)
+	mesh.Scale = Vector3.new(1.3, 0.5, 1.3)
 	
 	TweenService:Create(mesh,
-		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.8, 0.8, 0.8)}
+		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(1, 0.8, 1)}
 	):Play()
 	
-	TweenService:Create(gun,
-		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Transparency = 0}
-	):Play()
+	-- Puff of sugar
+	powder:Emit(20)
 	
-	-- Flash effect
-	pointLight.Brightness = 2
-	TweenService:Create(pointLight,
-		TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Brightness = 0.6}
-	):Play()
-	
-	-- Paint burst on spawn
-	paint:Emit(20)
-	
-	-- NO CLEANUP - Paintball guns stay until collected!
+	-- NO CLEANUP - Marshmallows stay until collected!
 end

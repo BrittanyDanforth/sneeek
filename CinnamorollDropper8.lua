@@ -1,7 +1,7 @@
 --[[
-	Cinnamoroll Dropper 8 - Lime Fabric Cube Dropper
-	Drops soft fabric cubes with kawaii effects
-	NO CLEANUP - Cubes stay until collected
+	Cinnamoroll Dropper 8 - Cloud Drop Style
+	Drops fluffy cloud-like Cinnamoroll orbs
+	NO CLEANUP - Orbs stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -14,6 +14,14 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
+
+-- Cinnamoroll cloud colors
+local COLORS = {
+	Color3.fromRGB(240, 248, 255),    -- Alice blue (cloud white)
+	Color3.fromRGB(230, 240, 255),    -- Light sky blue
+	Color3.fromRGB(255, 240, 245),    -- Lavender blush
+	Color3.fromRGB(240, 255, 255),    -- Azure
+}
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -48,37 +56,37 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
--- Rotation pattern
-local rotation = 0
+-- Cloud pattern
+local cloudPhase = 0
 
 while true do
 	task.wait(0.5) -- Fast drops!
 	
-	-- Create fabric cube
-	local cube = Instance.new("Part")
-	cube.Name = "FabricCube"
-	cube.Shape = Enum.PartType.Block
-	cube.Size = Vector3.new(1, 1, 1)
-	cube.BrickColor = BrickColor.new("Lime green")
-	cube.Material = Enum.Material.Fabric
-	cube.TopSurface = Enum.SurfaceType.Smooth
-	cube.BottomSurface = Enum.SurfaceType.Smooth
+	-- Create cloud orb
+	local orb = Instance.new("Part")
+	orb.Name = "CloudOrb"
+	orb.Shape = Enum.PartType.Ball
+	orb.Size = Vector3.new(1.3, 1.3, 1.3)
+	orb.Material = Enum.Material.SmoothPlastic
+	orb.Color = COLORS[math.random(1, #COLORS)]
+	orb.TopSurface = Enum.SurfaceType.Smooth
+	orb.BottomSurface = Enum.SurfaceType.Smooth
 	
 	-- Collision settings
-	cube.CanCollide = true
-	cube.CanTouch = true
-	cube.CanQuery = true
+	orb.CanCollide = true
+	orb.CanTouch = true
+	orb.CanQuery = true
 	
 	-- Set collision group
 	pcall(function()
-		cube.CollisionGroup = ORB_GROUP
+		orb.CollisionGroup = ORB_GROUP
 	end)
 	
-	-- Soft physics (it's fabric!)
-	cube.CustomPhysicalProperties = PhysicalProperties.new(
-		0.2,  -- Light
-		0.9,  -- High friction (fabric grips)
-		0.3,  -- Some bounce (soft)
+	-- Cloud physics
+	orb.CustomPhysicalProperties = PhysicalProperties.new(
+		0.1,  -- Very light like a cloud
+		0.6,  -- Medium friction
+		0.2,  -- Small bounce
 		1, 1
 	)
 	
@@ -86,64 +94,63 @@ while true do
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
 	cash.Value = 100
-	cash.Parent = cube
+	cash.Parent = orb
 	
-	-- Fabric glow
+	-- Cloud glow
 	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 0.5
+	pointLight.Brightness = 0.4
 	pointLight.Range = 6
-	pointLight.Color = Color3.fromRGB(50, 255, 50) -- Bright lime
-	pointLight.Parent = cube
+	pointLight.Color = Color3.fromRGB(230, 240, 255) -- Soft blue
+	pointLight.Parent = orb
 	
-	-- Soft outline
-	local selection = Instance.new("SelectionBox")
-	selection.Adornee = cube
-	selection.Color3 = Color3.fromRGB(100, 255, 100)
-	selection.LineThickness = 0.05
-	selection.Transparency = 0.3
-	selection.Parent = cube
+	-- Cloud transparency
+	orb.Transparency = 0.3
 	
-	-- Fabric particles
-	local fabric = Instance.new("ParticleEmitter")
-	fabric.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	fabric.Rate = 10
-	fabric.Lifetime = NumberRange.new(0.5, 1)
-	fabric.Speed = NumberRange.new(0.5, 1)
-	fabric.SpreadAngle = Vector2.new(180, 180)
-	fabric.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.2),
-		NumberSequenceKeypoint.new(1, 0)
+	-- Cloud particles
+	local clouds = Instance.new("ParticleEmitter")
+	clouds.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	clouds.Rate = 5
+	clouds.Lifetime = NumberRange.new(1, 2)
+	clouds.Speed = NumberRange.new(0.5)
+	clouds.SpreadAngle = Vector2.new(180, 180)
+	clouds.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(1, 1)
 	}
-	fabric.Color = ColorSequence.new(Color3.fromRGB(200, 255, 200))
-	fabric.LightEmission = 0.3
-	fabric.VelocityInheritance = 0.5
-	fabric.Parent = cube
+	clouds.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.8),
+		NumberSequenceKeypoint.new(1, 1)
+	}
+	clouds.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	clouds.VelocityInheritance = 0.5
+	clouds.Parent = orb
 	
-	-- Position with spin
-	rotation = rotation + 15
-	cube.CFrame = dropPart.CFrame * CFrame.Angles(math.rad(rotation), 0, math.rad(rotation)) - Vector3.new(0, 1.4, 0)
+	-- Position with drift
+	cloudPhase = cloudPhase + 0.5
+	local driftX = math.sin(cloudPhase) * 0.3
+	local driftZ = math.cos(cloudPhase) * 0.3
+	orb.CFrame = dropPart.CFrame - Vector3.new(driftX, 1.4, driftZ)
 	
-	-- Drop with spin
-	cube.AssemblyLinearVelocity = Vector3.new(0, -10, 0)
-	cube.AssemblyAngularVelocity = Vector3.new(2, 4, 2)
+	-- Float down gently
+	orb.AssemblyLinearVelocity = Vector3.new(driftX, -8, driftZ)
 	
 	-- Parent to storage
-	cube.Parent = PartStorage
+	orb.Parent = PartStorage
 	
-	-- Spawn animation (compress and release)
-	cube.Size = Vector3.new(0.5, 2, 0.5)
+	-- Spawn animation (puff into existence)
+	orb.Size = Vector3.new(0.3, 0.3, 0.3)
 	
-	TweenService:Create(cube,
-		TweenInfo.new(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1, 1, 1)}
+	TweenService:Create(orb,
+		TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
+		{Size = Vector3.new(1.3, 1.3, 1.3)}
 	):Play()
 	
 	-- Flash
-	pointLight.Brightness = 1.5
+	pointLight.Brightness = 0.8
 	TweenService:Create(pointLight,
-		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Brightness = 0.5}
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.4}
 	):Play()
 	
-	-- NO CLEANUP - Fabric cubes stay until collected!
+	-- NO CLEANUP - Cloud orbs stay until collected!
 end

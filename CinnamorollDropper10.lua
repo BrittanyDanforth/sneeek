@@ -1,7 +1,7 @@
 --[[
-	Cinnamoroll Dropper 10 - Premium Fabric Cube Dropper
-	Drops morphing fabric cubes with rainbow effects
-	NO CLEANUP - Cubes stay until collected
+	Cinnamoroll Dropper 10 - Heart Drop Style
+	Drops rainbow heart-themed Cinnamoroll orbs
+	NO CLEANUP - Orbs stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -48,7 +48,7 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
--- Rainbow colors
+-- Rainbow phase
 local rainbowPhase = 0
 local dropCount = 0
 
@@ -56,31 +56,34 @@ while true do
 	task.wait(0.5) -- Fast drops!
 	dropCount = dropCount + 1
 	
-	-- Create premium fabric cube
-	local cube = Instance.new("Part")
-	cube.Name = "PremiumFabricCube"
-	cube.Shape = Enum.PartType.Block
-	cube.Size = Vector3.new(1, 1, 1)
-	cube.BrickColor = BrickColor.new("Lime green")
-	cube.Material = Enum.Material.Fabric
-	cube.TopSurface = Enum.SurfaceType.Smooth
-	cube.BottomSurface = Enum.SurfaceType.Smooth
+	-- Create heart orb
+	local orb = Instance.new("Part")
+	orb.Name = "HeartOrb"
+	orb.Shape = Enum.PartType.Ball
+	orb.Size = Vector3.new(1.5, 1.5, 1.5)
+	orb.Material = Enum.Material.Neon
+	orb.TopSurface = Enum.SurfaceType.Smooth
+	orb.BottomSurface = Enum.SurfaceType.Smooth
+	
+	-- Rainbow color
+	rainbowPhase = (rainbowPhase + 30) % 360
+	orb.Color = Color3.fromHSV(rainbowPhase/360, 0.4, 1) -- Soft pastel rainbow
 	
 	-- Collision settings
-	cube.CanCollide = true
-	cube.CanTouch = true
-	cube.CanQuery = true
+	orb.CanCollide = true
+	orb.CanTouch = true
+	orb.CanQuery = true
 	
 	-- Set collision group
 	pcall(function()
-		cube.CollisionGroup = ORB_GROUP
+		orb.CollisionGroup = ORB_GROUP
 	end)
 	
-	-- Premium physics
-	cube.CustomPhysicalProperties = PhysicalProperties.new(
-		0.1,  -- Ultra light
-		0.7,  -- Good friction
-		0.4,  -- Nice bounce
+	-- Heart physics
+	orb.CustomPhysicalProperties = PhysicalProperties.new(
+		0.15, -- Very light
+		0.6,  -- Good friction
+		0.4,  -- Bouncy
 		1, 1
 	)
 	
@@ -88,129 +91,127 @@ while true do
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
 	cash.Value = 100
-	cash.Parent = cube
+	cash.Parent = orb
 	
-	-- Premium rainbow glow
+	-- Rainbow glow
 	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 0.8
+	pointLight.Brightness = 0.7
 	pointLight.Range = 10
-	pointLight.Color = Color3.fromRGB(50, 255, 50)
-	pointLight.Parent = cube
+	pointLight.Color = orb.Color
+	pointLight.Parent = orb
 	
-	-- Double outline effect
-	local outline1 = Instance.new("SelectionBox")
-	outline1.Adornee = cube
-	outline1.Color3 = Color3.fromRGB(200, 255, 200)
-	outline1.LineThickness = 0.1
-	outline1.Transparency = 0.2
-	outline1.Parent = cube
+	-- Heart outline
+	local selection = Instance.new("SelectionSphere")
+	selection.Adornee = orb
+	selection.Color3 = orb.Color
+	selection.SurfaceTransparency = 1
+	selection.Transparency = 0.3
+	selection.Parent = orb
 	
-	local outline2 = Instance.new("SelectionBox")
-	outline2.Adornee = cube
-	outline2.Color3 = Color3.fromRGB(100, 255, 100)
-	outline2.LineThickness = 0.15
-	outline2.Transparency = 0.5
-	outline2.Parent = cube
-	
-	-- Premium particles
-	local magic = Instance.new("ParticleEmitter")
-	magic.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	magic.Rate = 30
-	magic.Lifetime = NumberRange.new(0.5, 1.5)
-	magic.Speed = NumberRange.new(1, 3)
-	magic.SpreadAngle = Vector2.new(360, 360)
-	magic.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.5),
-		NumberSequenceKeypoint.new(0.5, 0.3),
-		NumberSequenceKeypoint.new(1, 0)
+	-- Heart particles
+	local hearts = Instance.new("ParticleEmitter")
+	hearts.Texture = "rbxasset://textures/particles/heart.dds"
+	hearts.Rate = 8
+	hearts.Lifetime = NumberRange.new(1, 2)
+	hearts.Speed = NumberRange.new(1, 3)
+	hearts.SpreadAngle = Vector2.new(180, 180)
+	hearts.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(0.5, 0.4),
+		NumberSequenceKeypoint.new(1, 0.2)
 	}
-	magic.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 200)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 255, 200)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 255, 255))
+	hearts.Color = ColorSequence.new(orb.Color)
+	hearts.LightEmission = 0.7
+	hearts.Parent = orb
+	
+	-- Rainbow sparkles
+	local sparkles = Instance.new("ParticleEmitter")
+	sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparkles.Rate = 20
+	sparkles.Lifetime = NumberRange.new(0.5, 1)
+	sparkles.Speed = NumberRange.new(1, 2)
+	sparkles.SpreadAngle = Vector2.new(360, 360)
+	sparkles.Size = NumberSequence.new(0.3)
+	sparkles.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromHSV(0, 0.4, 1)),
+		ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 0.4, 1)),
+		ColorSequenceKeypoint.new(0.66, Color3.fromHSV(0.66, 0.4, 1)),
+		ColorSequenceKeypoint.new(1, Color3.fromHSV(1, 0.4, 1))
 	}
-	magic.LightEmission = 0.8
-	magic.VelocityInheritance = 0.3
-	magic.Parent = cube
+	sparkles.LightEmission = 0.8
+	sparkles.VelocityInheritance = 0.3
+	sparkles.Parent = orb
 	
-	-- Beam effect
-	local attach1 = Instance.new("Attachment")
-	attach1.Position = Vector3.new(0, 0.5, 0)
-	attach1.Parent = cube
+	-- Heart motion pattern
+	local heartAngle = dropCount * 0.5
+	local heartRadius = 0.3
+	local offsetX = math.cos(heartAngle) * heartRadius
+	local offsetZ = math.sin(heartAngle) * heartRadius
 	
-	local attach2 = Instance.new("Attachment")
-	attach2.Position = Vector3.new(0, -0.5, 0)
-	attach2.Parent = cube
+	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 1.4, offsetZ)
 	
-	local beam = Instance.new("Beam")
-	beam.Attachment0 = attach1
-	beam.Attachment1 = attach2
-	beam.Color = ColorSequence.new(Color3.fromRGB(150, 255, 150))
-	beam.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.8),
-		NumberSequenceKeypoint.new(0.5, 0.5),
-		NumberSequenceKeypoint.new(1, 0.8)
-	}
-	beam.Width0 = 2
-	beam.Width1 = 2
-	beam.Parent = cube
-	
-	-- Spiral position
-	local spiralRadius = 0.5
-	local spiralAngle = dropCount * 0.5
-	local offsetX = math.cos(spiralAngle) * spiralRadius
-	local offsetZ = math.sin(spiralAngle) * spiralRadius
-	local offsetY = math.sin(dropCount * 0.3) * 0.2
-	
-	cube.CFrame = dropPart.CFrame - Vector3.new(offsetX, 1.4 - offsetY, offsetZ)
-	
-	-- Complex movement
-	cube.AssemblyLinearVelocity = Vector3.new(
-		offsetX * 4,
-		-8 + offsetY * 2,
-		offsetZ * 4
+	-- Float with love
+	orb.AssemblyLinearVelocity = Vector3.new(
+		offsetX * 3,
+		-9,
+		offsetZ * 3
 	)
-	cube.AssemblyAngularVelocity = Vector3.new(3, 6, 3)
+	orb.AssemblyAngularVelocity = Vector3.new(2, 4, 2)
 	
 	-- Parent to storage
-	cube.Parent = PartStorage
+	orb.Parent = PartStorage
 	
-	-- Morph animation
-	cube.Size = Vector3.new(2, 0.1, 2)
+	-- Spawn animation (heart beat)
+	orb.Size = Vector3.new(0.8, 0.8, 0.8)
 	
-	TweenService:Create(cube,
-		TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1, 1, 1)}
+	TweenService:Create(orb,
+		TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Size = Vector3.new(1.6, 1.6, 1.6)}
 	):Play()
 	
-	-- Rainbow color animation
+	task.wait(0.1)
+	
+	TweenService:Create(orb,
+		TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Size = Vector3.new(1.5, 1.5, 1.5)}
+	):Play()
+	
+	-- Rainbow flash
+	pointLight.Brightness = 2
+	TweenService:Create(pointLight,
+		TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.7}
+	):Play()
+	
+	-- Continuous color shift
 	task.spawn(function()
-		local hue = 0
-		while cube.Parent do
-			hue = (hue + 2) % 360
-			local color = Color3.fromHSV(hue/360, 0.3, 1) -- Soft pastel rainbow
-			pointLight.Color = color
-			outline1.Color3 = color
+		local localPhase = rainbowPhase
+		while orb.Parent do
+			localPhase = (localPhase + 2) % 360
+			local newColor = Color3.fromHSV(localPhase/360, 0.4, 1)
+			orb.Color = newColor
+			pointLight.Color = newColor
+			selection.Color3 = newColor
+			hearts.Color = ColorSequence.new(newColor)
 			task.wait(0.1)
 		end
 	end)
 	
-	-- Pulse animation
+	-- Heart beat pulse
 	task.spawn(function()
-		task.wait(0.3)
-		while cube.Parent do
-			TweenService:Create(cube,
-				TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-				{Size = Vector3.new(1.1, 1.1, 1.1)}
+		while orb.Parent do
+			TweenService:Create(orb,
+				TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+				{Size = Vector3.new(1.6, 1.6, 1.6)}
 			):Play()
-			task.wait(0.5)
-			TweenService:Create(cube,
-				TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-				{Size = Vector3.new(1, 1, 1)}
+			task.wait(0.4)
+			TweenService:Create(orb,
+				TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+				{Size = Vector3.new(1.5, 1.5, 1.5)}
 			):Play()
-			task.wait(0.5)
+			task.wait(0.4)
 		end
 	end)
 	
-	-- NO CLEANUP - Premium cubes stay until collected!
+	-- NO CLEANUP - Heart orbs stay until collected!
 end
