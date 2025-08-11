@@ -90,9 +90,9 @@ while true do
 	-- Add fluffy cloud mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://1098272" -- Little Fluffy Cloud
+	mesh.MeshId = "rbxassetid://1527559" -- Rainbow Cloud (more visible)
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(1.5, 1.5, 1.5) -- Scale for cloud
+	mesh.Scale = Vector3.new(3, 3, 3) -- Bigger scale for cloud
 	mesh.Parent = orb
 
 	-- COLLISION FIXED!
@@ -195,10 +195,10 @@ while true do
 	orb.Parent = PartStorage
 
 	-- Bounce spawn animation
-	mesh.Scale = Vector3.new(0.3, 0.3, 0.3)
+	mesh.Scale = Vector3.new(1, 1, 1)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1.5, 1.5, 1.5)}
+		{Scale = Vector3.new(3, 3, 3)}
 	)
 	spawnTween:Play()
 

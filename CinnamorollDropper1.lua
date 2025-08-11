@@ -113,7 +113,7 @@ while true do
 	-- Create cute cupcake part (BASIC - it's free!)
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCupcake_" .. orbCount
-	orb.Size = Vector3.new(1, 1, 1) -- Base size for mesh
+	orb.Size = Vector3.new(2, 2, 2) -- Bigger base size for mesh
 	orb.Material = Enum.Material.SmoothPlastic  -- Basic material
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
@@ -122,10 +122,17 @@ while true do
 	-- Add kawaii cupcake mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://20170940" -- Kawaii Cupcake from catalog
+	mesh.MeshId = "rbxassetid://1167945257" -- Heart Candy (more reliable)
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(1, 1, 1) -- Proper scale for cupcake
+	mesh.Scale = Vector3.new(2, 2, 2) -- Good scale
 	mesh.Parent = orb
+	
+	-- Add a soft glow
+	local light = Instance.new("PointLight")
+	light.Brightness = 0.5
+	light.Range = 10
+	light.Color = orb.Color
+	light.Parent = orb
 
 	-- COLLISION: On for world, off for players
 	orb.CanCollide = true -- CHANGED: Now collides with conveyor!
@@ -184,7 +191,7 @@ while true do
 	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1, 1, 1)}
+		{Scale = Vector3.new(2, 2, 2)}
 	)
 	spawnTween:Play()
 

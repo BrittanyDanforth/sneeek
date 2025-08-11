@@ -75,9 +75,9 @@ while true do
 	-- Add kawaii star mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://4580655175" -- Kawaii Star
+	mesh.MeshId = "rbxassetid://8691944038" -- Crystal Star (more visible)
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(2, 2, 2) -- Scale for star
+	mesh.Scale = Vector3.new(4, 4, 4) -- Scale for star
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -166,11 +166,11 @@ while true do
 	star.Parent = PartStorage
 	
 	-- Spawn animation
-	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
+	mesh.Scale = Vector3.new(1, 1, 1)
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(2, 2, 2)}
+		{Scale = Vector3.new(4, 4, 4)}
 	):Play()
 	
 	-- Flash effect
