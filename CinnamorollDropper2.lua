@@ -24,12 +24,13 @@ print("Full path:", script:GetFullName())
 local dropPart = script.Parent:WaitForChild("Drop")
 print("Drop part found at:", dropPart:GetFullName())
 
--- Cinnamoroll palette (SOFTENED for less eye strain)
+-- Cinnamoroll palette (PINK/PURPLE TONES - different from Dropper 1)
 local COLORS = {
-	Color3.fromRGB(245, 245, 245),    -- Softer white
-	Color3.fromRGB(210, 230, 245),    -- Gentle blue-white
-	Color3.fromRGB(245, 230, 235),    -- Soft pink-white
-	Color3.fromRGB(230, 238, 245),    -- Muted alice blue
+	Color3.fromRGB(255, 182, 193),    -- Light pink
+	Color3.fromRGB(221, 160, 221),    -- Plum
+	Color3.fromRGB(216, 191, 216),    -- Thistle
+	Color3.fromRGB(255, 218, 185),    -- Peach puff
+	Color3.fromRGB(255, 192, 203),    -- Pink
 }
 
 -- Pattern for anti-stacking
@@ -81,12 +82,11 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.Plastic  -- Better than SmoothPlastic but not Neon
+	orb.Material = Enum.Material.ForceField  -- Translucent glow material
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
-	orb.Reflectance = 0.2  -- Slight shine
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor
@@ -128,21 +128,34 @@ while true do
 	highlight.OutlineTransparency = 0.5
 	highlight.Parent = orb
 
-	-- REDUCED sparkles for performance
+	-- ENHANCED sparkles with color
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 3          -- Reduced from 8
-	sparkle.Lifetime = NumberRange.new(0.5, 1)
-	sparkle.Speed = NumberRange.new(0.5, 1)
+	sparkle.Rate = 5          -- More sparkles for mid-tier
+	sparkle.Lifetime = NumberRange.new(0.5, 1.5)
+	sparkle.Speed = NumberRange.new(0.5, 2)
 	sparkle.SpreadAngle = Vector2.new(180, 180)
-	sparkle.LightEmission = 0.7  -- Reduced from 1
+	sparkle.LightEmission = 1  -- Full glow
 	sparkle.LightInfluence = 0
 	sparkle.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.2),  -- Smaller particles
+		NumberSequenceKeypoint.new(0, 0.3),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(245, 245, 245))
+	-- Match sparkle color to orb color
+	sparkle.Color = ColorSequence.new(orb.Color)
 	sparkle.Parent = orb
+	
+	-- Add secondary star particles
+	local stars = Instance.new("ParticleEmitter")
+	stars.Texture = "rbxasset://textures/particles/star.dds"
+	stars.Rate = 2
+	stars.Lifetime = NumberRange.new(1, 2)
+	stars.Speed = NumberRange.new(0.5)
+	stars.SpreadAngle = Vector2.new(360, 360)
+	stars.LightEmission = 0.8
+	stars.Size = NumberSequence.new(0.4)
+	stars.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	stars.Parent = orb
 
 	-- Pattern positioning
 	local patterns = {
@@ -165,8 +178,8 @@ while true do
 		offset.Z * 2
 	)
 
-	-- Semi-transparent cloud
-	orb.Transparency = 0.05  -- Almost opaque, just a tiny bit of transparency
+	-- Semi-transparent cloud (ForceField needs some transparency)
+	orb.Transparency = 0.2  -- Slight transparency for ForceField to look good
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())
