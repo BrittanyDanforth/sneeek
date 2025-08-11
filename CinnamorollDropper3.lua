@@ -169,22 +169,14 @@ while true do
 	
 	-- Removed outer aura - was causing see-through issues
 	
-	-- Premium outline effect using layered part
-	local outline = Instance.new("Part")
-	outline.Name = "PremiumOutline"
-	outline.Shape = Enum.PartType.Ball
-	outline.Material = Enum.Material.Neon
-	outline.Size = Vector3.new(1.95, 1.95, 1.95)  -- Slightly larger than main orb
-	outline.Color = Color3.fromRGB(70, 130, 180)  -- Darker blue outline
-	outline.Transparency = 0.5
-	outline.CanCollide = false
-	outline.Massless = true
-	outline.Parent = orb
-	
-	local weldOutline = Instance.new("WeldConstraint")
-	weldOutline.Part0 = orb
-	weldOutline.Part1 = outline
-	weldOutline.Parent = orb
+	-- Highlight for extra pop
+	local highlight = Instance.new("Highlight")
+	highlight.FillColor = Color3.fromRGB(135, 206, 250)
+	highlight.FillTransparency = 0.7
+	highlight.OutlineColor = Color3.fromRGB(70, 130, 180)
+	highlight.OutlineTransparency = 0.3
+	highlight.DepthMode = Enum.HighlightDepthMode.Hidden  -- PROPER FIX!
+	highlight.Parent = orb
 
 	-- REDUCED Blue sparkles (as requested but toned down)
 	local sparkle = Instance.new("ParticleEmitter")
