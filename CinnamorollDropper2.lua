@@ -84,8 +84,8 @@ while true do
 	-- Add mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://10253958526"
-	mesh.TextureId = "rbxassetid://10253959770"
+	mesh.MeshId = "rbxassetid://114684643919279"  -- Cinnamoroll Plushie mesh
+	mesh.TextureId = "rbxassetid://136339015269351"  -- Cinnamoroll Plushie texture
 	mesh.Scale = Vector3.new(2, 2, 2) -- Adjust scale as needed
 	mesh.Parent = orb
 
