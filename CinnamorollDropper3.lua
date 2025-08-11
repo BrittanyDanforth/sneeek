@@ -237,12 +237,12 @@ while true do
 	spawnRing.Speed = NumberRange.new(0)
 	spawnRing.Lifetime = NumberRange.new(0.5)
 	spawnRing.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(0, 1),  -- Start bigger so it's a ring not a dot!
 		NumberSequenceKeypoint.new(1, 3.5) -- Premium larger ring
 	})
 	spawnRing.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.1),
-		NumberSequenceKeypoint.new(0.5, 0.4),
+		NumberSequenceKeypoint.new(0, 0.3),  -- Start more transparent
+		NumberSequenceKeypoint.new(0.5, 0.6),
 		NumberSequenceKeypoint.new(1, 1)
 	})
 	spawnRing.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250)) -- Light sky blue
