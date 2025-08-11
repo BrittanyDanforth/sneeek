@@ -163,7 +163,7 @@ while true do
 	local offset = patterns[dropPattern]
 	dropPattern = (dropPattern % #patterns) + 1
 
-	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
+	orb.CFrame = (dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset) * CFrame.Angles(math.rad(180), 0, 0)
 	print("Orb", orbCount, "spawned at:", orb.Position)
 
 	-- Float down gently
