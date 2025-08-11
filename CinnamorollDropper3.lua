@@ -26,11 +26,11 @@ print("Drop part position:", dropPart.Position)
 
 -- Premium Cinnamoroll palette (Blue-themed)
 local COLORS = {
-	Color3.fromRGB(135, 206, 250),    -- Light sky blue
-	Color3.fromRGB(173, 216, 230),    -- Light blue
-	Color3.fromRGB(100, 149, 237),    -- Cornflower blue
-	Color3.fromRGB(70, 130, 180),     -- Steel blue
-	Color3.fromRGB(176, 224, 230),    -- Powder blue
+	Color3.fromRGB(0, 100, 200),      -- Deep blue
+	Color3.fromRGB(0, 149, 255),      -- Bright blue
+	Color3.fromRGB(30, 144, 255),     -- Dodger blue
+	Color3.fromRGB(0, 120, 215),      -- Strong blue
+	Color3.fromRGB(65, 105, 225),     -- Royal blue
 }
 
 -- Smart positioning
@@ -144,7 +144,7 @@ while true do
 	local pointLight = Instance.new("PointLight")
 	pointLight.Brightness = 2
 	pointLight.Range = 10
-	pointLight.Color = Color3.fromRGB(135, 206, 250)  -- Light sky blue glow
+	pointLight.Color = Color3.fromRGB(0, 149, 255)  -- Bright blue glow
 	pointLight.Parent = orb
 	
 	-- Inner star core
@@ -153,7 +153,7 @@ while true do
 	core.Shape = Enum.PartType.Ball
 	core.Material = Enum.Material.Neon
 	core.Size = Vector3.new(1, 1, 1)
-	core.Color = Color3.fromRGB(100, 149, 237) -- Cornflower blue core
+	core.Color = Color3.fromRGB(0, 100, 200) -- Deep blue core
 	core.Transparency = 0.3
 	core.CanCollide = false
 	core.Massless = true
@@ -178,7 +178,7 @@ while true do
 		NumberSequenceKeypoint.new(0.5, 0.4),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250))  -- Light sky blue sparkles
+	sparkle.Color = ColorSequence.new(Color3.fromRGB(0, 149, 255))  -- Bright blue sparkles
 	sparkle.VelocityInheritance = 0.2
 	sparkle.Parent = orb
 	
@@ -191,7 +191,7 @@ while true do
 	shimmer.SpreadAngle = Vector2.new(180, 180)
 	shimmer.LightEmission = 1
 	shimmer.Size = NumberSequence.new(0.2)
-	shimmer.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230))  -- Light blue shimmer
+	shimmer.Color = ColorSequence.new(Color3.fromRGB(30, 144, 255))  -- Dodger blue shimmer
 	shimmer.Parent = orb
 	
 	-- Heart particles
@@ -203,7 +203,7 @@ while true do
 	hearts.SpreadAngle = Vector2.new(180, 180)
 	hearts.LightEmission = 0.5
 	hearts.Size = NumberSequence.new(0.3)
-	hearts.Color = ColorSequence.new(Color3.fromRGB(176, 224, 230)) -- Powder blue
+	hearts.Color = ColorSequence.new(Color3.fromRGB(65, 105, 225)) -- Royal blue hearts
 	hearts.Parent = orb
 	
 	-- Smart positioning
