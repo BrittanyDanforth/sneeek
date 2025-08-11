@@ -33,8 +33,8 @@ local ORB_GROUP = "CinnamorollOrbs"
 local PLAYER_GROUP = "Players"
 
 pcall(function()
-	PhysicsService:CreateCollisionGroup(ORB_GROUP)
-	PhysicsService:CreateCollisionGroup(PLAYER_GROUP)
+	PhysicsService:RegisterCollisionGroup(ORB_GROUP)
+	PhysicsService:RegisterCollisionGroup(PLAYER_GROUP)
 	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, PLAYER_GROUP, false)
 	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, ORB_GROUP, false)
 end)
@@ -45,7 +45,7 @@ local function setupPlayer(character)
 	for _, part in ipairs(character:GetDescendants()) do
 		if part:IsA("BasePart") then
 			pcall(function()
-				PhysicsService:SetPartCollisionGroup(part, PLAYER_GROUP)
+				part.CollisionGroup = PLAYER_GROUP
 			end)
 		end
 	end
@@ -81,7 +81,7 @@ while true do
 
 	-- Set collision group
 	pcall(function()
-		PhysicsService:SetPartCollisionGroup(orb, ORB_GROUP)
+		orb.CollisionGroup = ORB_GROUP
 	end)
 
 	-- Light weight for smooth movement
