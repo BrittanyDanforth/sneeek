@@ -113,13 +113,20 @@ while true do
 	-- Create cute cupcake part (BASIC - it's free!)
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCupcake_" .. orbCount
-	orb.Size = Vector3.new(2, 2, 2) -- Good size
-	orb.Shape = Enum.PartType.Ball -- Ball shape
+	orb.Size = Vector3.new(4, 4, 4) -- Bigger for mesh
 	orb.Material = Enum.Material.Neon  -- Glowing material
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	orb.Transparency = 0 -- FULLY VISIBLE
+	
+	-- Add mesh (using a free star mesh that definitely works)
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxasset://fonts/sword.mesh" -- Free sword mesh for testing
+	mesh.TextureId = "" -- No texture, use part color
+	mesh.Scale = Vector3.new(2, 2, 2) -- Good visible scale
+	mesh.Parent = orb
 	
 	-- Add a soft glow
 	local light = Instance.new("PointLight")
@@ -182,10 +189,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	orb.Size = Vector3.new(0.5, 0.5, 0.5)
-	local spawnTween = TweenService:Create(orb,
+	mesh.Scale = Vector3.new(1, 1, 1)
+	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = Vector3.new(2, 2, 2)}
+		{Scale = Vector3.new(2, 2, 2)}
 	)
 	spawnTween:Play()
 
