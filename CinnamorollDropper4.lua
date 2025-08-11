@@ -1,7 +1,7 @@
 --[[
-	Cinnamoroll Dropper 4 - Pastel Kawaii Style
-	Drops soft pastel Cinnamoroll orbs
-	NO CLEANUP - Orbs stay until collected
+	Cinnamoroll Dropper 4 - Donut Dropper
+	Drops cute pastel donuts
+	NO CLEANUP - Items stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -15,13 +15,13 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
 
--- Cinnamoroll pastel colors
+-- Donut colors (pastel)
 local COLORS = {
-	Color3.fromRGB(255, 230, 240),    -- Soft pink
-	Color3.fromRGB(230, 240, 255),    -- Soft blue
-	Color3.fromRGB(255, 240, 230),    -- Soft peach
-	Color3.fromRGB(240, 230, 255),    -- Soft lavender
-	Color3.fromRGB(230, 255, 240),    -- Soft mint
+	Color3.fromRGB(255, 220, 230), -- Pink frosting
+	Color3.fromRGB(220, 230, 255), -- Blue frosting
+	Color3.fromRGB(255, 255, 220), -- Yellow frosting
+	Color3.fromRGB(230, 220, 255), -- Purple frosting
+	Color3.fromRGB(220, 255, 230), -- Mint frosting
 }
 
 -- Create collision groups
@@ -57,100 +57,108 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
-local colorIndex = 1
+local donutCount = 0
 
 while true do
-	task.wait(1) -- Drop rate
+	task.wait(1) -- Medium drop rate
+	donutCount = donutCount + 1
 	
-	-- Create pastel orb
-	local orb = Instance.new("Part")
-	orb.Name = "PastelCinnamorollOrb"
-	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.ForceField -- Soft dreamy material
-	orb.Size = Vector3.new(1.5, 1.5, 1.5)
-	orb.TopSurface = Enum.SurfaceType.Smooth
-	orb.BottomSurface = Enum.SurfaceType.Smooth
-	orb.Color = COLORS[colorIndex]
+	-- Create donut
+	local donut = Instance.new("Part")
+	donut.Name = "KawaiiDonut"
+	donut.Size = Vector3.new(2, 0.6, 2) -- Donut proportions
+	donut.Material = Enum.Material.SmoothPlastic
+	donut.Color = COLORS[math.random(1, #COLORS)]
+	donut.TopSurface = Enum.SurfaceType.Smooth
+	donut.BottomSurface = Enum.SurfaceType.Smooth
 	
-	colorIndex = (colorIndex % #COLORS) + 1
+	-- Donut mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://4602192163" -- Donut Headband mesh
+	mesh.Scale = Vector3.new(0.8, 0.8, 0.8)
+	mesh.Parent = donut
 	
-	-- Collision settings
-	orb.CanCollide = true
-	orb.CanTouch = true
-	orb.CanQuery = true
+	-- Sweet glow
+	local glow = Instance.new("PointLight")
+	glow.Brightness = 0.4
+	glow.Range = 5
+	glow.Color = donut.Color
+	glow.Parent = donut
+	
+	-- Sprinkles! (small parts)
+	for i = 1, 3 do
+		local sprinkle = Instance.new("Part")
+		sprinkle.Name = "Sprinkle"
+		sprinkle.Size = Vector3.new(0.1, 0.1, 0.2)
+		sprinkle.Material = Enum.Material.Neon
+		sprinkle.BrickColor = BrickColor.random()
+		sprinkle.CanCollide = false
+		sprinkle.Massless = true
+		sprinkle.Parent = donut
+		
+		-- Weld sprinkle
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = donut
+		weld.Part1 = sprinkle
+		weld.Parent = donut
+		
+		-- Random position on donut
+		sprinkle.CFrame = donut.CFrame * CFrame.new(
+			math.random(-5, 5) * 0.1,
+			0.3,
+			math.random(-5, 5) * 0.1
+		)
+	end
+	
+	-- Cash value
+	local cash = Instance.new("IntValue")
+	cash.Name = "Cash"
+	cash.Value = 30
+	cash.Parent = donut
+	
+	-- Position
+	donut.CFrame = dropPart.CFrame * CFrame.Angles(0, math.rad(math.random(0, 360)), 0) - Vector3.new(0, 2, 0)
 	
 	-- Set collision group
 	pcall(function()
-		orb.CollisionGroup = ORB_GROUP
+		donut.CollisionGroup = ORB_GROUP
 	end)
 	
-	-- Physics
-	orb.CustomPhysicalProperties = PhysicalProperties.new(
+	-- Donut physics
+	donut.CustomPhysicalProperties = PhysicalProperties.new(
 		0.3,  -- Light
 		0.5,  -- Medium friction
 		0.2,  -- Small bounce
 		1, 1
 	)
 	
-	-- Cash value
-	local cash = Instance.new("IntValue")
-	cash.Name = "Cash"
-	cash.Value = 30
-	cash.Parent = orb
-	
-	-- Soft pastel glow
-	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 0.5
-	pointLight.Range = 5
-	pointLight.Color = orb.Color
-	pointLight.Parent = orb
-	
-	-- Subtle outline
-	local selection = Instance.new("SelectionBox")
-	selection.Adornee = orb
-	selection.Color3 = Color3.fromRGB(255, 255, 255) -- White outline
-	selection.LineThickness = 0.03
-	selection.Transparency = 0.5
-	selection.Parent = orb
-	
-	-- Soft sparkles
-	local sparkle = Instance.new("ParticleEmitter")
-	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 4
-	sparkle.Lifetime = NumberRange.new(0.5, 1)
-	sparkle.Speed = NumberRange.new(0.5, 1)
-	sparkle.SpreadAngle = Vector2.new(180, 180)
-	sparkle.Size = NumberSequence.new(0.2)
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	sparkle.LightEmission = 0.5
-	sparkle.VelocityInheritance = 0.3
-	sparkle.Parent = orb
-	
-	-- Position
-	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0)
-	
-	-- Drop velocity
-	orb.AssemblyLinearVelocity = Vector3.new(0, -14, 0)
-	
-	-- Slightly transparent
-	orb.Transparency = 0.2
+	-- Drop with spin
+	donut.AssemblyLinearVelocity = Vector3.new(0, -14, 0)
+	donut.AssemblyAngularVelocity = Vector3.new(0, 5, 0)
 	
 	-- Parent to storage
-	orb.Parent = PartStorage
+	donut.Parent = PartStorage
 	
 	-- Spawn animation
-	orb.Size = Vector3.new(0.5, 0.5, 0.5)
-	TweenService:Create(orb,
-		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.5, 1.5, 1.5)}
+	mesh.Scale = Vector3.new(0, 0, 0)
+	TweenService:Create(mesh,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(0.8, 0.8, 0.8)}
 	):Play()
 	
-	-- Soft flash
-	pointLight.Brightness = 1
-	TweenService:Create(pointLight,
-		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Brightness = 0.5}
-	):Play()
+	-- Sugar particles
+	local sugar = Instance.new("ParticleEmitter")
+	sugar.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sugar.Rate = 8
+	sugar.Lifetime = NumberRange.new(0.5, 1)
+	sugar.Speed = NumberRange.new(0.5, 1)
+	sugar.SpreadAngle = Vector2.new(180, 180)
+	sugar.Size = NumberSequence.new(0.1)
+	sugar.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	sugar.LightEmission = 0.5
+	sugar.VelocityInheritance = 0.5
+	sugar.Parent = donut
 	
-	-- NO CLEANUP - Orbs stay until collected!
+	-- NO CLEANUP - Donuts stay until collected!
 end

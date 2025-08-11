@@ -1,8 +1,7 @@
 --[[
-	Cinnamoroll Dropper 3 - Premium Kawaii Style
-	Fixed: Collides with conveyor/ground but not players
-	WITH DEBUG PRINTS
-	HEAVILY OPTIMIZED: Removed complex effects, reduced particles and lighting
+	Cinnamoroll Dropper 3 - Premium Star Dropper
+	Drops magical star items with rainbow effects
+	NO CLEANUP - Items stay until collected
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -13,30 +12,14 @@ local PhysicsService = game:GetService("PhysicsService")
 task.wait(2)
 local PartStorage = workspace:WaitForChild("PartStorage")
 
--- DEBUG: Print script location
-print("=== CINNAMOROLL DROPPER 3 (PREMIUM) DEBUG ===")
-print("Script location:", script:GetFullName())
-print("Script parent:", script.Parent.Name, "Class:", script.Parent.ClassName)
-print("Script grandparent:", script.Parent.Parent and script.Parent.Parent.Name or "nil")
-print("Script great-grandparent:", script.Parent.Parent and script.Parent.Parent.Parent and script.Parent.Parent.Parent.Name or "nil")
-
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
-print("Drop part found at:", dropPart:GetFullName())
-print("Drop part position:", dropPart.Position)
 
--- Premium Cinnamoroll palette (TONED DOWN Blue-themed)
-local COLORS = {
-	Color3.fromRGB(125, 186, 230),    -- Softer light sky blue
-	Color3.fromRGB(153, 196, 210),    -- Muted light blue
-	Color3.fromRGB(100, 139, 207),    -- Softer cornflower blue
-	Color3.fromRGB(80, 120, 160),     -- Muted steel blue
-	Color3.fromRGB(156, 204, 210),    -- Gentle powder blue
-}
-
--- Smart positioning
-local recentPositions = {}
-local MAX_MEMORY = 3
+-- Premium rainbow colors
+local function getRainbowColor(time)
+	local hue = (time * 0.1) % 1
+	return Color3.fromHSV(hue, 0.3, 1) -- Soft pastel rainbow
+end
 
 -- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
@@ -47,7 +30,6 @@ pcall(function()
 	PhysicsService:RegisterCollisionGroup(PLAYER_GROUP)
 	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, PLAYER_GROUP, false)
 	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, ORB_GROUP, false)
-	print("Premium collision groups configured")
 end)
 
 -- Setup player collision groups
@@ -72,207 +54,149 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
-local function getSmartOffset()
-	local offset = Vector3.new(
-		(math.random() - 0.5) * 0.6,
-		0,
-		(math.random() - 0.5) * 0.6
-	)
-
-	-- Avoid recent positions
-	for _, pos in ipairs(recentPositions) do
-		if (offset - pos).Magnitude < 0.2 then
-			offset = offset + Vector3.new(
-				(math.random() - 0.5) * 0.3,
-				0,
-				(math.random() - 0.5) * 0.3
-			)
-		end
-	end
-
-	table.insert(recentPositions, offset)
-	if #recentPositions > MAX_MEMORY then
-		table.remove(recentPositions, 1)
-	end
-
-	return offset
-end
-
-local orbCount = 0
+local starCount = 0
 
 while true do
-	task.wait(0.8) -- Premium faster drops
-
-	orbCount = orbCount + 1
-	print("\n--- Premium Dropper 3: Creating Dream Orb #" .. orbCount .. " ---")
-
-	-- Create dreamy orb
-	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollDream_" .. orbCount
-	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.Neon  -- Same as Dropper 2
-	orb.Size = Vector3.new(1.8, 1.8, 1.8)
-	orb.TopSurface = Enum.SurfaceType.Smooth
-	orb.BottomSurface = Enum.SurfaceType.Smooth
-	orb.Color = COLORS[math.random(1, #COLORS)]
-
-	-- COLLISION FIXED - Collides with world but not players!
-	orb.CanCollide = true -- CHANGED!
-	orb.CanTouch = true
-	orb.CanQuery = true
-
-	-- Set collision group
-	pcall(function()
-		orb.CollisionGroup = ORB_GROUP
-		print("Premium orb", orbCount, "collision group set")
-	end)
-
-	-- Dream-like physics
-	orb.CustomPhysicalProperties = PhysicalProperties.new(
-		0.1,  -- Ultra light
-		0.2,  -- Smooth friction
-		0,    -- No bounce - soft landing
-		1, 1
-	)
-
-	-- Cash value
+	task.wait(0.6) -- Fastest drop rate
+	starCount = starCount + 1
+	
+	-- Create star base
+	local star = Instance.new("Part")
+	star.Name = "PremiumStar"
+	star.Size = Vector3.new(2, 2, 0.5) -- Flat star shape
+	star.Material = Enum.Material.Neon
+	star.Color = getRainbowColor(tick())
+	star.TopSurface = Enum.SurfaceType.Smooth
+	star.BottomSurface = Enum.SurfaceType.Smooth
+	star.Transparency = 0
+	
+	-- Star mesh
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://3270017" -- Classic star mesh
+	mesh.Scale = Vector3.new(1.5, 1.5, 0.5)
+	mesh.Parent = star
+	
+	-- Premium glow
+	local glow = Instance.new("PointLight")
+	glow.Brightness = 0.8
+	glow.Range = 10
+	glow.Color = star.Color
+	glow.Parent = star
+	
+	-- Premium outline effect
+	local selection = Instance.new("SelectionSphere")
+	selection.Adornee = star
+	selection.Color3 = star.Color
+	selection.SurfaceTransparency = 1
+	selection.Transparency = 0.2
+	selection.Parent = star
+	
+	-- Cash value (premium!)
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	cash.Value = 30
-	cash.Parent = orb
-
-	-- REDUCED Premium lighting
-	local pointLight = Instance.new("PointLight")
-	pointLight.Brightness = 0.8   -- Reduced from 2
-	pointLight.Range = 5          -- Reduced from 10
-	pointLight.Color = Color3.fromRGB(125, 186, 230)  -- Softer light sky blue glow
-	pointLight.Parent = orb
-
-	-- POLISH: Multi-layer premium effect (removed inner core - was causing patterns)
-
-	-- Removed outer aura - ForceField material was creating unwanted pattern
-
-	-- FIXED: Using SelectionSphere instead of Highlight to prevent see-through
-	local selection = Instance.new("SelectionSphere")
-	selection.Adornee = orb
-	selection.Color3 = Color3.fromRGB(70, 130, 180)  -- Darker blue for premium
-	selection.SurfaceTransparency = 1  -- COMPLETELY transparent surface (no texture!)
-	selection.Transparency = 0.2  -- More solid outline for premium
-	selection.Parent = orb
-
-	-- REDUCED Blue sparkles (as requested but toned down)
+	cash.Value = 20 -- Highest value
+	cash.Parent = star
+	
+	-- Position
+	star.CFrame = dropPart.CFrame * CFrame.Angles(0, math.rad(starCount * 30), 0) - Vector3.new(0, 2, 0)
+	
+	-- Set collision group
+	pcall(function()
+		star.CollisionGroup = ORB_GROUP
+	end)
+	
+	-- Star physics
+	star.CustomPhysicalProperties = PhysicalProperties.new(
+		0.2,  -- Light
+		0.5,  -- Medium friction
+		0.3,  -- Some bounce
+		1, 1
+	)
+	
+	-- Spinning drop
+	star.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
+	star.AssemblyAngularVelocity = Vector3.new(0, 10, 0) -- Spin!
+	
+	-- Parent to storage
+	star.Parent = PartStorage
+	
+	-- Premium spawn animation
+	mesh.Scale = Vector3.new(0, 0, 0)
+	star.Transparency = 1
+	
+	-- Materialize
+	TweenService:Create(star,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Transparency = 0}
+	):Play()
+	
+	TweenService:Create(mesh,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(1.5, 1.5, 0.5)}
+	):Play()
+	
+	-- Flash effect
+	glow.Brightness = 2
+	TweenService:Create(glow,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Brightness = 0.8}
+	):Play()
+	
+	-- Rainbow sparkles
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 5          -- Reduced from 20
-	sparkle.Lifetime = NumberRange.new(1, 2)
+	sparkle.Rate = 15
+	sparkle.Lifetime = NumberRange.new(0.5, 1.5)
 	sparkle.Speed = NumberRange.new(1, 3)
 	sparkle.SpreadAngle = Vector2.new(360, 360)
-	sparkle.LightEmission = 0.7  -- Reduced from 1
-	sparkle.LightInfluence = 0
 	sparkle.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.2),  -- Smaller
-		NumberSequenceKeypoint.new(0.5, 0.3),
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(0.5, 0.5),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(125, 186, 230))  -- Softer light sky blue sparkles
+	sparkle.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 200)),
+		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(200, 255, 200)),
+		ColorSequenceKeypoint.new(0.66, Color3.fromRGB(200, 200, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 200))
+	}
+	sparkle.LightEmission = 1
 	sparkle.VelocityInheritance = 0.2
-	sparkle.Parent = orb
-
-	-- REMOVED shimmer effect for performance
-
-	-- MINIMAL Heart particles
-	local hearts = Instance.new("ParticleEmitter")
-	hearts.Texture = "rbxasset://textures/particles/heart.dds"
-	hearts.Rate = 1           -- Reduced from 2
-	hearts.Lifetime = NumberRange.new(2, 3)
-	hearts.Speed = NumberRange.new(0.5)
-	hearts.SpreadAngle = Vector2.new(180, 180)
-	hearts.LightEmission = 0.3  -- Reduced from 0.5
-	hearts.Size = NumberSequence.new(0.2)  -- Smaller
-	hearts.Color = ColorSequence.new(Color3.fromRGB(156, 204, 210)) -- Gentle powder blue
-	hearts.Parent = orb
-
-	-- Smart positioning
-	local offset = getSmartOffset()
-	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
-	print("Premium orb", orbCount, "spawned at:", orb.Position, "with offset:", offset)
-
-	-- Dreamy float (FIXED SPEED - same as other droppers)
-	local angle = math.random() * math.pi * 2
-	orb.AssemblyLinearVelocity = Vector3.new(
-		math.cos(angle) * 2,
-		-12,  -- Same speed as Dropper 1
-		math.sin(angle) * 2
-	)
-
-	-- Premium cloud transparency
-	orb.Transparency = 0  -- Completely opaque for visibility
-
-	-- Set spawn time
-	orb:SetAttribute("SpawnTime", tick())
-
-	-- Parent to storage
-	orb.Parent = PartStorage
-	print("Orb parented to:", PartStorage:GetFullName())
-
-	-- SIMPLIFIED entrance animation
-	orb.Size = Vector3.new(0.5, 0.5, 0.5)  -- Larger starting size to avoid black dot
-
-	TweenService:Create(orb,
-		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.8, 1.8, 1.8), Transparency = 0}
-	):Play()
-
-	-- POLISH: Premium spawn flash
-	pointLight.Brightness = 3 -- Bright magical flash
-	TweenService:Create(pointLight,
-		TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Brightness = 0.8} -- Back to normal
-	):Play()
-
-	-- POLISH: Dream ring spawn effect
-	local spawnRing = Instance.new("ParticleEmitter")
-	spawnRing.Texture = "rbxassetid://262979222" -- Ring texture
-	spawnRing.Rate = 0
-	spawnRing.Speed = NumberRange.new(0)
-	spawnRing.Lifetime = NumberRange.new(0.5)
-	spawnRing.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),  -- Fixed: Start as ring, not dot
-		NumberSequenceKeypoint.new(1, 3.5) -- Premium larger ring
-	})
-	spawnRing.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.3),  -- Fixed: Start more transparent
-		NumberSequenceKeypoint.new(0.5, 0.6),
+	sparkle.Parent = star
+	
+	-- Star trail
+	local attachment1 = Instance.new("Attachment")
+	attachment1.Position = Vector3.new(0, 1, 0)
+	attachment1.Parent = star
+	
+	local attachment2 = Instance.new("Attachment")
+	attachment2.Position = Vector3.new(0, -1, 0)
+	attachment2.Parent = star
+	
+	local trail = Instance.new("Trail")
+	trail.Attachment0 = attachment1
+	trail.Attachment1 = attachment2
+	trail.Color = ColorSequence.new(star.Color)
+	trail.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.5),
 		NumberSequenceKeypoint.new(1, 1)
-	})
-	spawnRing.Color = ColorSequence.new(Color3.fromRGB(135, 206, 250)) -- Light sky blue
-	spawnRing.LightEmission = 0.5
-	spawnRing.Parent = orb
-	spawnRing:Emit(2) -- Double ring for premium
-	Debris:AddItem(spawnRing, 1)
-
-	-- REMOVED spinning effect for performance
-
-	-- REMOVED core pulse animation
-
-	-- Track premium orb
+	}
+	trail.Lifetime = 0.5
+	trail.MinLength = 0
+	trail.Parent = star
+	
+	-- Continuous color animation
 	task.spawn(function()
-		task.wait(1.5)
-		if orb.Parent then
-			local touching = orb:GetTouchingParts()
-			if #touching > 0 then
-				print("Premium orb", orbCount, "landed on", #touching, "parts")
-				for i, part in ipairs(touching) do
-					if i <= 3 then -- Only print first 3
-						print("  -", part.Name)
-					end
-				end
-			else
-				print("Premium orb", orbCount, "still floating")
-			end
+		while star.Parent do
+			local newColor = getRainbowColor(tick())
+			star.Color = newColor
+			glow.Color = newColor
+			selection.Color3 = newColor
+			trail.Color = ColorSequence.new(newColor)
+			task.wait(0.1)
 		end
 	end)
-
-	-- NO CLEANUP - Orbs stay until collected!
-	-- Removed Debris:AddItem(orb, 25) and death animation
+	
+	-- NO CLEANUP - Stars stay until collected!
 end
