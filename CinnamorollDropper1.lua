@@ -111,9 +111,9 @@ while true do
 	print("\n--- Creating Orb #" .. orbCount .. " ---")
 
 	-- Create cute cupcake part (BASIC - it's free!)
-		local orb = Instance.new("Part")
+	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollBackpack_" .. orbCount
-	orb.Size = Vector3.new(4, 4, 4) -- Bigger for mesh
+	orb.Size = Vector3.new(2, 2, 2) -- Smaller collision box
 	orb.Material = Enum.Material.Neon  -- Glowing material
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
@@ -125,7 +125,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://9434530930" -- Cinnamoroll Backpack mesh
 	mesh.TextureId = "rbxassetid://9434566192" -- Cinnamoroll texture!
-	mesh.Scale = Vector3.new(1.2, 1.2, 1.2) -- Even BIGGER scale
+	mesh.Scale = Vector3.new(2, 2, 2) -- BIGGER scale for visibility
 	mesh.Parent = orb
 	
 	-- Add a soft glow
@@ -170,7 +170,7 @@ while true do
 	-- Position with small offset
 	local offsetX = math.random(-2, 2) * 0.1
 	local offsetZ = math.random(-2, 2) * 0.1
-	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 3, offsetZ) -- Lower spawn for mesh offset
+	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 2, offsetZ) -- Better spawn height
 
 	print("Orb spawned at:", orb.Position)
 	print("Drop part position:", dropPart.Position)
@@ -178,8 +178,8 @@ while true do
 	-- Gentle drop
 	orb.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
 
-	-- Cloud-like transparency
-	orb.Transparency = 0.1  -- Slightly transparent but still very visible
+	-- Make sure it's fully visible
+	orb.Transparency = 0  -- Fully opaque
 
 	-- Set spawn time for cleanup
 	orb:SetAttribute("SpawnTime", tick())
@@ -189,10 +189,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(0.3, 0.3, 0.3)
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1.2, 1.2, 1.2)}
+		{Scale = Vector3.new(2, 2, 2)}
 	)
 	spawnTween:Play()
 
