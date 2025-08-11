@@ -66,18 +66,18 @@ while true do
 	local star = Instance.new("Part")
 	star.Name = "PremiumStar_" .. starCount
 	star.Size = Vector3.new(2, 2, 2) -- Base size for mesh
-	star.Material = Enum.Material.Neon -- Premium glow
-	star.Color = getRainbowColor(tick())
+	star.Material = Enum.Material.SmoothPlastic -- Clean material for textured mesh
+	star.Color = Color3.new(1, 1, 1) -- White to show texture properly
 	star.TopSurface = Enum.SurfaceType.Smooth
 	star.BottomSurface = Enum.SurfaceType.Smooth
 	star.Transparency = 0
 	
-	-- Add kawaii star mesh
+	-- Add kawaii cat mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://8691944038" -- Crystal Star (more visible)
-	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(4, 4, 4) -- Scale for star
+	mesh.MeshId = "rbxassetid://1652187761" -- Cat mesh
+	mesh.TextureId = "rbxassetid://1652088642" -- Cat texture
+	mesh.Scale = Vector3.new(2, 2, 2) -- Scale for cat
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -102,16 +102,10 @@ while true do
 	local glow = Instance.new("PointLight")
 	glow.Brightness = 1
 	glow.Range = 10
-	glow.Color = star.Color
+	glow.Color = Color3.new(1, 1, 1) -- White light
 	glow.Parent = star
 	
-	-- Selection sphere for soft outline
-	local selection = Instance.new("SelectionSphere")
-	selection.Adornee = star
-	selection.Color3 = getRainbowColor(tick() + 0.5)
-	selection.SurfaceTransparency = 1
-	selection.Transparency = 0.5
-	selection.Parent = star
+	-- No outline needed - just the mesh!
 	
 	-- Rainbow sparkles
 	local sparkles = Instance.new("ParticleEmitter")
@@ -156,7 +150,7 @@ while true do
 	cash.Parent = star
 	
 	-- Position at dropper
-	star.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0)
+	star.CFrame = (dropPart.CFrame - Vector3.new(0, 1.75, 0)) * CFrame.Angles(math.rad(180), 0, 0)
 	
 	-- Drop with slight spin
 	star.AssemblyLinearVelocity = Vector3.new(0, -10, 0)
@@ -170,7 +164,7 @@ while true do
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(4, 4, 4)}
+		{Scale = Vector3.new(2, 2, 2)}
 	):Play()
 	
 	-- Flash effect
