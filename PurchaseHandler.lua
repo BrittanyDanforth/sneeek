@@ -1,5 +1,10 @@
--- PurchaseHandler for Cinnamoroll Tycoon
+-- PurchaseHandler for Tycoon Kit
+-- Works with existing Core_Handler system
 -- Handles purchase progression and button visibility
+
+local Settings = require(script.Parent.Parent.Settings)
+local Objects = {}
+local TeamColor = script.Parent.Parent:WaitForChild("TeamColor")
 
 local PurchaseHandler = {}
 PurchaseHandler.__index = PurchaseHandler
