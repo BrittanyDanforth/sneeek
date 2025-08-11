@@ -120,15 +120,22 @@ while true do
 	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- POLISH: Cinnamoroll-style highlight (blue like the eyes!)
-	local highlight = Instance.new("Highlight")
-	highlight.FillColor = Color3.fromRGB(255, 250, 250)
-	highlight.FillTransparency = 0.9  -- More transparent fill
-	highlight.OutlineColor = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
-	highlight.OutlineTransparency = 0.3  -- More solid outline
-	highlight.Adornee = orb
-	highlight.DepthMode = Enum.HighlightDepthMode.Occluded  -- THIS should fix it!
-	highlight.Parent = orb
+	-- POLISH: Fake outline using a slightly larger part
+	local outline = Instance.new("Part")
+	outline.Name = "Outline"
+	outline.Shape = Enum.PartType.Ball
+	outline.Material = Enum.Material.Neon
+	outline.Size = Vector3.new(1.7, 1.7, 1.7)  -- Slightly larger
+	outline.Color = Color3.fromRGB(135, 206, 250)  -- Light sky blue outline
+	outline.Transparency = 0.6
+	outline.CanCollide = false
+	outline.Massless = true
+	outline.Parent = orb
+	
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = orb
+	weld.Part1 = outline
+	weld.Parent = orb
 
 	-- ENHANCED sparkles with color
 	local sparkle = Instance.new("ParticleEmitter")
