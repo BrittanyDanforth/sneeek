@@ -106,11 +106,11 @@ while true do
 	orbCount = orbCount + 1
 	print("\n--- Premium Dropper 3: Creating Dream Orb #" .. orbCount .. " ---")
 
-	-- Create dreamy orb (SIMPLIFIED - no inner core)
+	-- Create dreamy orb
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollDream_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.SmoothPlastic  -- Solid material that still looks good
+	orb.Material = Enum.Material.Neon  -- Back to Neon but controlled
 	orb.Size = Vector3.new(1.8, 1.8, 1.8)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
@@ -148,9 +148,49 @@ while true do
 	pointLight.Color = Color3.fromRGB(125, 186, 230)  -- Softer light sky blue glow
 	pointLight.Parent = orb
 
-	-- POLISH: (SurfaceAppearance removed - requires plugin capability)
-
-	-- REMOVED INNER CORE FOR PERFORMANCE
+	-- POLISH: Multi-layer premium effect
+	-- Inner glass core
+	local innerCore = Instance.new("Part")
+	innerCore.Name = "InnerCore"
+	innerCore.Shape = Enum.PartType.Ball
+	innerCore.Material = Enum.Material.Glass
+	innerCore.Size = Vector3.new(1.2, 1.2, 1.2)
+	innerCore.Color = Color3.fromRGB(100, 149, 237)  -- Darker blue core
+	innerCore.Transparency = 0.4
+	innerCore.Reflectance = 0.5
+	innerCore.CanCollide = false
+	innerCore.Massless = true
+	innerCore.Parent = orb
+	
+	local weld1 = Instance.new("WeldConstraint")
+	weld1.Part0 = orb
+	weld1.Part1 = innerCore
+	weld1.Parent = orb
+	
+	-- Outer aura
+	local outerAura = Instance.new("Part")
+	outerAura.Name = "OuterAura"
+	outerAura.Shape = Enum.PartType.Ball
+	outerAura.Material = Enum.Material.ForceField
+	outerAura.Size = Vector3.new(2.2, 2.2, 2.2)
+	outerAura.Color = Color3.fromRGB(173, 216, 230)
+	outerAura.Transparency = 0.8
+	outerAura.CanCollide = false
+	outerAura.Massless = true
+	outerAura.Parent = orb
+	
+	local weld2 = Instance.new("WeldConstraint")
+	weld2.Part0 = orb
+	weld2.Part1 = outerAura
+	weld2.Parent = orb
+	
+	-- Highlight for extra pop
+	local highlight = Instance.new("Highlight")
+	highlight.FillColor = Color3.fromRGB(135, 206, 250)
+	highlight.FillTransparency = 0.7
+	highlight.OutlineColor = Color3.fromRGB(70, 130, 180)
+	highlight.OutlineTransparency = 0.3
+	highlight.Parent = orb
 
 	-- REDUCED Blue sparkles (as requested but toned down)
 	local sparkle = Instance.new("ParticleEmitter")

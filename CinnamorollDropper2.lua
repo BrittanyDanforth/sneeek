@@ -81,11 +81,12 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.SmoothPlastic  -- Solid material, not see-through
+	orb.Material = Enum.Material.Ice  -- Frosty cloud-like material
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
+	orb.Reflectance = 0.4  -- Shiny cloud
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor
@@ -119,7 +120,22 @@ while true do
 	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- POLISH: (SurfaceAppearance removed - requires plugin capability)
+	-- POLISH: Add outer glow shell
+	local glowShell = Instance.new("Part")
+	glowShell.Name = "GlowShell"
+	glowShell.Shape = Enum.PartType.Ball
+	glowShell.Material = Enum.Material.ForceField
+	glowShell.Size = Vector3.new(1.8, 1.8, 1.8)  -- Slightly larger
+	glowShell.Color = Color3.fromRGB(220, 240, 255)
+	glowShell.Transparency = 0.7
+	glowShell.CanCollide = false
+	glowShell.Massless = true
+	glowShell.Parent = orb
+	
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = orb
+	weld.Part1 = glowShell
+	weld.Parent = orb
 
 	-- REDUCED sparkles for performance
 	local sparkle = Instance.new("ParticleEmitter")
