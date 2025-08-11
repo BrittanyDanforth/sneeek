@@ -149,15 +149,15 @@ while true do
 	pointLight.Parent = orb
 
 	-- POLISH: Multi-layer premium effect
-	-- Inner glass core
+	-- Inner glass core (smaller to prevent sticking out)
 	local innerCore = Instance.new("Part")
 	innerCore.Name = "InnerCore"
 	innerCore.Shape = Enum.PartType.Ball
 	innerCore.Material = Enum.Material.Glass
-	innerCore.Size = Vector3.new(1.2, 1.2, 1.2)
+	innerCore.Size = Vector3.new(0.9, 0.9, 0.9)  -- Much smaller to stay inside
 	innerCore.Color = Color3.fromRGB(100, 149, 237)  -- Darker blue core
-	innerCore.Transparency = 0.4
-	innerCore.Reflectance = 0.5
+	innerCore.Transparency = 0.5  -- Slightly more transparent
+	innerCore.Reflectance = 0.4
 	innerCore.CanCollide = false
 	innerCore.Massless = true
 	innerCore.Parent = orb
