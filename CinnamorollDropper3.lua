@@ -149,15 +149,15 @@ while true do
 	pointLight.Parent = orb
 
 	-- POLISH: Multi-layer premium effect
-	-- Inner glass core (smaller to prevent sticking out)
+	-- Inner glass core
 	local innerCore = Instance.new("Part")
 	innerCore.Name = "InnerCore"
 	innerCore.Shape = Enum.PartType.Ball
 	innerCore.Material = Enum.Material.Glass
-	innerCore.Size = Vector3.new(0.9, 0.9, 0.9)  -- Much smaller to stay inside
+	innerCore.Size = Vector3.new(1.2, 1.2, 1.2)
 	innerCore.Color = Color3.fromRGB(100, 149, 237)  -- Darker blue core
-	innerCore.Transparency = 0.5  -- Slightly more transparent
-	innerCore.Reflectance = 0.4
+	innerCore.Transparency = 0.4
+	innerCore.Reflectance = 0.5
 	innerCore.CanCollide = false
 	innerCore.Massless = true
 	innerCore.Parent = orb
@@ -167,9 +167,24 @@ while true do
 	weld1.Part1 = innerCore
 	weld1.Parent = orb
 	
-	-- Removed outer aura - was causing see-through issues
+	-- Outer aura
+	local outerAura = Instance.new("Part")
+	outerAura.Name = "OuterAura"
+	outerAura.Shape = Enum.PartType.Ball
+	outerAura.Material = Enum.Material.ForceField
+	outerAura.Size = Vector3.new(2.2, 2.2, 2.2)
+	outerAura.Color = Color3.fromRGB(173, 216, 230)
+	outerAura.Transparency = 0.8
+	outerAura.CanCollide = false
+	outerAura.Massless = true
+	outerAura.Parent = orb
 	
-	-- Premium selection sphere for cartoon outline
+	local weld2 = Instance.new("WeldConstraint")
+	weld2.Part0 = orb
+	weld2.Part1 = outerAura
+	weld2.Parent = orb
+	
+	-- FIXED: Using SelectionSphere instead of Highlight to prevent see-through
 	local selection = Instance.new("SelectionSphere")
 	selection.Adornee = orb
 	selection.Color3 = Color3.fromRGB(70, 130, 180)  -- Darker blue for premium
