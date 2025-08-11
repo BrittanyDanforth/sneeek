@@ -24,14 +24,7 @@ print("Full path:", script:GetFullName())
 local dropPart = script.Parent:WaitForChild("Drop")
 print("Drop part found at:", dropPart:GetFullName())
 
--- Cinnamoroll palette (TONED DOWN whites for Neon - actual Cinnamoroll colors)
-local COLORS = {
-	Color3.fromRGB(240, 240, 255),    -- Soft blue-white (not pure white for Neon)
-	Color3.fromRGB(255, 230, 240),    -- Pink-tinted white
-	Color3.fromRGB(230, 240, 255),    -- Blue-tinted white
-	Color3.fromRGB(255, 220, 230),    -- Light pink
-	Color3.fromRGB(240, 230, 255),    -- Lavender white
-}
+-- No colors needed - using textured mesh!
 
 -- Pattern for anti-stacking
 local dropPattern = 1
@@ -78,22 +71,21 @@ while true do
 	orbCount = orbCount + 1
 	print("\n--- Dropper 2: Creating Orb #" .. orbCount .. " ---")
 
-	-- Create fluffy cloud part
-	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollCloud_" .. orbCount
-	orb.Size = Vector3.new(2, 2, 2) -- Base size for mesh
-	orb.Material = Enum.Material.Neon  -- BACK TO NEON
-	orb.TopSurface = Enum.SurfaceType.Smooth
-	orb.BottomSurface = Enum.SurfaceType.Smooth
-	orb.Color = COLORS[math.random(1, #COLORS)]
+	-- Create MeshPart instead of regular Part
+	local orb = Instance.new("MeshPart")
+	orb.Name = "CinnamorollMesh_" .. orbCount
+	orb.Size = Vector3.new(2, 2, 2) -- Will be overridden by mesh
+	orb.Material = Enum.Material.SmoothPlastic  -- Clean material
+	orb.Color = Color3.new(1, 1, 1) -- White to show texture properly
 	
-	-- Add fluffy cloud mesh
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://1527559" -- Rainbow Cloud (more visible)
-	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(3, 3, 3) -- Bigger scale for cloud
-	mesh.Parent = orb
+	-- Set the mesh and texture
+	orb.MeshId = "rbxassetid://10253958526"
+	orb.TextureID = "rbxassetid://10253959770"
+	orb.RenderFidelity = Enum.RenderFidelity.Precise
+	
+	-- Scale the mesh if needed
+	local meshScale = 2
+	orb.Size = orb.Size * meshScale
 
 	-- COLLISION FIXED!
 	orb.CanCollide = true -- Now collides with conveyor
@@ -124,7 +116,7 @@ while true do
 	local pointLight = Instance.new("PointLight")
 	pointLight.Brightness = 0.6  -- Reduced from 1.5
 	pointLight.Range = 4         -- Reduced from 7
-	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
+	pointLight.Color = Color3.new(1, 1, 1)  -- White light
 	pointLight.Parent = orb
 
 	-- POLISH: Using SelectionSphere for outline that renders properly
@@ -148,8 +140,8 @@ while true do
 		NumberSequenceKeypoint.new(0, 0.3),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	-- Match sparkle color to orb color
-	sparkle.Color = ColorSequence.new(orb.Color)
+	-- White sparkles to match Cinnamoroll
+	sparkle.Color = ColorSequence.new(Color3.new(1, 1, 1))
 	sparkle.Parent = orb
 
 	-- Add secondary star particles
@@ -194,11 +186,12 @@ while true do
 	-- Parent to storage
 	orb.Parent = PartStorage
 
-	-- Bounce spawn animation
-	mesh.Scale = Vector3.new(1, 1, 1)
-	local spawnTween = TweenService:Create(mesh,
+	-- Bounce spawn animation (scale the entire MeshPart)
+	local originalSize = orb.Size
+	orb.Size = originalSize * 0.3
+	local spawnTween = TweenService:Create(orb,
 		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(3, 3, 3)}
+		{Size = originalSize}
 	)
 	spawnTween:Play()
 
