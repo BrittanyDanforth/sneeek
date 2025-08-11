@@ -216,7 +216,7 @@ while true do
 	print("Orb parented to:", PartStorage:GetFullName())
 
 	-- SIMPLIFIED entrance animation
-	orb.Size = Vector3.new(0.2, 0.2, 0.2)
+	orb.Size = Vector3.new(0.5, 0.5, 0.5)  -- Larger starting size to avoid black dot
 
 	TweenService:Create(orb,
 		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),

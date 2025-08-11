@@ -124,7 +124,7 @@ while true do
 	local selection = Instance.new("SelectionSphere")
 	selection.Adornee = orb
 	selection.Color3 = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
-	selection.SurfaceTransparency = 0.9  -- Very transparent surface
+	selection.SurfaceTransparency = 1  -- COMPLETELY transparent surface (no texture!)
 	selection.Transparency = 0.3  -- Solid outline
 	selection.Parent = orb
 
