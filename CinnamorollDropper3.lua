@@ -77,7 +77,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://1652187761" -- Cat mesh
 	mesh.TextureId = "rbxassetid://1652088642" -- Cat texture
-	mesh.Scale = Vector3.new(0.3, 0.3, 0.3) -- Much smaller scale for cat
+	mesh.Scale = Vector3.new(0.2, 0.2, 0.2) -- Fixed smaller scale for cat
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -164,7 +164,7 @@ while true do
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.3, 0.3, 0.3)}
+		{Scale = Vector3.new(0.2, 0.2, 0.2)}
 	):Play()
 	
 	-- Flash effect
@@ -180,7 +180,7 @@ while true do
 	spawnRing.Shape = Enum.PartType.Cylinder
 	spawnRing.Size = Vector3.new(0.1, 3, 3)
 	spawnRing.Material = Enum.Material.ForceField
-	spawnRing.Color = star.Color
+	spawnRing.Color = Color3.fromRGB(255, 200, 200) -- Light pink ring
 	spawnRing.Transparency = 0.3
 	spawnRing.Anchored = true
 	spawnRing.CanCollide = false
@@ -198,15 +198,7 @@ while true do
 		spawnRing:Destroy()
 	end)
 	
-	-- Update color continuously
-	task.spawn(function()
-		while star.Parent do
-			star.Color = getRainbowColor(tick())
-			selection.Color3 = getRainbowColor(tick() + 0.5)
-			glow.Color = star.Color
-			task.wait(0.1)
-		end
-	end)
+	-- No color updates needed - using textured mesh!
 	
 	-- NO CLEANUP - Stars stay until collected!
 end
