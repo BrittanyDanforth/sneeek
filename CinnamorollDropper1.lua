@@ -125,7 +125,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://9434530930" -- Cinnamoroll Backpack mesh
 	mesh.TextureId = "rbxassetid://9434566192" -- Cinnamoroll texture!
-	mesh.Scale = Vector3.new(0.8, 0.8, 0.8) -- BIGGER scale
+	mesh.Scale = Vector3.new(1.2, 1.2, 1.2) -- Even BIGGER scale
 	mesh.Parent = orb
 	
 	-- Add a soft glow
@@ -170,7 +170,7 @@ while true do
 	-- Position with small offset
 	local offsetX = math.random(-2, 2) * 0.1
 	local offsetZ = math.random(-2, 2) * 0.1
-	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 1.75, offsetZ)
+	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 3, offsetZ) -- Lower spawn for mesh offset
 
 	print("Orb spawned at:", orb.Position)
 	print("Drop part position:", dropPart.Position)
@@ -189,10 +189,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(0.2, 0.2, 0.2)
+	mesh.Scale = Vector3.new(0.3, 0.3, 0.3)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.8, 0.8, 0.8)}
+		{Scale = Vector3.new(1.2, 1.2, 1.2)}
 	)
 	spawnTween:Play()
 
