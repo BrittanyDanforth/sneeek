@@ -195,8 +195,8 @@ while true do
 		math.sin(angle) * 2
 	)
 
-	-- More transparent for less visual impact
-	orb.Transparency = 0.25  -- Increased from 0.1
+	-- Premium cloud transparency
+	orb.Transparency = 0  -- Completely opaque for visibility
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())
@@ -210,7 +210,7 @@ while true do
 
 	TweenService:Create(orb,
 		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Size = Vector3.new(1.8, 1.8, 1.8), Transparency = 0.25}
+		{Size = Vector3.new(1.8, 1.8, 1.8), Transparency = 0}
 	):Play()
 
 	-- REMOVED spinning effect for performance

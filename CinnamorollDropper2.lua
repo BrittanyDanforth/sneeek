@@ -156,8 +156,8 @@ while true do
 		offset.Z * 2
 	)
 
-	-- More transparent for less visual impact
-	orb.Transparency = 0.3  -- Increased from 0.15
+	-- Semi-transparent cloud
+	orb.Transparency = 0.05  -- Almost opaque, just a tiny bit of transparency
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())

@@ -163,8 +163,8 @@ while true do
 	-- Gentle drop
 	orb.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
 
-	-- Cloud-like transparency (increased for less visual impact)
-	orb.Transparency = 0.35  -- Increased from 0.2
+	-- Cloud-like transparency
+	orb.Transparency = 0.1  -- Slightly transparent but still very visible
 
 	-- Set spawn time for cleanup
 	orb:SetAttribute("SpawnTime", tick())
