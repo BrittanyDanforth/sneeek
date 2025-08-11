@@ -1,6 +1,6 @@
 --[[
-	ULTRA POLISHED Purchase Handler with Progression System
-	Enhanced with satisfying visual and audio feedback
+	ULTRA POLISHED Purchase Handler with CORRECT Button Names
+	Fixed progression system using actual button names
 	"The Juice" 🧃 - Every action feels impactful!
 --]]
 
@@ -21,131 +21,146 @@ local Money = script.Parent:WaitForChild("CurrencyToCollect")
 local Stealing = Settings.StealSettings
 local CanSteal = true
 
--- PROGRESSION DATA - Define what unlocks what
+-- PROGRESSION DATA - Using ACTUAL button names from your tycoon
 local PROGRESSION_DATA = {
-	-- Starting item (FREE!)
+	-- Starting point (FREE!)
 	["Begin Working! - [$0]"] = {
 		unlocks = {"Buy Dropper - [$10,000]", "Buy Conveyer - [$8,000]"}
 	},
+	
+	-- Basic Droppers path
 	["Buy Dropper - [$10,000]"] = {
 		requires = {"Begin Working! - [$0]"},
 		unlocks = {"Buy Dropper - [$20,000]"}
 	},
-	["2"] = { -- Buy Dropper - [$20,000]
-		requires = {"1"},
-		unlocks = {"3", "4"}
+	["Buy Dropper - [$20,000]"] = {
+		requires = {"Buy Dropper - [$10,000]"},
+		unlocks = {"Buy Dropper - [$12,000]", "Buy Dropper - [$70]"}
 	},
-	["3"] = { -- Buy Dropper - [$12,000]
-		requires = {"2"},
-		unlocks = {"5", "16"}
+	["Buy Dropper - [$12,000]"] = {
+		requires = {"Buy Dropper - [$20,000]"},
+		unlocks = {"Buy Extra - [$35,000]", "Buy Path - [$10,000]"}
 	},
-	["4"] = { -- Buy Dropper - [$70]
-		requires = {"2"},
-		unlocks = {"7"}
+	["Buy Dropper - [$70]"] = {
+		requires = {"Buy Dropper - [$20,000]"},
+		unlocks = {"Buy Floor - [$1,500]"}
 	},
-	["5"] = { -- Buy Extra - [$35,000]
-		requires = {"3"},
-		unlocks = {"11"} -- Unlocks MEGA Dropper!
+	
+	-- Extra and MEGA path
+	["Buy Extra - [$35,000]"] = {
+		requires = {"Buy Dropper - [$12,000]"},
+		unlocks = {"Buy MEGA Dropper - [$300]"} -- KEY UNLOCK!
 	},
-	["7"] = { -- Buy Floor - [$1,500]
-		requires = {"4"},
-		unlocks = {"18"}
+	["Buy MEGA Dropper - [$300]"] = {
+		requires = {"Buy Extra - [$35,000]"},
+		unlocks = {
+			"Buy Super Dropper - [$1,000]",
+			"Buy Walls - [$100]",
+			"Buy a Mega Dropper - [$7,000]"
+		}
 	},
-	["8"] = { -- Buy Conveyer - [$8,000]
-		requires = {"1"},
-		unlocks = {"9"}
+	
+	-- Super and advanced droppers
+	["Buy Super Dropper - [$1,000]"] = {
+		requires = {"Buy MEGA Dropper - [$300]"},
+		unlocks = {"Buy a Omega Dropper - [$9,000]"}
 	},
-	["9"] = { -- Buy CORE Dropper - [$5,000]
-		requires = {"8"},
-		unlocks = {"10"}
+	["Buy a Mega Dropper - [$7,000]"] = {
+		requires = {"Buy MEGA Dropper - [$300]"},
+		unlocks = {"Buy an OwnerDoor - [$1,500]"}
 	},
-	["10"] = { -- Buy POWER CORE Dropper - [$2,000]
-		requires = {"9"},
-		unlocks = {"14"}
+	
+	-- Conveyer and CORE path
+	["Buy Conveyer - [$8,000]"] = {
+		requires = {"Begin Working! - [$0]"},
+		unlocks = {"Buy CORE Dropper - [$5,000]"}
 	},
-	["11"] = { -- Buy MEGA Dropper - [$300] ⭐ KEY ITEM
-		requires = {"5"},
-		unlocks = {"12", "19", "13"} -- Unlocks Super, Walls, and Mega $7k
+	["Buy CORE Dropper - [$5,000]"] = {
+		requires = {"Buy Conveyer - [$8,000]"},
+		unlocks = {"Buy POWER CORE Dropper - [$2,000]"}
 	},
-	["12"] = { -- Buy Super Dropper - [$1,000]
-		requires = {"11"},
-		unlocks = {"15"}
+	["Buy POWER CORE Dropper - [$2,000]"] = {
+		requires = {"Buy CORE Dropper - [$5,000]"},
+		unlocks = {"Buy a Omega Dropper - [$15,000]"}
 	},
-	["13"] = { -- Buy a Mega Dropper - [$7,000]
-		requires = {"11"},
-		unlocks = {"40"}
+	
+	-- Omega droppers
+	["Buy a Omega Dropper - [$15,000]"] = {
+		requires = {"Buy POWER CORE Dropper - [$2,000]"},
+		unlocks = {"Upgrade Roof - [$40,000]"}
 	},
-	["14"] = { -- Buy a Omega Dropper - [$15,000]
-		requires = {"10"},
-		unlocks = {"39"}
+	["Buy a Omega Dropper - [$9,000]"] = {
+		requires = {"Buy Super Dropper - [$1,000]"},
+		unlocks = {"Upgrade Wall - [$35,000]"}
 	},
-	["15"] = { -- Buy a Omega Dropper - [$9,000]
-		requires = {"12"},
-		unlocks = {"30"}
+	
+	-- Floor and Path progression
+	["Buy Floor - [$1,500]"] = {
+		requires = {"Buy Dropper - [$70]"},
+		unlocks = {"Buy Path - [$250]"}
 	},
-	["16"] = { -- Buy Path - [$10,000]
-		requires = {"3"},
-		unlocks = {"17"}
+	["Buy Path - [$250]"] = {
+		requires = {"Buy Floor - [$1,500]"},
+		unlocks = {"Buy Walls - [$100]"} -- Walls also needs MEGA
 	},
-	["17"] = { -- Buy Path - [$10,000] (second one)
-		requires = {"16"},
-		unlocks = {"20"}
+	["Buy Path - [$10,000]"] = {
+		requires = {"Buy Dropper - [$12,000]"},
+		unlocks = {"Buy Stair - [$2500]"} -- Note: You have two "Buy Path - [$10,000]"
 	},
-	["18"] = { -- Buy Path - [$250]
-		requires = {"7"},
-		unlocks = {"19"}
+	["Buy Stair - [$2500]"] = {
+		requires = {"Buy Path - [$10,000]"},
+		unlocks = {"Upgrade Walls - [$1,000]"}
 	},
-	["19"] = { -- Buy Walls - [$100]
-		requires = {"18", "11"}, -- Requires both Path AND MEGA Dropper
-		unlocks = {"21"}
+	
+	-- Walls and upgrades
+	["Buy Walls - [$100]"] = {
+		requires = {"Buy Path - [$250]", "Buy MEGA Dropper - [$300]"}, -- Needs both!
+		unlocks = {"Upgrade Walls - [$1,000]"}
 	},
-	["20"] = { -- Buy Stair - [$2500]
-		requires = {"17"},
-		unlocks = {"21"}
+	["Upgrade Walls - [$1,000]"] = {
+		requires = {"Buy Walls - [$100]"},
+		unlocks = {"Upgrade Walls - [$12,000]"}
 	},
-	-- Wall upgrades chain
-	["21"] = { -- Upgrade Walls - [$1,000]
-		requires = {"19"},
-		unlocks = {"25"}
+	["Upgrade Walls - [$12,000]"] = {
+		requires = {"Upgrade Walls - [$1,000]"},
+		unlocks = {"Upgrade Walls - [$20,000]"}
 	},
-	["25"] = { -- Upgrade Walls - [$12,000]
-		requires = {"21"},
-		unlocks = {"26"}
+	["Upgrade Walls - [$20,000]"] = {
+		requires = {"Upgrade Walls - [$12,000]"},
+		unlocks = {"Upgrade Walls - [$28,000]"}
 	},
-	["26"] = { -- Upgrade Walls - [$20,000]
-		requires = {"25"},
-		unlocks = {"27"}
+	["Upgrade Walls - [$28,000]"] = {
+		requires = {"Upgrade Walls - [$20,000]"},
+		unlocks = {"Upgrade Walls - [$350]"}
 	},
-	["27"] = { -- Upgrade Walls - [$28,000]
-		requires = {"26"},
-		unlocks = {"31"}
+	["Upgrade Walls - [$350]"] = {
+		requires = {"Upgrade Walls - [$28,000]"},
+		unlocks = {"Upgrade Walls - [$7,000]"}
 	},
-	["31"] = { -- Upgrade Walls - [$350]
-		requires = {"27"},
-		unlocks = {"35"}
+	["Upgrade Walls - [$7,000]"] = {
+		requires = {"Upgrade Walls - [$350]"},
+		unlocks = {"Upgrade Walls - [$700]"}
 	},
-	["35"] = { -- Upgrade Walls - [$7,000]
-		requires = {"31"},
-		unlocks = {"38"}
+	["Upgrade Walls - [$700]"] = {
+		requires = {"Upgrade Walls - [$7,000]"},
+		unlocks = {"Upgrade Wall - [$35,000]"}
 	},
-	["38"] = { -- Upgrade Walls - [$700]
-		requires = {"35"},
-		unlocks = {"30"}
+	["Upgrade Wall - [$35,000]"] = {
+		requires = {"Buy a Omega Dropper - [$9,000]", "Upgrade Walls - [$700]"},
+		unlocks = {"Upgrade Wall - [$45,000]"}
 	},
-	["30"] = { -- Upgrade Wall - [$35,000]
-		requires = {"15", "38"},
-		unlocks = {"32"}
+	["Upgrade Wall - [$45,000]"] = {
+		requires = {"Upgrade Wall - [$35,000]"},
+		unlocks = {"Upgrade Roof - [$40,000]"}
 	},
-	["32"] = { -- Upgrade Wall - [$45,000]
-		requires = {"30"},
-		unlocks = {"39"}
+	["Upgrade Roof - [$40,000]"] = {
+		requires = {"Buy a Omega Dropper - [$15,000]", "Upgrade Wall - [$45,000]"},
+		unlocks = {} -- End game!
 	},
-	["39"] = { -- Upgrade Roof - [$40,000]
-		requires = {"14", "32"},
-		unlocks = {}
-	},
-	["40"] = { -- Buy an OwnerDoor - [$1,500]
-		requires = {"13"},
+	
+	-- Special items
+	["Buy an OwnerDoor - [$1,500]"] = {
+		requires = {"Buy a Mega Dropper - [$7,000]"},
 		unlocks = {}
 	}
 }
@@ -303,8 +318,8 @@ local function addButtonHoverEffect(button)
 end
 
 -- Check if button requirements are met
-local function hasRequirements(buttonNumber)
-	local data = PROGRESSION_DATA[tostring(buttonNumber)]
+local function hasRequirements(buttonName)
+	local data = PROGRESSION_DATA[buttonName]
 	if not data then return true end -- No data = always available
 
 	if not data.requires then
@@ -312,8 +327,8 @@ local function hasRequirements(buttonNumber)
 	end
 
 	-- Check all requirements
-	for _, reqNum in pairs(data.requires) do
-		if not purchasedItems[reqNum] then
+	for _, reqName in pairs(data.requires) do
+		if not purchasedItems[reqName] then
 			return false
 		end
 	end
@@ -328,42 +343,34 @@ local function updateButtonVisibility()
 	for _, button in pairs(buttons:GetChildren()) do
 		local head = button:FindFirstChild("Head")
 		if head then
-			local buttonNum = button.Name:match("%d+")
+			local buttonName = button.Name
 
-			if buttonNum then
-				-- Already purchased - hide it
-				if purchasedItems[buttonNum] then
-					head.Transparency = 1
-					head.CanCollide = false
-					local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
-					if gui then gui.Enabled = false end
-					
-				-- Not purchased - check if it should be visible
-				else
-					local data = PROGRESSION_DATA[buttonNum]
-					
-					-- Special case: Only button 1 starts visible
-					if buttonNum == "1" and next(purchasedItems) == nil then
-						showButtonWithAnimation(button)
-						
-					-- Check if this button has data and requirements are met
-					elseif data and hasRequirements(buttonNum) then
-						showButtonWithAnimation(button)
-						
-					else
-						-- Hide button - not in progression data or requirements not met
-						head.Transparency = 1
-						head.CanCollide = false
-						local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
-						if gui then gui.Enabled = false end
-					end
-				end
-			else
-				-- No number in button name - hide it
+			-- Already purchased - hide it
+			if purchasedItems[buttonName] then
 				head.Transparency = 1
 				head.CanCollide = false
 				local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
 				if gui then gui.Enabled = false end
+				
+			-- Not purchased - check if it should be visible
+			else
+				local data = PROGRESSION_DATA[buttonName]
+				
+				-- Special case: Begin Working! is always visible at start
+				if buttonName == "Begin Working! - [$0]" and next(purchasedItems) == nil then
+					showButtonWithAnimation(button)
+					
+				-- Check if this button has data and requirements are met
+				elseif data and hasRequirements(buttonName) then
+					showButtonWithAnimation(button)
+					
+				else
+					-- Hide button - not in progression data or requirements not met
+					head.Transparency = 1
+					head.CanCollide = false
+					local gui = head:FindFirstChildOfClass("SurfaceGui") or head:FindFirstChildOfClass("BillboardGui")
+					if gui then gui.Enabled = false end
+				end
 			end
 		end
 	end
@@ -868,10 +875,8 @@ function processPurchase(button, playerStats)
 	end
 
 	-- Mark button as purchased
-	local buttonNum = button.Name:match("%d+")
-	if buttonNum then
-		purchasedItems[buttonNum] = true
-	end
+	local buttonName = button.Name
+	purchasedItems[buttonName] = true
 
 	-- 💥 EPIC BUTTON DISAPPEAR ANIMATION
 	local head = button:FindFirstChild("Head")
@@ -969,7 +974,8 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 				-- Create temp button for processPurchase
 				local tempButton = {
 					Price = {Value = 0}, -- Already paid
-					Object = button.Object
+					Object = button.Object,
+					Name = button.Name -- Include name for tracking
 				}
 				processPurchase(tempButton, playerStats)
 				return Enum.ProductPurchaseDecision.PurchaseGranted
@@ -989,13 +995,13 @@ local function debugButtonStates()
 		local head = button:FindFirstChild("Head")
 		if head then
 			local visible = head.Transparency == 0 and head.CanCollide
-			local buttonNum = button.Name:match("%d+")
+			local buttonName = button.Name
 			local status = visible and "VISIBLE" or "HIDDEN"
 			
 			if visible then
-				print("Button " .. button.Name .. " is " .. status)
-				if buttonNum and PROGRESSION_DATA[buttonNum] then
-					local data = PROGRESSION_DATA[buttonNum]
+				print("Button: " .. buttonName .. " is " .. status)
+				if PROGRESSION_DATA[buttonName] then
+					local data = PROGRESSION_DATA[buttonName]
 					if data.requires then
 						print("  Requires: " .. table.concat(data.requires, ", "))
 					end
@@ -1010,4 +1016,4 @@ end
 task.wait(2)
 debugButtonStates()
 
-print("✅ ULTRA POLISHED Purchase Handler loaded! 🧃 Maximum juice activated!")
+print("✅ ULTRA POLISHED Purchase Handler with CORRECT button names loaded! 🧃")
