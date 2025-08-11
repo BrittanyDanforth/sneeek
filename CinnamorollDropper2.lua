@@ -126,8 +126,7 @@ while true do
 	highlight.FillTransparency = 0.9  -- More transparent fill
 	highlight.OutlineColor = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
 	highlight.OutlineTransparency = 0.3  -- More solid outline
-	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Wait no, let me change this
-	highlight.Enabled = true
+	-- Removed DepthMode so it renders normally behind objects
 	highlight.Parent = orb
 
 	-- ENHANCED sparkles with color
