@@ -39,7 +39,6 @@ overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 overlay.BackgroundTransparency = 1
 overlay.Text = ""
 overlay.AutoButtonColor = false
-overlay.ZIndex = 1
 overlay.Parent = screenGui
 
 -- Main shop frame
@@ -50,7 +49,6 @@ mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
 mainFrame.BackgroundColor3 = Color3.fromRGB(17, 24, 39)
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
-mainFrame.ZIndex = 2
 mainFrame.Parent = screenGui
 
 -- Add rounded corners
@@ -124,6 +122,7 @@ container.BackgroundTransparency = 1
 container.ScrollBarThickness = 4
 container.ScrollBarImageColor3 = Color3.fromRGB(55, 65, 81)
 container.BorderSizePixel = 0
+container.CanvasSize = UDim2.new(0, 0, 0, 440) -- Set canvas size for 4 products
 container.Parent = mainFrame
 
 local listLayout = Instance.new("UIListLayout")
@@ -132,13 +131,15 @@ listLayout.Padding = UDim.new(0, 12)
 listLayout.Parent = container
 
 -- Create product cards
+print("Creating", #products, "product cards")
 for i, product in ipairs(products) do
 	local card = Instance.new("Frame")
 	card.Name = "Product" .. i
-	card.Size = UDim2.new(1, 0, 0, 100)
+	card.Size = UDim2.new(1, -8, 0, 100)
 	card.BackgroundColor3 = Color3.fromRGB(31, 41, 55)
 	card.BorderSizePixel = 0
 	card.Parent = container
+	print("Created product card", i, "for", product.amount, "cash")
 	
 	local cardCorner = Instance.new("UICorner")
 	cardCorner.CornerRadius = UDim.new(0, 12)
@@ -236,7 +237,6 @@ toggleBtn.Text = "💰"
 toggleBtn.TextSize = 35
 toggleBtn.Font = Enum.Font.Gotham
 toggleBtn.AutoButtonColor = false
-toggleBtn.ZIndex = 3
 toggleBtn.Parent = screenGui
 
 local toggleCorner = Instance.new("UICorner")
@@ -255,7 +255,6 @@ toggleShadow.ImageColor3 = Color3.new(0, 0, 0)
 toggleShadow.ImageTransparency = 0.8
 toggleShadow.ScaleType = Enum.ScaleType.Slice
 toggleShadow.SliceCenter = Rect.new(10, 10, 118, 118)
-toggleShadow.ZIndex = 2
 toggleShadow.Parent = toggleBtn
 
 -- Animation functions
