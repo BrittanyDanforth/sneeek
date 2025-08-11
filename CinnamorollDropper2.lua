@@ -118,13 +118,7 @@ while true do
 	pointLight.Color = Color3.fromRGB(200, 230, 255)
 	pointLight.Parent = orb
 	
-	-- Cloud outline (ForceField for soft glow)
-	local glow = Instance.new("SelectionBox")
-	glow.Adornee = orb
-	glow.Color3 = Color3.fromRGB(173, 216, 230)
-	glow.LineThickness = 0.1
-	glow.Transparency = 0.5
-	glow.Parent = orb
+	-- Removed the square outline - just using glow effect
 	
 	-- Kawaii sparkles
 	local sparkle = Instance.new("ParticleEmitter")
@@ -180,18 +174,7 @@ while true do
 	)
 	spawnTween:Play()
 	
-	-- Gentle rotation
-	local spin = Instance.new("BodyAngularVelocity")
-	spin.AngularVelocity = Vector3.new(0, 2, 0)
-	spin.MaxTorque = Vector3.new(0, math.huge, 0)
-	spin.Parent = orb
-	
-	-- Remove spin after landing
-	task.delay(1, function()
-		if spin.Parent then
-			spin:Destroy()
-		end
-	end)
+	-- Removed spinning - orbs just float down peacefully
 	
 	-- Track orb briefly
 	task.spawn(function()

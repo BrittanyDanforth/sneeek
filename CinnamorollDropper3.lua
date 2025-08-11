@@ -164,28 +164,35 @@ while true do
 	weld.Part1 = core
 	weld.Parent = orb
 	
-	-- Rainbow sparkles
+	-- White sparkles (as requested)
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 15
+	sparkle.Rate = 20  -- Good amount of sparkles
 	sparkle.Lifetime = NumberRange.new(1, 2)
-	sparkle.Speed = NumberRange.new(1, 2)
+	sparkle.Speed = NumberRange.new(1, 3)
 	sparkle.SpreadAngle = Vector2.new(360, 360)
 	sparkle.LightEmission = 1
 	sparkle.LightInfluence = 0
 	sparkle.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.4),
-		NumberSequenceKeypoint.new(0.5, 0.5),
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(0.5, 0.4),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 220)),    -- Pink
-		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(200, 220, 255)), -- Blue
-		ColorSequenceKeypoint.new(0.66, Color3.fromRGB(255, 255, 200)), -- Yellow
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 200, 255))     -- Purple
-	}
+	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))  -- Pure white sparkles
 	sparkle.VelocityInheritance = 0.2
 	sparkle.Parent = orb
+	
+	-- Additional shimmer effect
+	local shimmer = Instance.new("ParticleEmitter")
+	shimmer.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	shimmer.Rate = 10
+	shimmer.Lifetime = NumberRange.new(0.5, 1)
+	shimmer.Speed = NumberRange.new(0.5, 1)
+	shimmer.SpreadAngle = Vector2.new(180, 180)
+	shimmer.LightEmission = 1
+	shimmer.Size = NumberSequence.new(0.2)
+	shimmer.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))  -- White shimmer
+	shimmer.Parent = orb
 	
 	-- Heart particles
 	local hearts = Instance.new("ParticleEmitter")
@@ -204,11 +211,11 @@ while true do
 	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
 	print("Premium orb", orbCount, "spawned at:", orb.Position, "with offset:", offset)
 	
-	-- Dreamy float
+	-- Dreamy float (FIXED SPEED - same as other droppers)
 	local angle = math.random() * math.pi * 2
 	orb.AssemblyLinearVelocity = Vector3.new(
 		math.cos(angle) * 2,
-		-8,  -- Very gentle float
+		-12,  -- Same speed as Dropper 1
 		math.sin(angle) * 2
 	)
 	
@@ -295,6 +302,7 @@ while true do
 	task.delay(22, function()
 		if orb.Parent then
 			sparkle.Enabled = false
+			shimmer.Enabled = false
 			hearts.Enabled = false
 			
 			TweenService:Create(orb,

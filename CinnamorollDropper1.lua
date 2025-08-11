@@ -56,11 +56,12 @@ local function findConveyor()
 end
 findConveyor()
 
--- Cinnamoroll colors
+-- Cinnamoroll colors (MORE BLUE)
 local COLORS = {
-	Color3.fromRGB(255, 255, 255),    -- Pure white
-	Color3.fromRGB(220, 240, 255),    -- Soft blue-white
-	Color3.fromRGB(245, 250, 255),    -- Ice white
+	Color3.fromRGB(173, 216, 230),    -- Light blue
+	Color3.fromRGB(135, 206, 235),    -- Sky blue
+	Color3.fromRGB(176, 224, 230),    -- Powder blue
+	Color3.fromRGB(100, 149, 237),    -- Cornflower blue
 }
 
 -- Create collision groups if they don't exist
