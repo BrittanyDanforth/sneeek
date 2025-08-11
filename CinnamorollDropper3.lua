@@ -65,7 +65,7 @@ while true do
 	-- Create star part
 	local star = Instance.new("Part")
 	star.Name = "PremiumStar_" .. starCount
-	star.Size = Vector3.new(2, 2, 2) -- Base size for mesh
+	star.Size = Vector3.new(0.785, 2.065, 2.252) -- Proper cat collision size
 	star.Material = Enum.Material.SmoothPlastic -- Clean material for textured mesh
 	star.Color = Color3.new(1, 1, 1) -- White to show texture properly
 	star.TopSurface = Enum.SurfaceType.Smooth
@@ -77,7 +77,7 @@ while true do
 	mesh.MeshType = Enum.MeshType.FileMesh
 	mesh.MeshId = "rbxassetid://1652187761" -- Cat mesh
 	mesh.TextureId = "rbxassetid://1652088642" -- Cat texture
-	mesh.Scale = Vector3.new(2, 2, 2) -- Scale for cat
+	mesh.Scale = Vector3.new(0.8, 0.8, 0.8) -- Smaller scale for cat
 	mesh.Parent = star
 	
 	-- COLLISION
@@ -164,7 +164,7 @@ while true do
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(2, 2, 2)}
+		{Scale = Vector3.new(0.8, 0.8, 0.8)}
 	):Play()
 	
 	-- Flash effect
