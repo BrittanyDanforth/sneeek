@@ -15,13 +15,13 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
 
--- Donut colors (pastel)
+-- Strawberry cake colors
 local COLORS = {
-	Color3.fromRGB(255, 220, 230), -- Pink frosting
-	Color3.fromRGB(220, 230, 255), -- Blue frosting
-	Color3.fromRGB(255, 255, 220), -- Yellow frosting
-	Color3.fromRGB(230, 220, 255), -- Purple frosting
-	Color3.fromRGB(220, 255, 230), -- Mint frosting
+	Color3.fromRGB(255, 182, 193), -- Strawberry Pink
+	Color3.fromRGB(255, 239, 213), -- Cream
+	Color3.fromRGB(255, 204, 204), -- Light Pink
+	Color3.fromRGB(255, 228, 225), -- Misty Rose
+	Color3.fromRGB(250, 235, 215), -- Antique White
 }
 
 -- Create collision groups
@@ -57,108 +57,121 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 	end
 end
 
-local donutCount = 0
+local cakeCount = 0
 
 while true do
-	task.wait(1) -- Medium drop rate
-	donutCount = donutCount + 1
+	task.wait(0.9) -- Medium-fast drop rate
+	cakeCount = cakeCount + 1
 	
-	-- Create donut
-	local donut = Instance.new("Part")
-	donut.Name = "KawaiiDonut"
-	donut.Size = Vector3.new(2, 0.6, 2) -- Donut proportions
-	donut.Material = Enum.Material.SmoothPlastic
-	donut.Color = COLORS[math.random(1, #COLORS)]
-	donut.TopSurface = Enum.SurfaceType.Smooth
-	donut.BottomSurface = Enum.SurfaceType.Smooth
+	-- Create cake slice
+	local cake = Instance.new("Part")
+	cake.Name = "StrawberryCakeSlice"
+	cake.Size = Vector3.new(2, 2, 2) -- Cake slice size
+	cake.Material = Enum.Material.SmoothPlastic
+	cake.Color = COLORS[math.random(1, #COLORS)]
+	cake.TopSurface = Enum.SurfaceType.Smooth
+	cake.BottomSurface = Enum.SurfaceType.Smooth
+	cake.CanCollide = true
+	cake.CanTouch = true
+	cake.CanQuery = true
 	
-	-- Donut mesh
+	-- Add cake slice mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://4602192163" -- Donut Headband mesh
-	mesh.Scale = Vector3.new(0.8, 0.8, 0.8)
-	mesh.Parent = donut
+	mesh.MeshId = "rbxassetid://16511869836" -- Strawberry Cake Slice
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale appropriately
+	mesh.Parent = cake
+	
+	-- Frosting shine
+	cake.Reflectance = 0.2
 	
 	-- Sweet glow
 	local glow = Instance.new("PointLight")
-	glow.Brightness = 0.4
-	glow.Range = 5
-	glow.Color = donut.Color
-	glow.Parent = donut
+	glow.Brightness = 0.6
+	glow.Range = 7
+	glow.Color = Color3.fromRGB(255, 204, 204) -- Pink glow
+	glow.Parent = cake
 	
-	-- Sprinkles! (small parts)
-	for i = 1, 3 do
-		local sprinkle = Instance.new("Part")
-		sprinkle.Name = "Sprinkle"
-		sprinkle.Size = Vector3.new(0.1, 0.1, 0.2)
-		sprinkle.Material = Enum.Material.Neon
-		sprinkle.BrickColor = BrickColor.random()
-		sprinkle.CanCollide = false
-		sprinkle.Massless = true
-		sprinkle.Parent = donut
-		
-		-- Weld sprinkle
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = donut
-		weld.Part1 = sprinkle
-		weld.Parent = donut
-		
-		-- Random position on donut
-		sprinkle.CFrame = donut.CFrame * CFrame.new(
-			math.random(-5, 5) * 0.1,
-			0.3,
-			math.random(-5, 5) * 0.1
-		)
-	end
+	-- Strawberry particles
+	local berries = Instance.new("ParticleEmitter")
+	berries.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	berries.Rate = 8
+	berries.Lifetime = NumberRange.new(1, 2)
+	berries.Speed = NumberRange.new(0.5, 1)
+	berries.SpreadAngle = Vector2.new(30, 30)
+	berries.Color = ColorSequence.new(Color3.fromRGB(255, 99, 71)) -- Tomato red (strawberry)
+	berries.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(1, 0.1)
+	}
+	berries.LightEmission = 0.5
+	berries.Parent = cake
+	
+	-- Cream particles
+	local cream = Instance.new("ParticleEmitter")
+	cream.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	cream.Rate = 5
+	cream.Lifetime = NumberRange.new(1.5, 2.5)
+	cream.Speed = NumberRange.new(0.3)
+	cream.SpreadAngle = Vector2.new(45, 45)
+	cream.Color = ColorSequence.new(Color3.fromRGB(255, 250, 240)) -- Cream white
+	cream.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.7),
+		NumberSequenceKeypoint.new(1, 1)
+	}
+	cream.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.4),
+		NumberSequenceKeypoint.new(1, 0.8)
+	}
+	cream.LightEmission = 0.3
+	cream.Parent = cake
+	
+	-- Soft outline
+	local selection = Instance.new("SelectionBox")
+	selection.Adornee = cake
+	selection.Color3 = Color3.fromRGB(255, 182, 193)
+	selection.Transparency = 0.6
+	selection.LineThickness = 0.05
+	selection.Parent = cake
 	
 	-- Cash value
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	cash.Value = 30
-	cash.Parent = donut
-	
-	-- Position
-	donut.CFrame = dropPart.CFrame * CFrame.Angles(0, math.rad(math.random(0, 360)), 0) - Vector3.new(0, 2, 0)
+	cash.Value = 4 -- Good value
+	cash.Parent = cake
 	
 	-- Set collision group
-	pcall(function()
-		donut.CollisionGroup = ORB_GROUP
-	end)
+	cake.CollisionGroup = "CinnamorollOrbs"
 	
-	-- Donut physics
-	donut.CustomPhysicalProperties = PhysicalProperties.new(
-		0.3,  -- Light
-		0.5,  -- Medium friction
-		0.2,  -- Small bounce
+	-- Position at dropper
+	cake.CFrame = dropPart.CFrame * CFrame.new(0, -2, 0)
+	
+	-- Cake physics
+	cake.CustomPhysicalProperties = PhysicalProperties.new(
+		0.4, -- Medium density
+		0.6, -- Good friction
+		0.1, -- Low bounce
 		1, 1
 	)
 	
-	-- Drop with spin
-	donut.AssemblyLinearVelocity = Vector3.new(0, -14, 0)
-	donut.AssemblyAngularVelocity = Vector3.new(0, 5, 0)
-	
-	-- Parent to storage
-	donut.Parent = PartStorage
+	-- Drop
+	cake.AssemblyLinearVelocity = Vector3.new(0, -8, 0)
 	
 	-- Spawn animation
-	mesh.Scale = Vector3.new(0, 0, 0)
-	TweenService:Create(mesh,
+	cake.Transparency = 1
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
+	
+	TweenService:Create(cake,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.8, 0.8, 0.8)}
+		{Transparency = 0}
 	):Play()
 	
-	-- Sugar particles
-	local sugar = Instance.new("ParticleEmitter")
-	sugar.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sugar.Rate = 8
-	sugar.Lifetime = NumberRange.new(0.5, 1)
-	sugar.Speed = NumberRange.new(0.5, 1)
-	sugar.SpreadAngle = Vector2.new(180, 180)
-	sugar.Size = NumberSequence.new(0.1)
-	sugar.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	sugar.LightEmission = 0.5
-	sugar.VelocityInheritance = 0.5
-	sugar.Parent = donut
+	TweenService:Create(mesh,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(0.5, 0.5, 0.5)}
+	):Play()
 	
-	-- NO CLEANUP - Donuts stay until collected!
+	-- Parent to workspace
+	cake.Parent = PartStorage
 end

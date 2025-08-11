@@ -68,75 +68,64 @@ local COLORS = {
 }
 
 while true do
-	wait(0.7) -- Drop rate
-	orbCount = orbCount + 1
-	
-	-- Create kawaii cola bottle
+	task.wait(1.2) -- Slow drop rate (basic dropper)
 	local orb = Instance.new("Part", workspace.PartStorage)
-	orb.Name = "KawaiiCola"
-	orb.Size = Vector3.new(1, 1, 1) -- Base size for mesh
-	orb.Material = Enum.Material.Plastic
+	orb.Name = "KawaiiCupcake" 
+	orb.Size = Vector3.new(1.5, 1.5, 1.5) -- Cupcake size
+	orb.Material = Enum.Material.SmoothPlastic
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
+	orb.CanCollide = true
+	orb.CanTouch = true
+	orb.CanQuery = true
 	
-	-- Add Bloxy Cola mesh
+	-- Add kawaii cupcake mesh
 	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshId = "rbxassetid://10470609"
-	mesh.TextureId = "" -- No texture, use part color
-	mesh.Scale = Vector3.new(0.8, 0.8, 0.8) -- Slightly smaller for cuteness
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://20170940" -- Kawaii Cupcake from catalog
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(0.02, 0.02, 0.02) -- Scale down the mesh appropriately
 	mesh.Parent = orb
 	
-	-- Basic glow
-	local glow = Instance.new("PointLight")
-	glow.Brightness = 0.3
-	glow.Range = 4
-	glow.Color = orb.Color
-	glow.Parent = orb
+	-- Simple particles for basic dropper
+	local particles = Instance.new("ParticleEmitter")
+	particles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	particles.Rate = 5 -- Low rate for basic
+	particles.Lifetime = NumberRange.new(1, 2)
+	particles.Speed = NumberRange.new(0.5)
+	particles.SpreadAngle = Vector2.new(45, 45)
+	particles.Color = ColorSequence.new(orb.Color)
+	particles.LightEmission = 0.3
+	particles.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 0)
+	}
+	particles.Parent = orb
 	
-	-- Cash value
-	local cash = Instance.new("IntValue")
+	-- Add cash value
+	local cash = Instance.new("IntValue", orb)
 	cash.Name = "Cash"
-	cash.Value = 5 -- Low value for basic dropper
-	cash.Parent = orb
-	
-	-- Position at dropper
-	orb.CFrame = script.Parent.Drop.CFrame - Vector3.new(0, 2, 0)
+	cash.Value = 1 -- Basic value
 	
 	-- Set collision group
-	pcall(function()
-		orb.CollisionGroup = ORB_GROUP
-	end)
+	orb.CollisionGroup = "CinnamorollOrbs"
 	
-	-- Basic physics
-	orb.CustomPhysicalProperties = PhysicalProperties.new(
-		0.3, -- Low density
-		0.5, -- Medium friction
-		0.2, -- Low bounce
-		1, 1
-	)
-	
-	-- Drop velocity
-	orb.AssemblyLinearVelocity = Vector3.new(0, -15, 0)
+	-- Position and drop
+	orb.CFrame = dropperPart.CFrame * CFrame.new(0, -2, 0)
 	
 	-- Simple spawn animation
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
-	TweenService:Create(mesh,
+	orb.Transparency = 1
+	TweenService:Create(orb,
 		TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.8, 0.8, 0.8)}
+		{Transparency = 0}
 	):Play()
 	
-	-- Simple sparkle
-	local sparkle = Instance.new("ParticleEmitter")
-	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 2
-	sparkle.Lifetime = NumberRange.new(0.5)
-	sparkle.Speed = NumberRange.new(0.5)
-	sparkle.SpreadAngle = Vector2.new(180, 180)
-	sparkle.Size = NumberSequence.new(0.2)
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	sparkle.LightEmission = 0.5
-	sparkle.Parent = orb
+	TweenService:Create(mesh,
+		TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(0.02, 0.02, 0.02)}
+	):Play()
 	
-	-- NO CLEANUP - Items stay until collected!
+	-- Parent to workspace after setup
+	orb.Parent = workspace.PartStorage
 end

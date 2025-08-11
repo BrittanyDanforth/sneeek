@@ -15,13 +15,13 @@ local PartStorage = workspace:WaitForChild("PartStorage")
 -- Find the Drop part
 local dropPart = script.Parent:WaitForChild("Drop")
 
--- Cinnamoroll cloud colors
+-- Cinnamoroll cloud color palette  
 local COLORS = {
-	Color3.fromRGB(240, 248, 255),    -- Alice blue
-	Color3.fromRGB(255, 240, 248),    -- Lavender blush
-	Color3.fromRGB(230, 240, 255),    -- Light sky blue
-	Color3.fromRGB(255, 245, 238),    -- Seashell
-	Color3.fromRGB(240, 255, 255),    -- Azure
+	Color3.fromRGB(255, 250, 250), -- Snow White
+	Color3.fromRGB(248, 248, 255), -- Ghost White
+	Color3.fromRGB(240, 248, 255), -- Alice Blue
+	Color3.fromRGB(230, 243, 255), -- Soft Cinnamon Blue
+	Color3.fromRGB(255, 240, 245), -- Lavender Blush
 }
 
 -- Create collision groups
@@ -65,31 +65,70 @@ while true do
 	
 	-- Create cloud base
 	local cloud = Instance.new("Part")
-	cloud.Name = "KawaiiCloud"
-	cloud.Size = Vector3.new(2, 1, 1.5) -- Cloud proportions
+	cloud.Name = "FluffyCloudDrop"
+	cloud.Size = Vector3.new(2.5, 2.5, 2.5) -- Fluffy size
 	cloud.Material = Enum.Material.ForceField
 	cloud.Color = COLORS[math.random(1, #COLORS)]
+	cloud.Transparency = 0.1
 	cloud.TopSurface = Enum.SurfaceType.Smooth
 	cloud.BottomSurface = Enum.SurfaceType.Smooth
-	cloud.Transparency = 0.2
+	cloud.CanCollide = true
+	cloud.CanTouch = true
+	cloud.CanQuery = true
 	
-	-- Make it more cloud-like with a mesh
+	-- Add fluffy cloud mesh
 	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(1.2, 0.8, 1) -- Flatten for cloud shape
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = "rbxassetid://1098272" -- Little Fluffy Cloud
+	mesh.TextureId = "" -- Use part color
+	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale appropriately
 	mesh.Parent = cloud
 	
-	-- Cloud glow
+	-- Cloud mist particles
+	local mist = Instance.new("ParticleEmitter")
+	mist.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	mist.Rate = 10
+	mist.Lifetime = NumberRange.new(2, 3)
+	mist.Speed = NumberRange.new(0.5, 1)
+	mist.SpreadAngle = Vector2.new(30, 30)
+	mist.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	mist.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.7),
+		NumberSequenceKeypoint.new(1, 1)
+	}
+	mist.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(1, 1.5)
+	}
+	mist.LightEmission = 0.8
+	mist.Parent = cloud
+	
+	-- Sparkle particles
+	local sparkles = Instance.new("ParticleEmitter")
+	sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparkles.Rate = 15
+	sparkles.Lifetime = NumberRange.new(1, 2)
+	sparkles.Speed = NumberRange.new(0.5)
+	sparkles.SpreadAngle = Vector2.new(45, 45)
+	sparkles.Color = ColorSequence.new(Color3.fromRGB(173, 216, 230))
+	sparkles.LightEmission = 0.7
+	sparkles.Size = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(1, 0)
+	}
+	sparkles.Parent = cloud
+	
+	-- Soft glow
 	local glow = Instance.new("PointLight")
-	glow.Brightness = 0.5
-	glow.Range = 6
-	glow.Color = cloud.Color
+	glow.Brightness = 0.8
+	glow.Range = 8
+	glow.Color = Color3.fromRGB(173, 216, 230)
 	glow.Parent = cloud
 	
-	-- Cloud outline
+	-- Add selection sphere for soft outline
 	local selection = Instance.new("SelectionSphere")
 	selection.Adornee = cloud
-	selection.Color3 = Color3.fromRGB(173, 216, 230) -- Light blue
+	selection.Color3 = Color3.fromRGB(173, 216, 230)
 	selection.SurfaceTransparency = 1
 	selection.Transparency = 0.4
 	selection.Parent = cloud
@@ -97,72 +136,40 @@ while true do
 	-- Cash value
 	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	cash.Value = 10 -- Higher than Dropper 1
+	cash.Value = 3 -- Medium value
 	cash.Parent = cloud
 	
-	-- Position
-	cloud.CFrame = dropPart.CFrame - Vector3.new(0, 2, 0)
-	
 	-- Set collision group
-	pcall(function()
-		cloud.CollisionGroup = ORB_GROUP
-	end)
+	cloud.CollisionGroup = "CinnamorollOrbs"
 	
-	-- Cloud physics
+	-- Position at dropper
+	cloud.CFrame = dropPart.CFrame * CFrame.new(0, -2, 0)
+	
+	-- Floating physics
 	cloud.CustomPhysicalProperties = PhysicalProperties.new(
-		0.1,  -- Very light
-		0.3,  -- Low friction
-		0,    -- No bounce
+		0.1, -- Very light
+		0.3, -- Low friction
+		0.8, -- High bounce
 		1, 1
 	)
 	
-	-- Float down
-	cloud.AssemblyLinearVelocity = Vector3.new(
-		math.random(-2, 2),
-		-8,  -- Slower fall
-		math.random(-2, 2)
-	)
-	
-	-- Parent to storage
-	cloud.Parent = PartStorage
+	-- Gentle float down
+	cloud.AssemblyLinearVelocity = Vector3.new(0, -5, 0)
 	
 	-- Spawn animation
+	cloud.Transparency = 1
 	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
-	TweenService:Create(mesh,
-		TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(1.2, 0.8, 1)}
+	
+	TweenService:Create(cloud,
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Transparency = 0.1}
 	):Play()
 	
-	-- Cloud particles
-	local mist = Instance.new("ParticleEmitter")
-	mist.Texture = "rbxasset://textures/particles/smoke_main.dds"
-	mist.Rate = 3
-	mist.Lifetime = NumberRange.new(1, 2)
-	mist.Speed = NumberRange.new(0.5)
-	mist.SpreadAngle = Vector2.new(180, 180)
-	mist.Size = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.5),
-		NumberSequenceKeypoint.new(1, 1)
-	}
-	mist.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.8),
-		NumberSequenceKeypoint.new(1, 1)
-	}
-	mist.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	mist.VelocityInheritance = 0.5
-	mist.Parent = cloud
+	TweenService:Create(mesh,
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Scale = Vector3.new(0.5, 0.5, 0.5)}
+	):Play()
 	
-	-- Sparkles
-	local sparkle = Instance.new("ParticleEmitter")
-	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Rate = 5
-	sparkle.Lifetime = NumberRange.new(0.5, 1)
-	sparkle.Speed = NumberRange.new(0.5)
-	sparkle.SpreadAngle = Vector2.new(180, 180)
-	sparkle.Size = NumberSequence.new(0.3)
-	sparkle.Color = ColorSequence.new(cloud.Color)
-	sparkle.LightEmission = 0.8
-	sparkle.Parent = cloud
-	
-	-- NO CLEANUP - Clouds stay until collected!
+	-- Parent to workspace
+	cloud.Parent = PartStorage
 end
