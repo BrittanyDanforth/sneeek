@@ -1,36 +1,21 @@
 --[[
-	Cinnamoroll Dropper 2 - Enhanced Kawaii Style (Performance Optimized)
+	Cinnamoroll Dropper 2 - Enhanced Kawaii Style
 	Fixed: Collides with conveyor/ground but not players
-	OPTIMIZED: Part caching system for better performance
-	Modernized: Uses time() and Random.new()
+	POLISHED: Modernized with Random.new() and time()
+	NO CLEANUP: Orbs stay until collected
 --]]
 
--- Services
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 
--- Configuration
-local DROP_INTERVAL = 1.0 -- Faster drops
-local ORB_LIFETIME = 300 -- 5 minutes - plenty of time for conveyor
-local DROP_PART_NAME = "Drop"
-local CASH_VALUE = 15
-local MAX_CACHE_SIZE = 25 -- Keep cache reasonable
-
--- Wait for dependencies
+-- Wait for PartStorage
 task.wait(2)
-local dropperModel = script.Parent
 local PartStorage = workspace:WaitForChild("PartStorage")
 
-print("=== CINNAMOROLL DROPPER 2 (ENHANCED-CACHED) ===")
-
 -- Find the Drop part
-local dropPart = dropperModel:FindFirstChild(DROP_PART_NAME)
-if not dropPart then
-	warn("Cinnamoroll Dropper 2: 'Drop' part not found in", dropperModel:GetFullName())
-	return
-end
+local dropPart = script.Parent:WaitForChild("Drop")
 
 -- Cinnamoroll palette (TONED DOWN whites for Neon)
 local COLORS = {
@@ -54,7 +39,7 @@ local patterns = {
 	Vector3.new(0, 0, 0),
 }
 
--- Collision Groups Setup
+-- Create collision groups
 local ORB_GROUP = "CinnamorollOrbs"
 local PLAYER_GROUP = "Players"
 
@@ -65,83 +50,98 @@ pcall(function()
 	PhysicsService:CollisionGroupSetCollidable(ORB_GROUP, ORB_GROUP, false)
 end)
 
-local function setupPlayerCharacter(character)
+-- Setup player collision groups
+local function setupPlayer(character)
+	task.wait(0.1)
 	for _, part in ipairs(character:GetDescendants()) do
 		if part:IsA("BasePart") then
-			pcall(function() PhysicsService:SetPartCollisionGroup(part, PLAYER_GROUP) end)
+			pcall(function()
+				PhysicsService:SetPartCollisionGroup(part, PLAYER_GROUP)
+			end)
 		end
 	end
 end
 
 Players.PlayerAdded:Connect(function(player)
-	player.CharacterAdded:Connect(setupPlayerCharacter)
+	player.CharacterAdded:Connect(setupPlayer)
 end)
 
 for _, player in ipairs(Players:GetPlayers()) do
 	if player.Character then
-		setupPlayerCharacter(player.Character)
+		setupPlayer(player.Character)
 	end
 end
 
--- ================================================
--- === PART CACHING SYSTEM =======================
--- ================================================
-local orbCache = {}
+while true do
+	task.wait(1) -- Faster drops
 
-local function createOrbTemplate()
 	-- Create fluffy orb
 	local orb = Instance.new("Part")
+	orb.Name = "CinnamorollCloud"
 	orb.Shape = Enum.PartType.Ball
 	orb.Material = Enum.Material.Neon
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
+	orb.Color = COLORS[rng:NextInteger(1, #COLORS)]
+
+	-- Collision settings
 	orb.CanCollide = true
 	orb.CanTouch = true
 	orb.CanQuery = true
-	orb.Anchored = true
-	pcall(function() PhysicsService:SetPartCollisionGroup(orb, ORB_GROUP) end)
-	
+
+	-- Set collision group
+	pcall(function()
+		PhysicsService:SetPartCollisionGroup(orb, ORB_GROUP)
+	end)
+
 	-- Fluffy physics
-	orb.CustomPhysicalProperties = PhysicalProperties.new(0.2, 0.3, 0, 1, 1)
-	
+	orb.CustomPhysicalProperties = PhysicalProperties.new(
+		0.2,  -- Super light like a cloud
+		0.3,  -- Low friction
+		0,    -- No bounce
+		1, 1
+	)
+
 	-- Cash value
-	local cash = Instance.new("IntValue", orb)
+	local cash = Instance.new("IntValue")
 	cash.Name = "Cash"
-	
+	cash.Value = 15
+	cash.Parent = orb
+
 	-- Reduced glow
-	local pointLight = Instance.new("PointLight", orb)
-	pointLight.Name = "PointLight"
+	local pointLight = Instance.new("PointLight")
 	pointLight.Brightness = 0.6
 	pointLight.Range = 4
 	pointLight.Color = Color3.fromRGB(190, 210, 235)
-	
+	pointLight.Parent = orb
+
 	-- Selection sphere outline
-	local selection = Instance.new("SelectionSphere", orb)
-	selection.Name = "SelectionSphere"
+	local selection = Instance.new("SelectionSphere")
 	selection.Adornee = orb
 	selection.Color3 = Color3.fromRGB(135, 206, 250)
 	selection.SurfaceTransparency = 1  -- No texture
 	selection.Transparency = 0.3
-	
+	selection.Parent = orb
+
 	-- Enhanced sparkles
-	local sparkle = Instance.new("ParticleEmitter", orb)
-	sparkle.Name = "Sparkle"
+	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 	sparkle.Rate = 5
 	sparkle.Lifetime = NumberRange.new(0.5, 1.5)
 	sparkle.Speed = NumberRange.new(0.5, 2)
 	sparkle.SpreadAngle = Vector2.new(180, 180)
 	sparkle.LightEmission = 1
+	sparkle.LightInfluence = 0
 	sparkle.Size = NumberSequence.new{
 		NumberSequenceKeypoint.new(0, 0.3),
 		NumberSequenceKeypoint.new(1, 0)
 	}
-	sparkle.VelocityInheritance = 0
+	sparkle.Color = ColorSequence.new(orb.Color)
+	sparkle.Parent = orb
 	
 	-- Star particles
-	local stars = Instance.new("ParticleEmitter", orb)
-	stars.Name = "Stars"
+	local stars = Instance.new("ParticleEmitter")
 	stars.Texture = "rbxasset://textures/particles/star.dds"
 	stars.Rate = 2
 	stars.Lifetime = NumberRange.new(1, 2)
@@ -150,68 +150,44 @@ local function createOrbTemplate()
 	stars.LightEmission = 0.8
 	stars.Size = NumberSequence.new(0.4)
 	stars.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
-	
-	return orb
-end
+	stars.Parent = orb
 
-local function getOrb()
-	if #orbCache > 0 then
-		return table.remove(orbCache)
-	end
-	return createOrbTemplate()
-end
-
-local function returnOrbToCache(orb)
-	-- Only cache if there's room, otherwise just leave it alone
-	if #orbCache < MAX_CACHE_SIZE then
-		orb.Transparency = 1
-		orb.Anchored = true
-		orb.Parent = PartStorage
-		table.insert(orbCache, orb)
-	end
-	-- If cache is full, do nothing - let the orb exist!
-end
-
--- Main Loop
-while true do
-	task.wait(DROP_INTERVAL)
-	
-	-- Get orb from cache
-	local orb = getOrb()
-	orb.Name = "CinnamorollCloud"
-	orb.Color = COLORS[rng:NextInteger(1, #COLORS)]
-	orb.Cash.Value = CASH_VALUE
-	orb:SetAttribute("SpawnTime", time())
-	
 	-- Pattern positioning
 	local offset = patterns[dropPattern]
 	dropPattern = (dropPattern % #patterns) + 1
+
 	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
-	
-	-- Re-enable all effects
-	orb.PointLight.Enabled = true
-	orb.SelectionSphere.Visible = true
-	orb.Sparkle.Enabled = true
-	orb.Sparkle.Color = ColorSequence.new(orb.Color)  -- Match orb color
-	orb.Stars.Enabled = true
+
+	-- Float down gently
+	orb.AssemblyLinearVelocity = Vector3.new(
+		offset.X * 2,
+		-10,
+		offset.Z * 2
+	)
+
+	-- Fully solid
 	orb.Transparency = 0
+
+	-- Set spawn time
+	orb:SetAttribute("SpawnTime", time())
+
+	-- Parent to storage
 	orb.Parent = PartStorage
-	
+
 	-- Bounce spawn animation
 	orb.Size = Vector3.new(0.4, 0.4, 0.4)
 	TweenService:Create(orb,
 		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
 		{Size = Vector3.new(1.6, 1.6, 1.6)}
 	):Play()
-	
+
 	-- Magical spawn flash
-	local pointLight = orb.PointLight
 	pointLight.Brightness = 2
 	TweenService:Create(pointLight,
 		TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{Brightness = 0.6}
 	):Play()
-	
+
 	-- Cloud puff spawn effect
 	local spawnPuff = Instance.new("ParticleEmitter")
 	spawnPuff.Texture = "rbxassetid://262979222"
@@ -230,16 +206,7 @@ while true do
 	spawnPuff.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
 	spawnPuff.Parent = orb
 	spawnPuff:Emit(2)
-	Debris:AddItem(spawnPuff, 1)
-	
-	-- Launch
-	orb.Anchored = false
-	orb.AssemblyLinearVelocity = Vector3.new(
-		offset.X * 2,
-		-10,
-		offset.Z * 2
-	)
-	
-	-- NO AUTOMATIC CLEANUP - Orbs stay until collected!
-	-- The game/tycoon system should handle cleanup when collected
+	Debris:AddItem(spawnPuff, 1) -- Only cleanup the effect!
+
+	-- NO CLEANUP FOR ORBS - They stay until collected by the tycoon!
 end
