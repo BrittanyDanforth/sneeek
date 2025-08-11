@@ -120,14 +120,13 @@ while true do
 	pointLight.Color = Color3.fromRGB(190, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- POLISH: Cinnamoroll-style highlight (blue like the eyes!)
-	local highlight = Instance.new("Highlight")
-	highlight.FillColor = Color3.fromRGB(255, 250, 250)
-	highlight.FillTransparency = 0.9  -- More transparent fill
-	highlight.OutlineColor = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
-	highlight.OutlineTransparency = 0.3  -- More solid outline
-	highlight.DepthMode = Enum.HighlightDepthMode.Hidden  -- THIS IS THE FIX!
-	highlight.Parent = orb
+	-- POLISH: Using SelectionSphere for outline that renders properly
+	local selection = Instance.new("SelectionSphere")
+	selection.Adornee = orb
+	selection.Color3 = Color3.fromRGB(135, 206, 250)  -- Light sky blue (like Cinnamoroll's eyes)
+	selection.SurfaceTransparency = 0.9  -- Very transparent surface
+	selection.Transparency = 0.3  -- Solid outline
+	selection.Parent = orb
 
 	-- ENHANCED sparkles with color
 	local sparkle = Instance.new("ParticleEmitter")

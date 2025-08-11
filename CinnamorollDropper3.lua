@@ -169,14 +169,13 @@ while true do
 	
 	-- Removed outer aura - was causing see-through issues
 	
-	-- Highlight for extra pop
-	local highlight = Instance.new("Highlight")
-	highlight.FillColor = Color3.fromRGB(135, 206, 250)
-	highlight.FillTransparency = 0.7
-	highlight.OutlineColor = Color3.fromRGB(70, 130, 180)
-	highlight.OutlineTransparency = 0.3
-	highlight.DepthMode = Enum.HighlightDepthMode.Hidden  -- PROPER FIX!
-	highlight.Parent = orb
+	-- Premium selection sphere for cartoon outline
+	local selection = Instance.new("SelectionSphere")
+	selection.Adornee = orb
+	selection.Color3 = Color3.fromRGB(70, 130, 180)  -- Darker blue for premium
+	selection.SurfaceTransparency = 0.8  -- Mostly transparent surface
+	selection.Transparency = 0.2  -- More solid outline for premium
+	selection.Parent = orb
 
 	-- REDUCED Blue sparkles (as requested but toned down)
 	local sparkle = Instance.new("ParticleEmitter")
