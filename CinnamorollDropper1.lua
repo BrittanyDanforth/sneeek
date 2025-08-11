@@ -120,12 +120,12 @@ while true do
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	orb.Transparency = 0 -- FULLY VISIBLE
 	
-	-- Add mesh (using a free star mesh that definitely works)
+	-- Add cute heart mesh (free and works)
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxasset://fonts/sword.mesh" -- Free sword mesh for testing
+	mesh.MeshId = "rbxassetid://105992239" -- Heart mesh
 	mesh.TextureId = "" -- No texture, use part color
-	mesh.Scale = Vector3.new(2, 2, 2) -- Good visible scale
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1) -- Scale for heart
 	mesh.Parent = orb
 	
 	-- Add a soft glow
@@ -189,10 +189,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(1, 1, 1)
+	mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(2, 2, 2)}
+		{Scale = Vector3.new(0.1, 0.1, 0.1)}
 	)
 	spawnTween:Play()
 
