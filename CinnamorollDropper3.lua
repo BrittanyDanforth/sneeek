@@ -159,8 +159,8 @@ while true do
 	-- Parent to workspace
 	star.Parent = PartStorage
 	
-	-- Spawn animation
-	mesh.Scale = Vector3.new(1, 1, 1)
+	-- Spawn animation - start tiny, grow to normal
+	mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
 	
 	TweenService:Create(mesh,
 		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
