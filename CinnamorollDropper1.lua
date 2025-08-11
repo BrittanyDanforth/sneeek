@@ -119,12 +119,12 @@ while true do
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	
-	-- Add kawaii cupcake mesh
+	-- Add Cinnamoroll backpack mesh
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://1167945257" -- Heart Candy (more reliable)
+	mesh.MeshId = "rbxassetid://14089769563" -- Cinnamoroll Sanrio Backpack
 	mesh.TextureId = "" -- Use part color
-	mesh.Scale = Vector3.new(2, 2, 2) -- Good scale
+	mesh.Scale = Vector3.new(0.1, 0.1, 0.1) -- Scale for backpack
 	mesh.Parent = orb
 	
 	-- Add a soft glow
@@ -188,10 +188,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
+	mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(2, 2, 2)}
+		{Scale = Vector3.new(0.1, 0.1, 0.1)}
 	)
 	spawnTween:Play()
 
