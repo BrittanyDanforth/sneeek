@@ -152,12 +152,7 @@ while true do
 	pointLight.Color = Color3.fromRGB(180, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- POLISH: Add subtle crystal sheen
-	local appearance = Instance.new("SurfaceAppearance")
-	appearance.AlphaMode = Enum.AlphaMode.Transparency
-	appearance.ColorMap = "rbxassetid://248553221"  -- Soft cloudy texture
-	appearance.MetalnessMap = "rbxassetid://10497334942"  -- Metallic shine
-	appearance.Parent = orb
+	-- POLISH: (SurfaceAppearance removed - requires plugin capability)
 
 	-- Position with small offset
 	local offsetX = math.random(-2, 2) * 0.1

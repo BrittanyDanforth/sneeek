@@ -148,12 +148,7 @@ while true do
 	pointLight.Color = Color3.fromRGB(125, 186, 230)  -- Softer light sky blue glow
 	pointLight.Parent = orb
 
-	-- POLISH: Premium crystal sheen
-	local appearance = Instance.new("SurfaceAppearance")
-	appearance.AlphaMode = Enum.AlphaMode.Transparency
-	appearance.ColorMap = "rbxassetid://248553221"  -- Soft cloudy texture
-	appearance.MetalnessMap = "rbxassetid://10497334942"  -- Metallic shine
-	appearance.Parent = orb
+	-- POLISH: (SurfaceAppearance removed - requires plugin capability)
 
 	-- REMOVED INNER CORE FOR PERFORMANCE
 
