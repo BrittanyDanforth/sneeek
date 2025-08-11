@@ -1,0 +1,73 @@
+CINNAMOROLL TYCOON - DROPPER PROGRESSION FLOW
+=============================================
+
+START: Buy Dropper - [$10,000]
+    |
+    ├──> Buy Dropper - [$20,000]
+    |         |
+    |         ├──> Buy Dropper - [$12,000]
+    |         |         |
+    |         |         ├──> Buy Extra - [$35,000]
+    |         |         |         |
+    |         |         |         └──> Buy MEGA Dropper - [$300] ⭐ KEY ITEM
+    |         |         |                   |
+    |         |         |                   ├──> Buy Super Dropper - [$1,000]
+    |         |         |                   |         |
+    |         |         |                   |         └──> Buy a Omega Dropper - [$9,000]
+    |         |         |                   |                   |
+    |         |         |                   |                   └──> Upgrade Wall - [$35,000]
+    |         |         |                   |
+    |         |         |                   ├──> Buy Walls - [$100] (also requires Buy Path - [$250])
+    |         |         |                   |         |
+    |         |         |                   |         └──> Upgrade Walls chain...
+    |         |         |                   |
+    |         |         |                   └──> Buy a Mega Dropper - [$7,000]
+    |         |         |                             |
+    |         |         |                             └──> Buy an OwnerDoor - [$1,500]
+    |         |         |
+    |         |         └──> Buy Path - [$10,000]
+    |         |                   |
+    |         |                   └──> Buy Path - [$10,000]_2
+    |         |                             |
+    |         |                             └──> Buy Stair - [$2500]
+    |         |
+    |         └──> Buy Dropper - [$70]
+    |                   |
+    |                   └──> Buy Floor - [$1,500]
+    |                             |
+    |                             └──> Buy Path - [$250]
+    |                                       |
+    |                                       └──> Buy Walls - [$100] (also requires MEGA Dropper)
+    |
+    └──> Buy Conveyer - [$8,000]
+              |
+              └──> Buy CORE Dropper - [$5,000]
+                        |
+                        └──> Buy POWER CORE Dropper - [$2,000]
+                                  |
+                                  └──> Buy a Omega Dropper - [$15,000]
+                                            |
+                                            └──> Upgrade Roof - [$40,000]
+
+KEY POINTS:
+===========
+1. The issue was: After buying MEGA Dropper [$300], the Super Dropper and Walls weren't showing
+2. FIXED: MEGA Dropper now properly unlocks:
+   - Buy Super Dropper - [$1,000]
+   - Buy Walls - [$100] (requires both MEGA Dropper AND Buy Path - [$250])
+   - Buy a Mega Dropper - [$7,000]
+
+3. Button Visibility Rules:
+   - Green button = You can afford it
+   - Red button = You can't afford it yet
+   - Hidden button = Prerequisites not met
+
+4. Progression Tips:
+   - Start with the $10,000 dropper
+   - Follow either the main dropper path OR the conveyer/CORE path
+   - MEGA Dropper at $300 is a key unlock point
+   - Some items require multiple prerequisites (like Walls)
+
+WALL UPGRADE CHAIN:
+==================
+Buy Walls [$100] → Upgrade Walls [$1,000] → [$12,000] → [$20,000] → [$28,000] → [$350] → [$7,000] → [$700] → Upgrade Wall [$35,000] → [$45,000] → Upgrade Roof [$40,000]
