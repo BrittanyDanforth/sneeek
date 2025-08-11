@@ -82,7 +82,7 @@ while true do
 	local orb = Instance.new("Part")
 	orb.Name = "CinnamorollCloud_" .. orbCount
 	orb.Shape = Enum.PartType.Ball
-	orb.Material = Enum.Material.ForceField  -- Translucent glow material
+	orb.Material = Enum.Material.Neon  -- SOLID GLOW, NOT SEE THROUGH
 	orb.Size = Vector3.new(1.6, 1.6, 1.6)
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
@@ -178,8 +178,8 @@ while true do
 		offset.Z * 2
 	)
 
-	-- Semi-transparent cloud (ForceField needs some transparency)
-	orb.Transparency = 0.2  -- Slight transparency for ForceField to look good
+	-- Semi-transparent cloud
+	orb.Transparency = 0  -- FULLY SOLID
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())
