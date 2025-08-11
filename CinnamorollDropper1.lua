@@ -111,21 +111,21 @@ while true do
 	print("\n--- Creating Orb #" .. orbCount .. " ---")
 
 	-- Create cute cupcake part (BASIC - it's free!)
-	local orb = Instance.new("Part")
-	orb.Name = "CinnamorollCupcake_" .. orbCount
+		local orb = Instance.new("Part")
+	orb.Name = "CinnamorollBackpack_" .. orbCount
 	orb.Size = Vector3.new(4, 4, 4) -- Bigger for mesh
 	orb.Material = Enum.Material.Neon  -- Glowing material
 	orb.TopSurface = Enum.SurfaceType.Smooth
 	orb.BottomSurface = Enum.SurfaceType.Smooth
 	orb.Color = COLORS[math.random(1, #COLORS)]
 	orb.Transparency = 0 -- FULLY VISIBLE
-	
-	-- Add Cinnamoroll mesh (THE REAL ONE!)
+
+	-- Add Cinnamoroll BACKPACK mesh!
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.FileMesh
-	mesh.MeshId = "rbxassetid://9434530930" -- ACTUAL Cinnamoroll mesh from Handle
+	mesh.MeshId = "rbxassetid://9434530930" -- Cinnamoroll Backpack mesh
 	mesh.TextureId = "rbxassetid://9434566192" -- Cinnamoroll texture!
-	mesh.Scale = Vector3.new(0.5, 0.5, 0.5) -- Scale for Cinnamoroll
+	mesh.Scale = Vector3.new(0.8, 0.8, 0.8) -- BIGGER scale
 	mesh.Parent = orb
 	
 	-- Add a soft glow
@@ -189,10 +189,10 @@ while true do
 	print("Orb parented to:", orb.Parent:GetFullName())
 
 	-- Simple spawn effect
-	mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
+	mesh.Scale = Vector3.new(0.2, 0.2, 0.2)
 	local spawnTween = TweenService:Create(mesh,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Scale = Vector3.new(0.5, 0.5, 0.5)}
+		{Scale = Vector3.new(0.8, 0.8, 0.8)}
 	)
 	spawnTween:Play()
 
