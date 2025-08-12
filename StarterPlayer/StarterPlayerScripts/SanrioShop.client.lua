@@ -1,9 +1,10 @@
 --[[
-  🧷 Sanrio Character Takeover Shop – Polished Tabbed Layout
-  - Home tab: Big hero at top, rotating through ALL items
-  - Cash tab: Cinnamoroll-themed grid
-  - Gamepasses tab: Kuromi-themed grid
-  - Stable events, debounced show/hide, FontFace, robust Hello Kitty bubble
+  🧷 Sanrio Character Takeover Shop – Tabbed Layout v2 (Upscaled + Standalone HK Talker)
+  - Home tab: Large hero rotating through ALL items
+  - Cash tab: Cinnamoroll blue overlay background + big white cards
+  - Gamepasses tab: Kuromi lavender overlay background + big white cards
+  - Standalone Hello Kitty talker (bottom-left), reliable typewriter + close button + auto hide
+  - Stable events, debounced show/hide, FontFace throughout
 ]]
 
 -- Services
@@ -45,11 +46,6 @@ end
 -- Assets
 local ASSETS = {
 	paperTexture = "rbxassetid://0",
-	tapeHello = "rbxassetid://0",
-	tapeMelody = "rbxassetid://0",
-	tapeKuromi = "rbxassetid://0",
-	tapeCinna = "rbxassetid://0",
-
 	badgeHello = "rbxassetid://0",
 	badgeMelody = "rbxassetid://0",
 	badgeKuromi = "rbxassetid://0",
@@ -60,7 +56,7 @@ local ASSETS = {
 	iconCash   = "rbxassetid://10709728059",
 	iconPass   = "rbxassetid://10709727148",
 
-	-- Hello Kitty portrait for the chat bubble (waving)
+	-- Hello Kitty portrait for the talker
 	hkPortrait = "rbxassetid://8399407671",
 }
 
@@ -75,12 +71,9 @@ local theme = {
 	scrollbar= Color3.fromRGB(180, 185, 200),
 
 	kitty    = Color3.fromRGB(255, 64, 64),
-	melody   = Color3.fromRGB(255, 196, 214),
 	kuromiLav= Color3.fromRGB(200, 190, 255),
 	kuromiInk= Color3.fromRGB(38, 38, 46),
 	cinnaSky = Color3.fromRGB(186, 214, 255),
-	mint     = Color3.fromRGB(164, 234, 214),
-	butter   = Color3.fromRGB(255, 221, 128),
 }
 
 -- Data
@@ -130,11 +123,11 @@ local dim = Instance.new("Frame")
 	dim.ZIndex = 5
 	dim.Parent = screenGui
 
--- Panel
+-- Panel (upscaled)
 local panel = Instance.new("Frame")
 	panel.Name = "Panel"
-	panel.Size = UDim2.new(0, 740, 0, 720)
-	panel.Position = UDim2.new(0.5, -370, 0.5, -360)
+	panel.Size = UDim2.new(0, 980, 0, 860)
+	panel.Position = UDim2.new(0.5, -490, 0.5, -430)
 	panel.BackgroundColor3 = theme.panel
 	panel.BorderSizePixel = 0
 	panel.Visible = false
@@ -158,7 +151,7 @@ local panelShadow = Instance.new("ImageLabel")
 -- Header
 local header = Instance.new("Frame")
 	header.Name = "Header"
-	header.Size = UDim2.new(1, -24, 0, 78)
+	header.Size = UDim2.new(1, -24, 0, 88)
 	header.Position = UDim2.new(0, 12, 0, 12)
 	header.BackgroundColor3 = theme.panelAlt
 	header.BorderSizePixel = 0
@@ -171,26 +164,26 @@ local headerStroke = Instance.new("UIStroke") headerStroke.Color = theme.stroke 
 local kittyBadge = Instance.new("ImageLabel")
 	kittyBadge.BackgroundTransparency = 1
 	kittyBadge.Image = ASSETS.badgeHello
-	kittyBadge.Size = UDim2.new(0, 40, 0, 40)
-	kittyBadge.Position = UDim2.new(0, 16, 0.5, -20)
+	kittyBadge.Size = UDim2.new(0, 46, 0, 46)
+	kittyBadge.Position = UDim2.new(0, 16, 0.5, -23)
 	kittyBadge.ZIndex = 8
 	kittyBadge.Parent = header
 
 local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 64, 0, 0)
-	title.Size = UDim2.new(1, -120, 1, 0)
+	title.Position = UDim2.new(0, 72, 0, 0)
+	title.Size = UDim2.new(1, -140, 1, 0)
 	title.Text = "Sanrio Shop"
 	title.TextColor3 = theme.text
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 8
 	title.Parent = header
-setFont(title, Enum.FontWeight.SemiBold, 30)
+setFont(title, Enum.FontWeight.SemiBold, 34)
 
 local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "Close"
-	closeBtn.Size = UDim2.new(0, 36, 0, 36)
-	closeBtn.Position = UDim2.new(1, -52, 0.5, -18)
+	closeBtn.Size = UDim2.new(0, 40, 0, 40)
+	closeBtn.Position = UDim2.new(1, -56, 0.5, -20)
 	closeBtn.BackgroundTransparency = 1
 	closeBtn.Text = ""
 	closeBtn.AutoButtonColor = false
@@ -203,15 +196,15 @@ local closeIcon = Instance.new("ImageLabel")
 	closeIcon.ImageColor3 = Color3.new(0, 0, 0)
 	closeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 	closeIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-	closeIcon.Size = UDim2.new(0, 22, 0, 22)
+	closeIcon.Size = UDim2.new(0, 24, 0, 24)
 	closeIcon.ZIndex = 9
 	closeIcon.Parent = closeBtn
 
 -- Tabs
-local TABBAR_Y = 12 + 78 + 8
+local TABBAR_Y = 12 + 88 + 10
 local tabBar = Instance.new("Frame")
 	tabBar.Name = "TabBar"
-	tabBar.Size = UDim2.new(1, -24, 0, 44)
+	tabBar.Size = UDim2.new(1, -24, 0, 52)
 	tabBar.Position = UDim2.new(0, 12, 0, TABBAR_Y)
 	tabBar.BackgroundTransparency = 1
 	tabBar.ZIndex = 7
@@ -221,18 +214,18 @@ local tabsList = Instance.new("UIListLayout")
 	tabsList.FillDirection = Enum.FillDirection.Horizontal
 	tabsList.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	tabsList.VerticalAlignment = Enum.VerticalAlignment.Center
-	tabsList.Padding = UDim.new(0, 8)
+	tabsList.Padding = UDim.new(0, 10)
 	tabsList.Parent = tabBar
 
 local function makeTabButton(text: string)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 132, 1, 0)
+	btn.Size = UDim2.new(0, 156, 1, 0)
 	btn.BackgroundColor3 = theme.panel
 	btn.AutoButtonColor = false
 	btn.Text = text
 	btn.TextColor3 = theme.text
 	btn.ZIndex = 8
-	setFont(btn, Enum.FontWeight.SemiBold, 18)
+	setFont(btn, Enum.FontWeight.SemiBold, 20)
 	local c = Instance.new("UICorner") c.CornerRadius = UDim.new(1, 0) c.Parent = btn
 	local s = Instance.new("UIStroke") s.Color = theme.stroke s.Thickness = 1 s.Parent = btn
 	return btn
@@ -243,10 +236,10 @@ local tabCash = makeTabButton("Cash")
 local tabPass = makeTabButton("Gamepasses")
 
 tabHome.Parent = tabBar
-local spacer = Instance.new("Frame") spacer.Size = UDim2.new(0, 8, 1, 0) spacer.BackgroundTransparency = 1 spacer.Parent = tabBar
+local spacer = Instance.new("Frame") spacer.Size = UDim2.new(0, 10, 1, 0) spacer.BackgroundTransparency = 1 spacer.Parent = tabBar
 
 tabCash.Parent = tabBar
-local spacer2 = Instance.new("Frame") spacer2.Size = UDim2.new(0, 8, 1, 0) spacer2.BackgroundTransparency = 1 spacer2.Parent = tabBar
+local spacer2 = Instance.new("Frame") spacer2.Size = UDim2.new(0, 10, 1, 0) spacer2.BackgroundTransparency = 1 spacer2.Parent = tabBar
 
 tabPass.Parent = tabBar
 
@@ -255,7 +248,7 @@ local function styleTabSelected(btn: TextButton, accent: Color3)
 	for _, c in ipairs(btn:GetChildren()) do
 		if c:IsA("UIStroke") then c.Color = accent end
 	end
-	btn.BackgroundColor3 = blendTowardWhite(accent, 0.92)
+	btn.BackgroundColor3 = blendTowardWhite(accent, 0.9)
 end
 
 local function styleTabIdle(btn: TextButton)
@@ -267,7 +260,7 @@ local function styleTabIdle(btn: TextButton)
 end
 
 -- Pages container
-local CONTENT_TOP = TABBAR_Y + 44 + 8
+local CONTENT_TOP = TABBAR_Y + 52 + 10
 local pages = Instance.new("Frame")
 	pages.Name = "Pages"
 	pages.BackgroundTransparency = 1
@@ -295,10 +288,28 @@ local function showOnly(page: Frame)
 	pagePass.Visible = (page == pagePass)
 end
 
--- Sticker Card
+-- Accent overlay backgrounds (stronger theme)
+local function makeOverlay(parent: Frame, color: Color3)
+	local overlay = Instance.new("Frame")
+	overlay.BackgroundColor3 = blendTowardWhite(color, 0.65)
+	overlay.BorderSizePixel = 0
+	overlay.Size = UDim2.new(1, -24, 1, -24)
+	overlay.Position = UDim2.new(0, 12, 0, 12)
+	overlay.ZIndex = 5
+	overlay.Parent = parent
+	local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0, 18) corner.Parent = overlay
+	return overlay
+end
+
+local cashOverlay = makeOverlay(pageCash, theme.cinnaSky)
+local passOverlay = makeOverlay(pagePass, theme.kuromiLav)
+
+-- Sticker Card (bigger)
+local CARD_W, CARD_H = 320, 180
+
 local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, isPass: boolean, nameTextColor: Color3?)
 	local outer = Instance.new("Frame")
-	outer.Size = UDim2.new(0, 230, 0, 140)
+	outer.Size = UDim2.new(0, CARD_W, 0, CARD_H)
 	outer.BackgroundColor3 = Color3.new(1, 1, 1)
 	outer.BorderSizePixel = 0
 	outer.ZIndex = 6
@@ -306,17 +317,17 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 	local outerShadow = Instance.new("ImageLabel")
 	outerShadow.BackgroundTransparency = 1
 	outerShadow.Image = "rbxassetid://6015897843"
-	outerShadow.ImageTransparency = 0.78
+	outerShadow.ImageTransparency = 0.76
 	outerShadow.ScaleType = Enum.ScaleType.Slice
 	outerShadow.SliceCenter = Rect.new(49, 49, 450, 450)
-	outerShadow.Size = UDim2.new(1, 24, 1, 24)
-	outerShadow.Position = UDim2.new(0, -12, 0, -8)
+	outerShadow.Size = UDim2.new(1, 30, 1, 30)
+	outerShadow.Position = UDim2.new(0, -15, 0, -10)
 	outerShadow.ZIndex = 5
 	outerShadow.Parent = outer
 
 	local inner = Instance.new("Frame")
-	inner.Size = UDim2.new(1, -16, 1, -16)
-	inner.Position = UDim2.new(0, 8, 0, 8)
+	inner.Size = UDim2.new(1, -18, 1, -18)
+	inner.Position = UDim2.new(0, 9, 0, 9)
 	inner.BackgroundColor3 = theme.panelAlt
 	inner.BorderSizePixel = 0
 	inner.ZIndex = 6
@@ -325,7 +336,7 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 	local innerStroke = Instance.new("UIStroke") innerStroke.Color = theme.stroke innerStroke.Thickness = 1 innerStroke.Parent = inner
 
 	local stripe = Instance.new("Frame")
-	stripe.Size = UDim2.new(1, 0, 0, 5)
+	stripe.Size = UDim2.new(1, 0, 0, 6)
 	stripe.BackgroundColor3 = accent
 	stripe.BorderSizePixel = 0
 	stripe.ZIndex = 6
@@ -335,8 +346,8 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 		local badge = Instance.new("ImageLabel")
 		badge.BackgroundTransparency = 1
 		badge.Image = charBadgeId
-		badge.Size = UDim2.new(0, 24, 0, 24)
-		badge.Position = UDim2.new(1, -30, 0, 8)
+		badge.Size = UDim2.new(0, 26, 0, 26)
+		badge.Position = UDim2.new(1, -34, 0, 10)
 		badge.ZIndex = 7
 		badge.Parent = inner
 	end
@@ -345,8 +356,8 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 	icon.BackgroundTransparency = 1
 	icon.Image = isPass and ASSETS.iconPass or ASSETS.iconCash
 	icon.ImageColor3 = accent
-	icon.Size = UDim2.new(0, 40, 0, 40)
-	icon.Position = UDim2.new(0, 12, 0, 18)
+	icon.Size = UDim2.new(0, 46, 0, 46)
+	icon.Position = UDim2.new(0, 14, 0, 24)
 	icon.ZIndex = 7
 	icon.Parent = inner
 
@@ -355,27 +366,27 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 	name.Text = data.name
 	name.TextColor3 = nameTextColor or theme.text
 	name.TextXAlignment = Enum.TextXAlignment.Left
-	name.Position = UDim2.new(0, 62, 0, 18)
-	name.Size = UDim2.new(1, -74, 0, 22)
+	name.Position = UDim2.new(0, 72, 0, 22)
+	name.Size = UDim2.new(1, -84, 0, 26)
 	name.ZIndex = 7
 	name.Parent = inner
-	setFont(name, Enum.FontWeight.SemiBold, 18)
+	setFont(name, Enum.FontWeight.SemiBold, 20)
 
 	local sub = Instance.new("TextLabel")
 	sub.BackgroundTransparency = 1
 	sub.Text = isPass and "Gamepass" or "Cash Bundle"
 	sub.TextColor3 = theme.subtext
 	sub.TextXAlignment = Enum.TextXAlignment.Left
-	sub.Position = UDim2.new(0, 62, 0, 42)
-	sub.Size = UDim2.new(1, -74, 0, 18)
+	sub.Position = UDim2.new(0, 72, 0, 52)
+	sub.Size = UDim2.new(1, -84, 0, 20)
 	sub.ZIndex = 7
 	sub.Parent = inner
-	setFont(sub, Enum.FontWeight.Regular, 14)
+	setFont(sub, Enum.FontWeight.Regular, 16)
 
 	local cta = Instance.new("TextButton")
 	cta.AutoButtonColor = false
-	cta.Size = UDim2.new(0, 116, 0, 36)
-	cta.Position = UDim2.new(0, 12, 1, -44)
+	cta.Size = UDim2.new(0, 146, 0, 42)
+	cta.Position = UDim2.new(0, 14, 1, -54)
 	cta.BackgroundColor3 = blendTowardWhite(accent, 0.85)
 	cta.Text = isPass and ("R$ " .. tostring(data.price)) or "Get"
 	cta.TextColor3 = accent
@@ -383,7 +394,7 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 	cta.Parent = inner
 	local ctaCorner = Instance.new("UICorner") ctaCorner.CornerRadius = UDim.new(1, 0) ctaCorner.Parent = cta
 	local ctaStroke = Instance.new("UIStroke") ctaStroke.Color = accent ctaStroke.Thickness = 2 ctaStroke.Transparency = 0.15 ctaStroke.Parent = cta
-	setFont(cta, Enum.FontWeight.Bold, 18)
+	setFont(cta, Enum.FontWeight.Bold, 20)
 
 	cta.MouseEnter:Connect(function()
 		tween(cta, TweenInfo.new(0.12), {BackgroundColor3 = blendTowardWhite(accent, 0.9)})
@@ -404,19 +415,21 @@ end
 
 -- Grid page builder
 local function buildGrid(parent: Frame, items: {any}, isPass: boolean, char: {badgeId: string?, accent: Color3?, accentAdjust: ((Color3) -> Color3)?, darkText: Color3?})
-	for _, c in ipairs(parent:GetChildren()) do if c:IsA("ScrollingFrame") then c:Destroy() end end
+	for _, c in ipairs(parent:GetChildren()) do
+		if c:IsA("ScrollingFrame") then c:Destroy() end
+	end
 	local scroll = Instance.new("ScrollingFrame")
-	scroll.Size = UDim2.new(1, 0, 1, 0)
+	scroll.Size = UDim2.new(1, -32, 1, -32)
+	scroll.Position = UDim2.new(0, 16, 0, 16)
 	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 	scroll.BackgroundTransparency = 1
 	scroll.ScrollBarThickness = 8
 	scroll.ScrollBarImageColor3 = theme.scrollbar
 	scroll.ZIndex = 6
 	scroll.Parent = parent
-	local pad = Instance.new("UIPadding") pad.PaddingTop = UDim.new(0, 6) pad.PaddingLeft = UDim.new(0, 6) pad.PaddingRight = UDim.new(0, 6) pad.PaddingBottom = UDim.new(0, 6) pad.Parent = scroll
 	local grid = Instance.new("UIGridLayout")
-	grid.CellSize = UDim2.new(0, 230, 0, 140)
-	grid.CellPadding = UDim2.new(0, 12, 0, 12)
+	grid.CellSize = UDim2.new(0, CARD_W, 0, CARD_H)
+	grid.CellPadding = UDim2.new(0, 16, 0, 16)
 	grid.SortOrder = Enum.SortOrder.LayoutOrder
 	grid.Parent = scroll
 
@@ -427,13 +440,13 @@ local function buildGrid(parent: Frame, items: {any}, isPass: boolean, char: {ba
 		card.Parent = scroll
 	end
 	-- update canvas size after render
-	task.delay(0.03, function()
-		scroll.CanvasSize = UDim2.new(0, 0, 0, grid.AbsoluteContentSize.Y + 12)
+	task.delay(0.05, function()
+		scroll.CanvasSize = UDim2.new(0, 0, 0, grid.AbsoluteContentSize.Y + 16)
 	end)
 end
 
 -- Pages content
--- Home hero (only element on Home)
+-- Home hero (bigger)
 local hero: Frame
 local heroBadge: ImageLabel
 local heroTitle: TextLabel
@@ -444,7 +457,7 @@ local heroCTAStroke: UIStroke
 local function buildHero(parent: Frame)
 	hero = Instance.new("Frame")
 	hero.Name = "Hero"
-	hero.Size = UDim2.new(1, -24, 0, 156)
+	hero.Size = UDim2.new(1, -24, 0, 220)
 	hero.Position = UDim2.new(0, 12, 0, 0)
 	hero.BackgroundColor3 = theme.panelAlt
 	hero.BorderSizePixel = 0
@@ -456,43 +469,43 @@ local function buildHero(parent: Frame)
 
 	heroBadge = Instance.new("ImageLabel")
 	heroBadge.BackgroundTransparency = 1
-	heroBadge.Size = UDim2.new(0, 56, 0, 56)
-	heroBadge.Position = UDim2.new(0, 18, 0.5, -28)
+	heroBadge.Size = UDim2.new(0, 72, 0, 72)
+	heroBadge.Position = UDim2.new(0, 24, 0.5, -36)
 	heroBadge.ZIndex = 7
 	heroBadge.Parent = hero
 
 	heroTitle = Instance.new("TextLabel")
 	heroTitle.BackgroundTransparency = 1
-	heroTitle.Position = UDim2.new(0, 90, 0, 24)
-	heroTitle.Size = UDim2.new(1, -240, 0, 32)
+	heroTitle.Position = UDim2.new(0, 116, 0, 34)
+	heroTitle.Size = UDim2.new(1, -300, 0, 40)
 	heroTitle.TextXAlignment = Enum.TextXAlignment.Left
 	heroTitle.TextColor3 = theme.text
 	heroTitle.ZIndex = 7
 	heroTitle.Parent = hero
-	setFont(heroTitle, Enum.FontWeight.SemiBold, 26)
+	setFont(heroTitle, Enum.FontWeight.SemiBold, 30)
 
 	heroDesc = Instance.new("TextLabel")
 	heroDesc.BackgroundTransparency = 1
-	heroDesc.Position = UDim2.new(0, 90, 0, 62)
-	heroDesc.Size = UDim2.new(1, -240, 0, 26)
+	heroDesc.Position = UDim2.new(0, 116, 0, 78)
+	heroDesc.Size = UDim2.new(1, -300, 0, 30)
 	heroDesc.TextXAlignment = Enum.TextXAlignment.Left
 	heroDesc.TextColor3 = theme.subtext
 	heroDesc.ZIndex = 7
 	heroDesc.Parent = hero
-	setFont(heroDesc, Enum.FontWeight.Regular, 18)
+	setFont(heroDesc, Enum.FontWeight.Regular, 20)
 
 	heroCTA = Instance.new("TextButton")
 	heroCTA.BackgroundColor3 = theme.panel
 	heroCTA.AutoButtonColor = false
-	heroCTA.Size = UDim2.new(0, 160, 0, 44)
-	heroCTA.Position = UDim2.new(1, -176, 0.5, -22)
+	heroCTA.Size = UDim2.new(0, 200, 0, 52)
+	heroCTA.Position = UDim2.new(1, -220, 0.5, -26)
 	heroCTA.Text = "Get"
 	heroCTA.TextColor3 = theme.text
 	heroCTA.ZIndex = 8
 	heroCTA.Parent = hero
 	local heroCTACorner = Instance.new("UICorner") heroCTACorner.CornerRadius = UDim.new(1, 0) heroCTACorner.Parent = heroCTA
 	heroCTAStroke = Instance.new("UIStroke") heroCTAStroke.Color = theme.stroke heroCTAStroke.Thickness = 1 heroCTAStroke.Parent = heroCTA
-	setFont(heroCTA, Enum.FontWeight.Bold, 20)
+	setFont(heroCTA, Enum.FontWeight.Bold, 22)
 end
 
 -- Build pages
@@ -504,7 +517,7 @@ local charKuromi = { badgeId = ASSETS.badgeKuromi, accentAdjust = function(_) re
 buildGrid(pageCash, shopData.cash, false, charCinna)
 buildGrid(pagePass, shopData.gamepasses, true, charKuromi)
 
--- Hero rotation built from all items
+-- Hero rotation from all items
 local heroRot = {}
 for _, item in ipairs(shopData.cash) do
 	table.insert(heroRot, {
@@ -512,7 +525,7 @@ for _, item in ipairs(shopData.cash) do
 		title = item.name,
 		desc = "Quick boost to help you progress",
 		color = item.color or theme.cinnaSky,
-		ref = {source = "cash", id = item.id, isPass = false},
+		ref = {id = item.id, isPass = false},
 	})
 end
 for _, item in ipairs(shopData.gamepasses) do
@@ -521,7 +534,7 @@ for _, item in ipairs(shopData.gamepasses) do
 		title = item.name,
 		desc = "Upgrade your power, permanently",
 		color = item.color or theme.kuromiLav,
-		ref = {source = "gamepasses", id = item.id, isPass = true},
+		ref = {id = item.id, isPass = true},
 	})
 end
 
@@ -561,8 +574,8 @@ task.spawn(function()
 	end
 end)
 
--- Hello Kitty Bubble
-local function createHelloKittyBubble(parentPanel: Frame)
+-- Standalone Hello Kitty Talker (bottom-left, independent)
+local function createHKTalkerStandalone(rootGui: ScreenGui)
 	local messagesGeneral = {
 		"Taking a little break? 🎀",
 		"So many friendly choices here!",
@@ -578,48 +591,37 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	}
 
 	local container = Instance.new("Frame")
-	container.Name = "HKBubble"
-	container.Size = UDim2.new(0, 420, 0, 130)
+	container.Name = "HKTalker"
+	container.Size = UDim2.new(0, 500, 0, 150)
 	container.AnchorPoint = Vector2.new(0, 1)
-	container.Position = UDim2.new(0, 16, 1, -16)
+	container.Position = UDim2.new(0, 20, 1, -20)
 	container.BackgroundTransparency = 1
 	container.Visible = false
-	container.ZIndex = 20
-	container.Parent = parentPanel
+	container.ZIndex = 100
+	container.Parent = rootGui
 
 	local portrait = Instance.new("ImageLabel")
 	portrait.Name = "Portrait"
 	portrait.BackgroundColor3 = theme.panel
 	portrait.Image = ASSETS.hkPortrait
-	portrait.Size = UDim2.new(0, 56, 0, 56)
-	portrait.Position = UDim2.new(0, 0, 1, -56)
+	portrait.Size = UDim2.new(0, 64, 0, 64)
+	portrait.Position = UDim2.new(0, 0, 1, -64)
 	portrait.AnchorPoint = Vector2.new(0, 1)
 	portrait.BorderSizePixel = 0
 	portrait.Visible = false
-	portrait.ZIndex = 21
+	portrait.ZIndex = 101
 	portrait.Parent = container
 	local portraitCorner = Instance.new("UICorner") portraitCorner.CornerRadius = UDim.new(1, 0) portraitCorner.Parent = portrait
 	local portraitStroke = Instance.new("UIStroke") portraitStroke.Color = theme.kitty portraitStroke.Thickness = 2 portraitStroke.Parent = portrait
 
-	if ASSETS.hkPortrait == "rbxassetid://0" then
-		local hkText = Instance.new("TextLabel")
-		hkText.BackgroundTransparency = 1
-		hkText.Size = UDim2.new(1, 0, 1, 0)
-		hkText.Text = "HK"
-		hkText.TextColor3 = theme.kitty
-		hkText.ZIndex = 22
-		hkText.Parent = portrait
-		setFont(hkText, Enum.FontWeight.SemiBold, 18)
-	end
-
 	local group = Instance.new("Frame")
 	group.Name = "BubbleGroup"
 	group.BackgroundTransparency = 1
-	group.Size = UDim2.new(0, 350, 0, 110)
-	group.Position = UDim2.new(0, 60, 1, -8)
+	group.Size = UDim2.new(0, 410, 0, 130)
+	group.Position = UDim2.new(0, 76, 1, 0)
 	group.AnchorPoint = Vector2.new(0, 1)
 	group.Visible = false
-	group.ZIndex = 21
+	group.ZIndex = 101
 	group.Parent = container
 
 	local shadow = Instance.new("ImageLabel")
@@ -630,7 +632,7 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	shadow.SliceCenter = Rect.new(49, 49, 450, 450)
 	shadow.Size = UDim2.new(1, 22, 1, 22)
 	shadow.Position = UDim2.new(0, -8, 0, -6)
-	shadow.ZIndex = 20
+	shadow.ZIndex = 100
 	shadow.Parent = group
 
 	local bubble = Instance.new("Frame")
@@ -639,20 +641,20 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	bubble.BorderSizePixel = 0
 	bubble.Size = UDim2.new(1, -8, 1, -8)
 	bubble.Position = UDim2.new(0, 0, 0, 0)
-	bubble.ZIndex = 21
+	bubble.ZIndex = 101
 	bubble.Parent = group
 	local bubbleCorner = Instance.new("UICorner") bubbleCorner.CornerRadius = UDim.new(0, 18) bubbleCorner.Parent = bubble
 	local bubbleStroke = Instance.new("UIStroke") bubbleStroke.Color = theme.stroke bubbleStroke.Thickness = 1 bubbleStroke.Parent = bubble
 
 	local tail = Instance.new("Frame")
 	tail.Name = "Tail"
-	tail.Size = UDim2.new(0, 14, 0, 14)
-	tail.Position = UDim2.new(0, -6, 1, -28)
+	tail.Size = UDim2.new(0, 16, 0, 16)
+	tail.Position = UDim2.new(0, -7, 1, -30)
 	tail.AnchorPoint = Vector2.new(0, 0)
 	tail.BackgroundColor3 = theme.panel
 	tail.BorderSizePixel = 0
 	tail.Rotation = 45
-	tail.ZIndex = 21
+	tail.ZIndex = 101
 	tail.Parent = bubble
 	local tailCorner = Instance.new("UICorner") tailCorner.CornerRadius = UDim.new(0, 4) tailCorner.Parent = tail
 	local tailStroke = Instance.new("UIStroke") tailStroke.Color = theme.stroke tailStroke.Thickness = 1 tailStroke.Parent = tail
@@ -663,20 +665,37 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	textLabel.TextWrapped = true
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.TextYAlignment = Enum.TextYAlignment.Top
-	textLabel.Size = UDim2.new(1, -20, 1, -24)
-	textLabel.Position = UDim2.new(0, 16, 0, 14)
+	textLabel.Size = UDim2.new(1, -26, 1, -30)
+	textLabel.Position = UDim2.new(0, 16, 0, 16)
 	textLabel.TextColor3 = theme.text
-	textLabel.ZIndex = 22
+	textLabel.ZIndex = 102
 	textLabel.Parent = bubble
-	setFont(textLabel, Enum.FontWeight.Regular, 18)
+	setFont(textLabel, Enum.FontWeight.Regular, 19)
 
-	-- Breathing animation
+	local xBtn = Instance.new("TextButton")
+	xBtn.Name = "Close"
+	xBtn.BackgroundTransparency = 1
+	xBtn.Size = UDim2.new(0, 28, 0, 28)
+	xBtn.Position = UDim2.new(1, -36, 0, 6)
+	xBtn.Text = ""
+	xBtn.ZIndex = 103
+	xBtn.Parent = bubble
+	local xIcon = Instance.new("ImageLabel")
+	xIcon.BackgroundTransparency = 1
+	xIcon.Image = ASSETS.iconCloseX
+	xIcon.ImageColor3 = Color3.fromRGB(50, 50, 50)
+	xIcon.Size = UDim2.new(0, 20, 0, 20)
+	xIcon.Position = UDim2.new(0.5, -10, 0.5, -10)
+	xIcon.ZIndex = 104
+	xIcon.Parent = xBtn
+
+	-- Breathing
 	task.spawn(function()
 		while true do
 			if portrait.Visible then
-				tween(portrait, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.new(0, 57, 0, 57)})
+				tween(portrait, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.new(0, 66, 0, 66)})
 				task.wait(1.2)
-				tween(portrait, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = UDim2.new(0, 56, 0, 56)})
+				tween(portrait, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = UDim2.new(0, 64, 0, 64)})
 				task.wait(1.2)
 			else
 				task.wait(0.2)
@@ -684,48 +703,11 @@ local function createHelloKittyBubble(parentPanel: Frame)
 		end
 	end)
 
-	local inputConnections: {RBXScriptConnection} = {}
 	local showing = false
-	local typewriterToken = 0
+	local typeToken = 0
+	local hideDelayConn: RBXScriptConnection? = nil
 
-	local function disconnectInputs()
-		for _, c in ipairs(inputConnections) do if c.Connected then c:Disconnect() end end
-		table.clear(inputConnections)
-	end
-
-	local function typeText(full: string, speed: number)
-		typewriterToken += 1
-		local token = typewriterToken
-		textLabel.Text = ""
-		for i = 1, #full do
-			if token ~= typewriterToken then return end
-			textLabel.Text = string.sub(full, 1, i)
-			task.wait(speed)
-		end
-	end
-
-	local function hide()
-		if not showing then return end
-		showing = false
-		typewriterToken += 1
-		tween(textLabel, TweenInfo.new(0.12), {TextTransparency = 1})
-		tween(group, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 280, 0, 90), Position = UDim2.new(0, 56, 1, -16)})
-		task.wait(0.12)
-		tween(group, TweenInfo.new(0.15), {BackgroundTransparency = 1})
-		tween(bubble, TweenInfo.new(0.15), {BackgroundTransparency = 1})
-		tween(shadow, TweenInfo.new(0.15), {ImageTransparency = 1})
-		tween(portrait, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), ImageTransparency = 1})
-		task.wait(0.18)
-		container.Visible = false
-		portrait.Visible = false
-		textLabel.TextTransparency = 0
-		bubble.BackgroundTransparency = 0
-		shadow.ImageTransparency = 0.75
-		portrait.Size = UDim2.new(0, 56, 0, 56)
-		disconnectInputs()
-	end
-
-	local function pickMessage(context: string): string
+	local function pick(context: string): string
 		if context == "cash" then
 			return messagesCash[math.random(1, #messagesCash)]
 		elseif context == "pass" then
@@ -735,51 +717,90 @@ local function createHelloKittyBubble(parentPanel: Frame)
 		end
 	end
 
-	local function show(context: string)
-		if showing then return end
-		showing = true
-		local msg = pickMessage(context)
+	local function typeText(full: string, speed: number)
+		typeToken += 1
+		local tok = typeToken
+		textLabel.Text = ""
+		for i = 1, #full do
+			if tok ~= typeToken then return end
+			textLabel.Text = string.sub(full, 1, i)
+			task.wait(speed)
+		end
+	end
 
+	local function hide()
+		if not showing then return end
+		showing = false
+		typeToken += 1
+		if hideDelayConn then hideDelayConn:Disconnect() hideDelayConn = nil end
+		tween(textLabel, TweenInfo.new(0.1), {TextTransparency = 1})
+		tween(group, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 320, 0, 90)})
+		tween(portrait, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), ImageTransparency = 1})
+		task.wait(0.18)
+		container.Visible = false
+		portrait.Visible = false
+		group.Visible = false
+		textLabel.TextTransparency = 0
+		portrait.Size = UDim2.new(0, 64, 0, 64)
+	end
+
+	xBtn.MouseButton1Click:Connect(hide)
+
+	local function show(context: string)
+		local msg = pick(context)
 		container.Visible = true
 		portrait.Visible = true
+		group.Visible = true
 		portrait.ImageTransparency = 0
 		portrait.Size = UDim2.new(0, 0, 0, 0)
-
-		group.Visible = true
 		group.Size = UDim2.new(0, 10, 0, 10)
-		group.Position = UDim2.new(0, 60, 1, -8)
-		textLabel.TextTransparency = 0
 		textLabel.Text = ""
+		showing = true
 
-		tween(portrait, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 56, 0, 56)})
-		task.delay(0.08, function()
-			tween(group, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 350, 0, 110)})
-			tween(shadow, TweenInfo.new(0.2), {ImageTransparency = 0.7})
+		tween(portrait, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 64, 0, 64)})
+		task.delay(0.06, function()
+			tween(group, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 410, 0, 130)})
 		end)
-		task.delay(0.18, function()
+		task.delay(0.16, function()
 			typeText(msg, 0.03)
 		end)
 
-		table.insert(inputConnections, UserInputService.InputBegan:Connect(function(_, gp)
-			if gp then return end
+		if hideDelayConn then hideDelayConn:Disconnect() hideDelayConn = nil end
+		hideDelayConn = task.delay(6, function()
+			-- auto hide after 6s
 			hide()
-		end))
-		table.insert(inputConnections, UserInputService.InputChanged:Connect(function(inp, gp)
-			if gp then return end
-			if inp.UserInputType == Enum.UserInputType.MouseMovement then hide() end
-		end))
+		end)
 	end
 
-	return { Show = show, Hide = hide }
+	-- Optional: periodic auto messages while panel is visible
+	local autoConn = nil
+	local function startAuto(getVisible: () -> boolean, getContext: () -> string)
+		if autoConn then autoConn:Disconnect() autoConn = nil end
+		autoConn = game:GetService("RunService").Heartbeat:Connect(function()
+			-- every ~30s
+			-- simple timer without allocations
+			local now = tick()
+			if (container:GetAttribute("_last") or 0) + 30 < now then
+				container:SetAttribute("_last", now)
+				if getVisible() then show(getContext()) end
+			end
+		end)
+	end
+
+	return {
+		Show = show,
+		Hide = hide,
+		StartAuto = startAuto,
+	}
 end
 
-local hkBubble = createHelloKittyBubble(panel)
+local hkTalker = createHKTalkerStandalone(screenGui)
 
 -- Toggle button
 local toggleBtn = Instance.new("ImageButton")
 	toggleBtn.Name = "ShopToggle"
 	toggleBtn.AnchorPoint = Vector2.new(1, 1)
-	toggleBtn.Size = UDim2.new(0, 138, 0, 46)
+	toggleBtn.Size = UDim2.new(0, 156, 0, 50)
 	toggleBtn.Position = UDim2.new(1, -16, 1, -16)
 	toggleBtn.BackgroundColor3 = theme.panel
 	toggleBtn.AutoButtonColor = false
@@ -792,22 +813,22 @@ local toggleStroke = Instance.new("UIStroke") toggleStroke.Color = theme.stroke 
 local toggleIcon = Instance.new("ImageLabel")
 	toggleIcon.BackgroundTransparency = 1
 	toggleIcon.Image = (ASSETS.badgeHello ~= "rbxassetid://0") and ASSETS.badgeHello or ASSETS.iconBag
-	toggleIcon.Size = UDim2.new(0, 20, 0, 20)
-	toggleIcon.Position = UDim2.new(0, 12, 0.5, -10)
+	toggleIcon.Size = UDim2.new(0, 22, 0, 22)
+	toggleIcon.Position = UDim2.new(0, 12, 0.5, -11)
 	toggleIcon.ImageColor3 = (ASSETS.badgeHello ~= "rbxassetid://0") and theme.kitty or theme.text
 	toggleIcon.ZIndex = 11
 	toggleIcon.Parent = toggleBtn
 
 local toggleText = Instance.new("TextLabel")
 	toggleText.BackgroundTransparency = 1
-	toggleText.Size = UDim2.new(1, -44, 1, 0)
-	toggleText.Position = UDim2.new(0, 40, 0, 0)
+	toggleText.Size = UDim2.new(1, -50, 1, 0)
+	toggleText.Position = UDim2.new(0, 44, 0, 0)
 	toggleText.Text = "Shop"
 	toggleText.TextColor3 = theme.text
 	toggleText.TextXAlignment = Enum.TextXAlignment.Left
 	toggleText.ZIndex = 11
 	toggleText.Parent = toggleBtn
-setFont(toggleText, Enum.FontWeight.SemiBold, 18)
+setFont(toggleText, Enum.FontWeight.SemiBold, 20)
 
 -- Tabs logic
 local currentTab = "Home"
@@ -834,6 +855,8 @@ local function selectTab(name: string)
 		currentTab = "Pass"
 		currentContext = "pass"
 	end
+	-- ping HK talker each tab switch
+	hkTalker.Show(currentContext)
 end
 
 selectTab("Home")
@@ -853,31 +876,30 @@ local function showShop()
 	dim.Visible = true
 	panel.Visible = true
 	dim.BackgroundTransparency = 1
-	panel.Position = UDim2.new(0.5, -370, 0.52, -360)
-	panel.Size = UDim2.new(0, 730, 0, 700)
+	panel.Position = UDim2.new(0.5, -490, 0.52, -430)
+	panel.Size = UDim2.new(0, 960, 0, 830)
 
 	tween(dim, TweenInfo.new(0.22), {BackgroundTransparency = 0.2})
 	tween(blur, TweenInfo.new(0.22), {Size = 8})
 	tween(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, -370, 0.5, -360),
-		Size = UDim2.new(0, 740, 0, 720),
+		Position = UDim2.new(0.5, -490, 0.5, -430),
+		Size = UDim2.new(0, 980, 0, 860),
 	})
 
-	-- Home default
-	selectTab("Home")
-	task.delay(0.6, function() hkBubble.Show(currentContext) end)
+	selectTab(currentTab)
+	task.delay(0.25, function() hkTalker.Show(currentContext) end)
 	isAnimating = false
 end
 
 local function hideShop()
 	if isAnimating or not panel.Visible then return end
 	isAnimating = true
-	hkBubble.Hide()
+	hkTalker.Hide()
 	tween(dim, TweenInfo.new(0.2), {BackgroundTransparency = 1})
 	tween(blur, TweenInfo.new(0.2), {Size = 0})
 	tween(panel, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, -370, 0.53, -360),
-		Size = UDim2.new(0, 730, 0, 700),
+		Position = UDim2.new(0.5, -490, 0.53, -430),
+		Size = UDim2.new(0, 960, 0, 830),
 	})
 	task.wait(0.2)
 	dim.Visible = false
@@ -893,11 +915,11 @@ closeBtn.MouseButton1Click:Connect(hideShop)
 -- Hovers
 
 toggleBtn.MouseEnter:Connect(function()
-	tween(toggleBtn, TweenInfo.new(0.12), {Size = UDim2.new(0, 144, 0, 48)})
+	tween(toggleBtn, TweenInfo.new(0.12), {Size = UDim2.new(0, 164, 0, 54)})
 end)
 
 toggleBtn.MouseLeave:Connect(function()
-	tween(toggleBtn, TweenInfo.new(0.14), {Size = UDim2.new(0, 138, 0, 46)})
+	tween(toggleBtn, TweenInfo.new(0.14), {Size = UDim2.new(0, 156, 0, 50)})
 end)
 
 closeBtn.MouseEnter:Connect(function()
@@ -916,4 +938,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 	end
 end)
 
-print("🧷 Tabbed Sanrio Shop loaded (Home + Cash + Gamepasses)")
+-- Start periodic talker messages while shop is visible
+hkTalker.StartAuto(function() return panel.Visible end, function() return currentContext end)
+
+print("🧷 Tabbed Sanrio Shop v2 loaded (Upscaled + Strong Theming + Standalone HK Talker)")
