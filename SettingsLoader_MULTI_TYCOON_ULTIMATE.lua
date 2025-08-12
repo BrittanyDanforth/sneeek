@@ -132,6 +132,19 @@ local function findRealTycoons()
 							if settings and settings:IsA("ModuleScript") then
 								print(string.format("     📄 Has Settings at: %s", settings:GetFullName()))
 								realTycoons[#realTycoons].settings = settings
+							else
+								print("     ⚠️ No Settings module found in this tycoon")
+								-- Let's check parent containers too
+								local parent = child.Parent
+								while parent and parent ~= workspace do
+									local parentSettings = parent:FindFirstChild("Settings")
+									if parentSettings and parentSettings:IsA("ModuleScript") then
+										print(string.format("     📄 Found Settings in parent at: %s", parentSettings:GetFullName()))
+										realTycoons[#realTycoons].settings = parentSettings
+										break
+									end
+									parent = parent.Parent
+								end
 							end
 						end
 					end
@@ -161,6 +174,19 @@ local function findRealTycoons()
 				if settings and settings:IsA("ModuleScript") then
 					print(string.format("   📄 Has Settings at: %s", settings:GetFullName()))
 					realTycoons[#realTycoons].settings = settings
+				else
+					print("   ⚠️ No Settings module found in this tycoon")
+					-- Let's check parent containers too
+					local parent = child.Parent
+					while parent and parent ~= workspace do
+						local parentSettings = parent:FindFirstChild("Settings")
+						if parentSettings and parentSettings:IsA("ModuleScript") then
+							print(string.format("   📄 Found Settings in parent at: %s", parentSettings:GetFullName()))
+							realTycoons[#realTycoons].settings = parentSettings
+							break
+						end
+						parent = parent.Parent
+					end
 				end
 			end
 		end
