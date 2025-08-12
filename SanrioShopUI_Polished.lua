@@ -86,7 +86,7 @@ end
 -- Asset Manager with validation
 local AssetManager = {}
 AssetManager.assets = {
-	paperTexture = "rbxassetid://0",
+	paperTexture = "rbxassetid://3584103989",  -- Subtle paper texture
 	badgeHello = "rbxassetid://17398522865",
 	badgeMelody = "rbxassetid://17398525031",
 	badgeKuromi = "rbxassetid://17398526388",
@@ -99,12 +99,17 @@ AssetManager.assets = {
 	
 	hkPortrait = "rbxassetid://8399407650",
 	
-	-- Sound effects
-	soundClick = "rbxassetid://12221976",
+	-- Additional themed assets
+	hkBowPattern = "rbxassetid://6022668879",  -- Bow pattern
+	cloudTexture = "rbxassetid://7149254641",  -- Cloud texture for Cinnamoroll
+	starPattern = "rbxassetid://6022668898",   -- Star pattern
+	
+	-- Sound effects (using actual Roblox sounds)
+	soundClick = "rbxassetid://876939830",
 	soundHover = "rbxassetid://12221990",
-	soundOpen = "rbxassetid://12222005",
-	soundClose = "rbxassetid://12222019",
-	soundTypewriter = "rbxassetid://12222084"
+	soundOpen = "rbxassetid://9120458886",
+	soundClose = "rbxassetid://9120462866",
+	soundTypewriter = "rbxassetid://9113880610"
 }
 
 function AssetManager.getAsset(name: string): string
@@ -162,11 +167,17 @@ ShopDataManager.data = {
 }
 
 function ShopDataManager.getProductInfo(id: number)
-	return MarketplaceService:GetProductInfo(id, Enum.InfoType.Product)
+	local success, info = pcall(function()
+		return MarketplaceService:GetProductInfo(id, Enum.InfoType.Product)
+	end)
+	return success and info or nil
 end
 
 function ShopDataManager.getGamePassInfo(id: number)
-	return MarketplaceService:GetProductInfo(id, Enum.InfoType.GamePass)
+	local success, info = pcall(function()
+		return MarketplaceService:GetProductInfo(id, Enum.InfoType.GamePass)
+	end)
+	return success and info or nil
 end
 
 -- Sound Manager
@@ -175,11 +186,18 @@ SoundManager.sounds = {}
 SoundManager.enabled = true
 
 function SoundManager:init()
-	self.sounds.click = Utils.createSound(AssetManager.assets.soundClick, 0.4)
-	self.sounds.hover = Utils.createSound(AssetManager.assets.soundHover, 0.2)
-	self.sounds.open = Utils.createSound(AssetManager.assets.soundOpen, 0.5)
-	self.sounds.close = Utils.createSound(AssetManager.assets.soundClose, 0.5)
-	self.sounds.typewriter = Utils.createSound(AssetManager.assets.soundTypewriter, 0.1)
+	local function safeCreateSound(assetId: string, volume: number)
+		if AssetManager.isValidAsset(assetId) then
+			return Utils.createSound(assetId, volume)
+		end
+		return nil
+	end
+	
+	self.sounds.click = safeCreateSound(AssetManager.assets.soundClick, 0.4)
+	self.sounds.hover = safeCreateSound(AssetManager.assets.soundHover, 0.2)
+	self.sounds.open = safeCreateSound(AssetManager.assets.soundOpen, 0.5)
+	self.sounds.close = safeCreateSound(AssetManager.assets.soundClose, 0.5)
+	self.sounds.typewriter = safeCreateSound(AssetManager.assets.soundTypewriter, 0.1)
 end
 
 function SoundManager:play(soundName: string)
@@ -406,6 +424,20 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.DisplayOrder = 1000
 screenGui.Parent = playerGui
+
+-- Add paper background texture
+if AssetManager.isValidAsset(AssetManager.assets.paperTexture) then
+	local paperBg = Instance.new("ImageLabel")
+	paperBg.Name = "PaperBackground"
+	paperBg.Size = UDim2.fromScale(1, 1)
+	paperBg.BackgroundTransparency = 1
+	paperBg.Image = AssetManager.assets.paperTexture
+	paperBg.ImageTransparency = 0.93
+	paperBg.ScaleType = Enum.ScaleType.Tile
+	paperBg.TileSize = UDim2.fromOffset(200, 200)
+	paperBg.ZIndex = 1
+	paperBg.Parent = screenGui
+end
 
 -- Blur Manager
 local BlurManager = {}
@@ -926,6 +958,21 @@ end
 
 -- Build Home Page
 local function buildHomePage()
+	-- Add decorative background pattern
+	if AssetManager.isValidAsset(AssetManager.assets.hkBowPattern) then
+		local pattern = Instance.new("ImageLabel")
+		pattern.Name = "BowPattern"
+		pattern.BackgroundTransparency = 1
+		pattern.Image = AssetManager.assets.hkBowPattern
+		pattern.ImageTransparency = 0.92
+		pattern.ImageColor3 = Color3.fromRGB(255, 200, 200)
+		pattern.ScaleType = Enum.ScaleType.Tile
+		pattern.TileSize = UDim2.fromOffset(120, 120)
+		pattern.Size = UDim2.fromScale(1, 1)
+		pattern.ZIndex = 11
+		pattern.Parent = homePage
+	end
+	
 	-- Hero section
 	local heroSection = UIFactory.createFrame({
 		Name = "HeroSection",
@@ -934,18 +981,29 @@ local function buildHomePage()
 		BackgroundColor3 = ThemeManager.getColor("panelAlt"),
 		CornerRadius = UDim.new(0, 18),
 		Stroke = {},
+		Shadow = {Offset = 40, Transparency = 0.6},
 		ZIndex = 12
 	})
 	heroSection.Parent = homePage
 	
-	-- Hero gradient
+	-- Hero gradient with sparkle effect
 	local heroGradient = Instance.new("UIGradient")
 	heroGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Utils.blendColor(ThemeManager.getColor("kitty"), Color3.new(1, 1, 1), 0.95)),
+		ColorSequenceKeypoint.new(0.5, Utils.blendColor(ThemeManager.getColor("kitty"), Color3.new(1, 1, 1), 0.98)),
 		ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1))
 	}
 	heroGradient.Rotation = 45
 	heroGradient.Parent = heroSection
+	
+	-- Animated gradient rotation
+	task.spawn(function()
+		while heroSection.Parent do
+			local t = tick()
+			heroGradient.Rotation = 45 + math.sin(t * 0.5) * 10
+			task.wait(0.1)
+		end
+	end)
 	
 	-- Hero content will be populated by rotation system
 	local heroBadge = UIFactory.createImageLabel({
@@ -1173,6 +1231,34 @@ local function buildCashPage()
 	bgGradient.Rotation = 90
 	bgGradient.Parent = bgOverlay
 	
+	-- Add floating cloud decorations
+	if AssetManager.isValidAsset(AssetManager.assets.cloudTexture) then
+		for i = 1, 3 do
+			local cloud = Instance.new("ImageLabel")
+			cloud.Name = "Cloud" .. i
+			cloud.BackgroundTransparency = 1
+			cloud.Image = AssetManager.assets.cloudTexture
+			cloud.ImageTransparency = 0.85
+			cloud.Size = UDim2.fromOffset(150 + i * 30, 80 + i * 15)
+			cloud.Position = UDim2.fromScale(0.1 + i * 0.3, 0.05 + i * 0.15)
+			cloud.ZIndex = 11
+			cloud.Parent = cashPage
+			
+			-- Floating animation
+			task.spawn(function()
+				local startX = cloud.Position.X.Scale
+				while cloud.Parent do
+					local t = tick()
+					cloud.Position = UDim2.fromScale(
+						startX + math.sin(t * 0.2 + i) * 0.05,
+						cloud.Position.Y.Scale + math.sin(t * 0.3 + i * 2) * 0.02
+					)
+					task.wait(0.1)
+				end
+			end)
+		end
+	end
+	
 	-- Create scrolling frame for cash items
 	local cashScroll = UIFactory.createScrollingFrame({
 		Name = "CashScroll",
@@ -1234,6 +1320,29 @@ local function buildGamepassesPage()
 	}
 	bgGradient.Rotation = 135
 	bgGradient.Parent = bgOverlay
+	
+	-- Add edgy star decorations
+	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
+		local stars = Instance.new("ImageLabel")
+		stars.Name = "StarPattern"
+		stars.BackgroundTransparency = 1
+		stars.Image = AssetManager.assets.starPattern
+		stars.ImageTransparency = 0.9
+		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
+		stars.ScaleType = Enum.ScaleType.Tile
+		stars.TileSize = UDim2.fromOffset(100, 100)
+		stars.Size = UDim2.fromScale(1, 1)
+		stars.ZIndex = 11
+		stars.Parent = passPage
+		
+		-- Rotating stars effect
+		task.spawn(function()
+			while stars.Parent do
+				stars.Rotation = stars.Rotation + 0.1
+				task.wait(0.1)
+			end
+		end)
+	end
 	
 	-- Create scrolling frame for gamepass items
 	local passScroll = UIFactory.createScrollingFrame({
