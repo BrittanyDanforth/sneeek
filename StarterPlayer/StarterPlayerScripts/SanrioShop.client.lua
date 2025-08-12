@@ -70,9 +70,44 @@ local ASSETS = {
 	kuromiPattern = "rbxassetid://0",       -- dark repeating skull/chains pattern
 }
 
--- Style Guide
-local Style = require(script.Parent:WaitForChild("ShopStyleGuide"))
-local Transitions = require(script.Parent:WaitForChild("SanrioShopTransitions"))
+-- Style Guide with robust loader
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local function tryRequire(moduleNames: {string})
+	for _, name in ipairs(moduleNames) do
+		local m = script:FindFirstChild(name) or script.Parent:FindFirstChild(name) or ReplicatedStorage:FindFirstChild(name, true)
+		if m then
+			local ok, mod = pcall(require, m)
+			if ok and mod then return mod end
+		end
+	end
+	return nil
+end
+local Style = tryRequire({"ShopStyleGuide", "ShopStyle", "StyleGuide"})
+if not Style then
+	warn("[SanrioShop] Style module not found; using inline defaults.")
+	Style = require(script:FindFirstChild("ShopStyleGuide") or script.Parent:FindFirstChild("ShopStyleGuide") or Instance.new("ModuleScript"))
+	Style.colors = {
+		background = Color3.fromRGB(253, 252, 250), surface = Color3.fromRGB(255,255,255), surfaceAlt = Color3.fromRGB(246,248,252),
+		stroke = Color3.fromRGB(222,226,235), text = Color3.fromRGB(35,38,46), subtext = Color3.fromRGB(120,126,140), scrollbar = Color3.fromRGB(180,185,200),
+		kitty = Color3.fromRGB(255,64,64), kuromiLav = Color3.fromRGB(200,190,255), kuromiInk = Color3.fromRGB(38,38,46), cinnaSky = Color3.fromRGB(186,214,255),
+	}
+	Style.radii = {panel=24, section=18, cardOuter=20, cardInner=16, pill=999}
+	Style.stroke = {thin=1, regular=1.5, thick=2, neon=3}
+	Style.fonts = {display=function(weight) return Font.new("rbxasset://fonts/families/GothamSSm.json", weight or Enum.FontWeight.SemiBold, Enum.FontStyle.Normal) end,
+		monoDisplay=function(weight) return Font.new("rbxasset://fonts/families/RobotoMono.json", weight or Enum.FontWeight.Bold, Enum.FontStyle.Normal) end}
+	function Style.applyCorner(gui, px) local c=Instance.new("UICorner"); c.CornerRadius=UDim.new(0,px); c.Parent=gui; return c end
+	function Style.applyStroke(gui, color, thickness, transparency) local s=Instance.new("UIStroke"); s.Color=color or Style.colors.stroke; s.Thickness=thickness or 1; s.Transparency=transparency or 0; s.Parent=gui; return s end
+	function Style.setFont(label, fontFace, size) label.FontFace=fontFace; label.TextSize=size end
+	function Style.blendTowardWhite(c,t) return Color3.new(c.R+(1-c.R)*t, c.G+(1-c.G)*t, c.B+(1-c.B)*t) end
+end
+local Transitions = tryRequire({"SanrioShopTransitions", "ShopTransitions"}) or {
+	crossfade = function(oldFrame, newFrame)
+		if oldFrame and oldFrame~=newFrame then oldFrame.Visible=false end
+		newFrame.Visible=true
+	end,
+	moveUnderline = function() end,
+}
+print("[SanrioShop] Booting UI…")
 local theme = {
 	bg       = Style.colors.background,
 	panel    = Style.colors.surface,
