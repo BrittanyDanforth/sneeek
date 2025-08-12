@@ -192,57 +192,22 @@ end
 
 task.defer(fixButtonPositions)
 
--- Update button visibility based on progression
-local function updateButtonVisibility(buttons, playerMoney)
+-- Update button visibility based on money (colors only - dependency system handles actual visibility)
+local function updateButtonColors(buttons, playerMoney)
 	for _, button in ipairs(buttons:GetChildren()) do
 		local head = button:FindFirstChild("Head")
-		if not head then continue end
+		if not head or head.Transparency > 0 then continue end
 
-		local buttonName = button.Name
 		local price = button:FindFirstChild("Price")
 		price = price and price.Value or 0
 
-		-- 1. By default, assume the button should be hidden.
-		local shouldShow = false
-
-		-- 2. Only check progression if the button has NOT been purchased yet.
-		if not purchasedItems[buttonName] then
-			local progressionInfo = PROGRESSION_DATA[buttonName]
-			
-			-- 3. Make sure the button is actually part of our progression plan.
-			if progressionInfo then
-				-- 4. If it has no requirements, it's a starting item. Show it.
-				if not progressionInfo.requires then
-					shouldShow = true
-				-- 5. If it DOES have requirements, check if all have been met.
-				else
-					local requirementsMet = true
-					for _, req in ipairs(progressionInfo.requires) do
-						if not purchasedItems[req] then
-							requirementsMet = false
-							break -- Stop checking if one is missing
-						end
-					end
-					shouldShow = requirementsMet
-				end
+		-- Only update colors for visible buttons
+		if head.CanCollide and price > 0 and playerMoney then
+			if playerMoney.Value >= price then
+				head.BrickColor = BrickColor.new("Lime green")
+			else
+				head.BrickColor = BrickColor.new("Really red")
 			end
-		end
-
-		-- 6. Now, apply the visibility and color based on the result.
-		if shouldShow then
-			head.Transparency = 0
-			head.CanCollide = true
-
-			if price > 0 and playerMoney then
-				if playerMoney.Value >= price then
-					head.BrickColor = BrickColor.new("Lime green")
-				else
-					head.BrickColor = BrickColor.new("Really red")
-				end
-			end
-		else
-			head.Transparency = 1
-			head.CanCollide = false
 		end
 	end
 end
@@ -456,22 +421,19 @@ local buttons = script.Parent:WaitForChild("Buttons")
 local purchases = script.Parent:WaitForChild("Purchases")
 local purchasedObjects = script.Parent:WaitForChild("PurchasedObjects")
 
--- Initial visibility
+-- Initial button colors
 local initialOwner = script.Parent.Owner.Value
 local initialStats = nil
 if initialOwner then
 	initialStats = ServerStorage.PlayerMoney:FindFirstChild(initialOwner.Name)
 end
-updateButtonVisibility(buttons, initialStats)
+updateButtonColors(buttons, initialStats)
 
 -- Process each button
 for _, button in ipairs(buttons:GetChildren()) do
 	task.spawn(function()
 		local head = button:FindFirstChild("Head")
 		if not head then return end
-
-		-- Add simple hover effect
-		addSimpleHoverEffect(button)
 
 		-- Load object
 		local objectName = button:FindFirstChild("Object")
@@ -483,7 +445,48 @@ for _, button in ipairs(buttons:GetChildren()) do
 				purchaseObject:Destroy()
 			else
 				warn("Object missing for button:", button.Name)
+				head.CanCollide = false
+				head.Transparency = 1
+				return
 			end
+		end
+
+		-- DEPENDENCY SYSTEM - Check if button has dependency
+		local dependency = button:FindFirstChild("Dependency")
+		if dependency and dependency.Value then
+			-- Hide button until dependency is purchased
+			head.CanCollide = false
+			head.Transparency = 1
+			
+			-- Wait for dependency to be purchased
+			task.spawn(function()
+				purchasedObjects:WaitForChild(dependency.Value)
+				
+				-- Fade in button when dependency is met
+				if Settings.ButtonsFadeIn then
+					-- Start at 70% transparent for smooth fade
+					head.Transparency = 0.7
+					TweenService:Create(head,
+						TweenInfo.new(Settings.FadeInTime or 0.5, Enum.EasingStyle.Quad),
+						{Transparency = 0}
+					):Play()
+					task.wait(Settings.FadeInTime or 0.5)
+				else
+					head.Transparency = 0
+				end
+				head.CanCollide = true
+				
+				-- Update colors now that button is visible
+				local owner = script.Parent.Owner.Value
+				if owner then
+					local stats = ServerStorage.PlayerMoney:FindFirstChild(owner.Name)
+					updateButtonColors(buttons, stats)
+				end
+			end)
+		else
+			-- No dependency - button is immediately visible
+			-- Add hover effect only to visible buttons
+			addSimpleHoverEffect(button)
 		end
 
 		-- Handle touches
@@ -651,8 +654,8 @@ function processPurchase(button, playerStats)
 		createMinimalParticles(head.Position)
 	end
 
-	-- Update visibility
-	updateButtonVisibility(buttons, playerStats)
+	-- Update button colors
+	updateButtonColors(buttons, playerStats)
 end
 
 -- Handle BuyObject folder
@@ -711,14 +714,14 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
 
--- Update visibility when money changes
+-- Update button colors when money changes
 script.Parent.Owner.Changed:Connect(function()
 	local owner = script.Parent.Owner.Value
 	if owner then
 		local playerStats = ServerStorage.PlayerMoney:FindFirstChild(owner.Name)
 		if playerStats then
 			playerStats.Changed:Connect(function()
-				updateButtonVisibility(buttons, playerStats)
+				updateButtonColors(buttons, playerStats)
 			end)
 		end
 	end
