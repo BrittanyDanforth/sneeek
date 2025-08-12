@@ -17,6 +17,10 @@ local PRODUCT_TO_CASH = {
 -- Store the old ProcessReceipt if one exists (probably from tycoon)
 local oldProcessReceipt = MarketplaceService.ProcessReceipt
 
+-- IMPORTANT: Make sure PurchaseHandler runs first
+-- Wait a bit to ensure tycoon handlers are loaded
+task.wait(1)
+
 -- Wait for PlayerMoney folder
 local playerMoneyFolder
 local attempts = 0
