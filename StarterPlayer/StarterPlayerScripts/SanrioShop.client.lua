@@ -57,7 +57,7 @@ local ASSETS = {
 	iconPass   = "rbxassetid://10709727148",
 
 	-- Hello Kitty portrait for the talker
-	hkPortrait = "rbxassetid://8399407671",
+	hkPortrait = "rbxassetid://8399407650",
 }
 
 -- Theme
@@ -580,14 +580,22 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 		"Taking a little break? 🎀",
 		"So many friendly choices here!",
 		"Find a favorite yet? Everything is super cute!",
+		"Hello! I love how cozy it feels here. 🌸",
+		"Shopping with friends is the best! 💖",
 	}
 	local messagesCash = {
 		"Apples are my favorite, but cash is useful too! 🍎",
 		"Sweet picks! A little boost goes a long way. 🎀",
+		"Treat yourself to a small top-up — you earned it!",
+		"Shiny coins make adventures easier! ✨",
+		"Just a sprinkle of cash can help a lot! 💫",
 	}
 	local messagesPass = {
 		"Upgrades make everything extra special! ✨",
 		"Feeling brave? Try a power-up! 👀",
+		"Perks make every day more fun!",
+		"A little upgrade can go a long way! 🌟",
+		"VIP is super comfy — like a warm hug! ☁️",
 	}
 
 	local container = Instance.new("Frame")
@@ -774,15 +782,35 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 
 	-- Optional: periodic auto messages while panel is visible
 	local autoConn = nil
-	local function startAuto(getVisible: () -> boolean, getContext: () -> string)
+	local function startAuto(getVisible: () -> boolean, getContext: () -> string, getOpenSeconds: () -> number)
 		if autoConn then autoConn:Disconnect() autoConn = nil end
 		autoConn = game:GetService("RunService").Heartbeat:Connect(function()
-			-- every ~30s
-			-- simple timer without allocations
 			local now = tick()
-			if (container:GetAttribute("_last") or 0) + 30 < now then
+			local last = (container:GetAttribute("_last") or 0) :: number
+			local interval = (container:GetAttribute("_interval") or 120) :: number
+			local visible = getVisible()
+			local openSecs = getOpenSeconds()
+			-- Reset arming when not visible
+			if not visible then
+				container:SetAttribute("_last", 0)
+				container:SetAttribute("_interval", 120)
+				return
+			end
+			-- Require at least 120s since opening before first message
+			if openSecs < 120 then return end
+			-- First message exactly after gating
+			if last == 0 then
+				local ctx = getContext()
+				show(ctx)
 				container:SetAttribute("_last", now)
-				if getVisible() then show(getContext()) end
+				container:SetAttribute("_interval", math.random(120, 210))
+				return
+			end
+			if now - last >= interval then
+				local ctx = getContext()
+				show(ctx)
+				container:SetAttribute("_last", now)
+				container:SetAttribute("_interval", math.random(120, 210))
 			end
 		end)
 	end
@@ -833,6 +861,7 @@ setFont(toggleText, Enum.FontWeight.SemiBold, 20)
 -- Tabs logic
 local currentTab = "Home"
 local currentContext = "general"
+local shopOpenAt = 0
 
 local function selectTab(name: string)
 	styleTabIdle(tabHome)
@@ -855,8 +884,7 @@ local function selectTab(name: string)
 		currentTab = "Pass"
 		currentContext = "pass"
 	end
-	-- ping HK talker each tab switch
-	hkTalker.Show(currentContext)
+	-- removed immediate HK talker ping on tab switch
 end
 
 selectTab("Home")
@@ -878,6 +906,7 @@ local function showShop()
 	dim.BackgroundTransparency = 1
 	panel.Position = UDim2.new(0.5, -490, 0.52, -430)
 	panel.Size = UDim2.new(0, 960, 0, 830)
+	shopOpenAt = tick()
 
 	tween(dim, TweenInfo.new(0.22), {BackgroundTransparency = 0.2})
 	tween(blur, TweenInfo.new(0.22), {Size = 8})
@@ -887,7 +916,7 @@ local function showShop()
 	})
 
 	selectTab(currentTab)
-	task.delay(0.25, function() hkTalker.Show(currentContext) end)
+	-- do not show talker immediately; StartAuto handles gating
 	isAnimating = false
 end
 
@@ -904,6 +933,7 @@ local function hideShop()
 	task.wait(0.2)
 	dim.Visible = false
 	panel.Visible = false
+	shopOpenAt = 0
 	isAnimating = false
 end
 
@@ -938,7 +968,11 @@ UserInputService.InputBegan:Connect(function(input, gp)
 	end
 end)
 
--- Start periodic talker messages while shop is visible
-hkTalker.StartAuto(function() return panel.Visible end, function() return currentContext end)
+-- Start periodic talker messages while shop is visible (with 2-minute gating and random long intervals)
+hkTalker.StartAuto(
+	function() return panel.Visible end,
+	function() return currentContext end,
+	function() if panel.Visible and shopOpenAt > 0 then return tick() - shopOpenAt else return 0 end end
+)
 
-print("🧷 Tabbed Sanrio Shop v2 loaded (Upscaled + Strong Theming + Standalone HK Talker)")
+print("🧷 Tabbed Sanrio Shop v2 loaded (Upscaled + Strong Theming + Standalone HK Talker; HK waits 2 min)")
