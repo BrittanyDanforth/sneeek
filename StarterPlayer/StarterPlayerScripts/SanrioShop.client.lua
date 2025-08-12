@@ -585,7 +585,7 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 	}
 	local messagesCash = {
 		"Apples are my favorite, but cash is useful too! 🍎",
-		"Sweet picks! A little boost goes a long way. 🎀",
+		"A little boost can help when you need it most. 🎀",
 		"Treat yourself to a small top-up — you earned it!",
 		"Shiny coins make adventures easier! ✨",
 		"Just a sprinkle of cash can help a lot! 💫",
@@ -713,7 +713,7 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 
 	local showing = false
 	local typeToken = 0
-	local hideDelayConn: RBXScriptConnection? = nil
+	local hideDelayThread: thread? = nil
 
 	local function pick(context: string): string
 		if context == "cash" then
@@ -740,7 +740,8 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 		if not showing then return end
 		showing = false
 		typeToken += 1
-		if hideDelayConn then hideDelayConn:Disconnect() hideDelayConn = nil end
+		if hideDelayThread and coroutine.status(hideDelayThread) ~= "dead" then task.cancel(hideDelayThread) end
+		hideDelayThread = nil
 		tween(textLabel, TweenInfo.new(0.1), {TextTransparency = 1})
 		tween(group, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 320, 0, 90)})
 		tween(portrait, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), ImageTransparency = 1})
@@ -773,8 +774,8 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 			typeText(msg, 0.03)
 		end)
 
-		if hideDelayConn then hideDelayConn:Disconnect() hideDelayConn = nil end
-		hideDelayConn = task.delay(6, function()
+		if hideDelayThread and coroutine.status(hideDelayThread) ~= "dead" then task.cancel(hideDelayThread) end
+		hideDelayThread = task.delay(6, function()
 			-- auto hide after 6s
 			hide()
 		end)
