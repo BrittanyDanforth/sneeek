@@ -202,37 +202,33 @@ local function updateButtonVisibility(buttons, playerMoney)
 		local price = button:FindFirstChild("Price")
 		price = price and price.Value or 0
 
+		-- 1. By default, assume the button should be hidden.
 		local shouldShow = false
 
-		if buttonName == "Begin Working! - [$0]" and not purchasedItems[buttonName] then
-			shouldShow = true
-		elseif purchasedItems[buttonName] then
-			shouldShow = false
-		else
+		-- 2. Only check progression if the button has NOT been purchased yet.
+		if not purchasedItems[buttonName] then
 			local progressionInfo = PROGRESSION_DATA[buttonName]
-			if progressionInfo and progressionInfo.requires then
-				local requirementsMet = true
-				for _, req in ipairs(progressionInfo.requires) do
-					if not purchasedItems[req] then
-						requirementsMet = false
-						break
-					end
-				end
-				shouldShow = requirementsMet
-			elseif not progressionInfo then
-				for itemName, itemData in pairs(PROGRESSION_DATA) do
-					if purchasedItems[itemName] and itemData.unlocks then
-						for _, unlock in ipairs(itemData.unlocks) do
-							if unlock == buttonName then
-								shouldShow = true
-								break
-							end
+			
+			-- 3. Make sure the button is actually part of our progression plan.
+			if progressionInfo then
+				-- 4. If it has no requirements, it's a starting item. Show it.
+				if not progressionInfo.requires then
+					shouldShow = true
+				-- 5. If it DOES have requirements, check if all have been met.
+				else
+					local requirementsMet = true
+					for _, req in ipairs(progressionInfo.requires) do
+						if not purchasedItems[req] then
+							requirementsMet = false
+							break -- Stop checking if one is missing
 						end
 					end
+					shouldShow = requirementsMet
 				end
 			end
 		end
 
+		-- 6. Now, apply the visibility and color based on the result.
 		if shouldShow then
 			head.Transparency = 0
 			head.CanCollide = true
