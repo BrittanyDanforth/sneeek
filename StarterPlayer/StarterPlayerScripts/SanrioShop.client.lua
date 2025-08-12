@@ -212,6 +212,7 @@ local closeIcon = Instance.new("ImageLabel")
 	closeIcon.Size = UDim2.new(0, 24, 0, 24)
 	closeIcon.ZIndex = 9
 	closeIcon.Parent = closeBtn
+	closeIcon.Visible = false
 
 -- Tabs
 local TABBAR_Y = 12 + 88 + 10
@@ -1137,7 +1138,26 @@ end
 
 -- Wiring
 
-toggleBtn.MouseButton1Click:Connect(showShop)
+toggleBtn.MouseButton1Click:Connect(function()
+	-- animate entrance from toggle button position
+	local startPos = toggleBtn.AbsolutePosition
+	local startX, startY = startPos.X, startPos.Y
+	panel.Size = UDim2.new(0, 10, 0, 10)
+	panel.Position = UDim2.fromOffset(startX, startY)
+	toggleBtn.Visible = false
+	dim.Visible = true
+	dim.BackgroundTransparency = 1
+	panel.Visible = true
+	shopOpenAt = tick()
+	TweenService:Create(dim, TweenInfo.new(0.22), {BackgroundTransparency = 0.2}):Play()
+	TweenService:Create(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 980, 0, 860),
+		Position = UDim2.new(0.5, -490, 0.5, -430)
+	}):Play()
+	TweenService:Create(blur, TweenInfo.new(0.22), {Size = 8}):Play()
+	selectTab(currentTab)
+	isAnimating = false
+end)
 closeBtn.MouseButton1Click:Connect(hideShop)
 
 -- Hovers
@@ -1151,11 +1171,11 @@ toggleBtn.MouseLeave:Connect(function()
 end)
 
 closeBtn.MouseEnter:Connect(function()
-	tween(closeIcon, TweenInfo.new(0.08), {ImageColor3 = Color3.fromRGB(25, 25, 25)})
+	tween(closeBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 44, 0, 44)})
 end)
 
 closeBtn.MouseLeave:Connect(function()
-	tween(closeIcon, TweenInfo.new(0.1), {ImageColor3 = Color3.new(0, 0, 0)})
+	tween(closeBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 40, 0, 40)})
 end)
 
 -- Hotkey (M)
