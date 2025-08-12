@@ -103,12 +103,15 @@ AssetManager.assets = {
 	hkBowPattern = "rbxassetid://6022668879",  -- Bow pattern
 	cloudTexture = "rbxassetid://7149254641",  -- Cloud texture for Cinnamoroll
 	starPattern = "rbxassetid://6022668898",   -- Star pattern
+	hkCuteFace = "rbxassetid://14978925654",  -- Hello Kitty cute face
+	cinnamorollFly = "rbxassetid://15011356128",  -- Cinnamoroll flying
+	melodyFlower = "rbxassetid://17398525031"  -- My Melody with flower
 	
 	-- Sound effects (using actual Roblox sounds)
 	soundClick = "rbxassetid://876939830",
-	soundHover = "rbxassetid://12221990",
-	soundOpen = "rbxassetid://9120458886",
-	soundClose = "rbxassetid://9120462866",
+	soundHover = "rbxassetid://12221967",
+	soundOpen = "rbxassetid://9125713501",  -- Whoosh sound
+	soundClose = "rbxassetid://9119713951",  -- Pop sound
 	soundTypewriter = "rbxassetid://9113880610"
 }
 
@@ -439,6 +442,50 @@ if AssetManager.isValidAsset(AssetManager.assets.paperTexture) then
 	paperBg.Parent = screenGui
 end
 
+-- Add sparkle particles effect
+local function createSparkleEffect(parent: GuiObject)
+	local sparkleContainer = Instance.new("Frame")
+	sparkleContainer.Name = "SparkleContainer"
+	sparkleContainer.Size = UDim2.fromScale(1, 1)
+	sparkleContainer.BackgroundTransparency = 1
+	sparkleContainer.ZIndex = 150
+	sparkleContainer.Parent = parent
+	
+	-- Create multiple sparkles
+	for i = 1, 8 do
+		local sparkle = Instance.new("Frame")
+		sparkle.Name = "Sparkle" .. i
+		sparkle.Size = UDim2.fromOffset(4, 4)
+		sparkle.BackgroundColor3 = Color3.new(1, 1, 1)
+		sparkle.Position = UDim2.fromScale(math.random(), math.random())
+		sparkle.ZIndex = 151
+		sparkle.Parent = sparkleContainer
+		
+		local sparkleCorner = Instance.new("UICorner")
+		sparkleCorner.CornerRadius = UDim.new(1, 0)
+		sparkleCorner.Parent = sparkle
+		
+		-- Sparkle animation
+		task.spawn(function()
+			local startPos = sparkle.Position
+			local speed = 0.5 + math.random() * 0.5
+			local offset = math.random() * math.pi * 2
+			
+			while sparkle.Parent do
+				local t = tick() * speed + offset
+				sparkle.Position = UDim2.fromScale(
+					startPos.X.Scale + math.sin(t) * 0.02,
+					(startPos.Y.Scale - t * 0.1 % 1.2) % 1.2
+				)
+				sparkle.BackgroundTransparency = 0.3 + math.sin(t * 2) * 0.3
+				task.wait(0.1)
+			end
+		end)
+	end
+	
+	return sparkleContainer
+end
+
 -- Blur Manager
 local BlurManager = {}
 BlurManager.blur = nil
@@ -495,6 +542,9 @@ local mainPanel = UIFactory.createFrame({
 	ZIndex = 10
 })
 mainPanel.Parent = screenGui
+
+-- Add sparkle effect to main panel
+createSparkleEffect(mainPanel)
 
 -- Add responsive scaling
 local uiScale = Instance.new("UIScale")
@@ -971,6 +1021,35 @@ local function buildHomePage()
 		pattern.Size = UDim2.fromScale(1, 1)
 		pattern.ZIndex = 11
 		pattern.Parent = homePage
+	end
+	
+	-- Add cute Hello Kitty decoration
+	if AssetManager.isValidAsset(AssetManager.assets.hkCuteFace) then
+		local hkDecor = UIFactory.createImageLabel({
+			Name = "HelloKittyDecor",
+			Image = AssetManager.assets.hkCuteFace,
+			Size = UDim2.fromOffset(150, 150),
+			Position = UDim2.new(1, -10, 1, -10),
+			AnchorPoint = Vector2.new(1, 1),
+			BackgroundTransparency = 1,
+			ImageTransparency = 0.1,
+			ZIndex = 12
+		})
+		hkDecor.Parent = homePage
+		
+		-- Bouncing animation
+		task.spawn(function()
+			while hkDecor.Parent do
+				Utils.tween(hkDecor, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+					Position = UDim2.new(1, -10, 1, -20)
+				})
+				task.wait(1.5)
+				Utils.tween(hkDecor, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+					Position = UDim2.new(1, -10, 1, -10)
+				})
+				task.wait(1.5)
+			end
+		end)
 	end
 	
 	-- Hero section
@@ -1801,13 +1880,39 @@ function ShopManager:open()
 	dimOverlay.BackgroundTransparency = 1
 	mainPanel.Position = UDim2.new(0.5, 0, 0.52, 0)
 	mainPanel.Size = UDim2.new(0, 960, 0, 830)
+	mainPanel.BackgroundTransparency = 0.3
+	
+	-- Create opening effect
+	local openEffect = Instance.new("Frame")
+	openEffect.Name = "OpenEffect"
+	openEffect.Size = UDim2.fromOffset(100, 100)
+	openEffect.Position = UDim2.new(0.5, 0, 0.5, 0)
+	openEffect.AnchorPoint = Vector2.new(0.5, 0.5)
+	openEffect.BackgroundColor3 = ThemeManager.getColor("kitty")
+	openEffect.ZIndex = 200
+	openEffect.Parent = screenGui
+	
+	local effectCorner = Instance.new("UICorner")
+	effectCorner.CornerRadius = UDim.new(1, 0)
+	effectCorner.Parent = openEffect
+	
+	-- Animate the opening effect
+	Utils.tween(openEffect, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Size = UDim2.fromOffset(2000, 2000),
+		BackgroundTransparency = 1
+	})
+	
+	task.delay(0.5, function()
+		openEffect:Destroy()
+	end)
 	
 	-- Animate in
 	BlurManager:show(10)
 	Utils.tween(dimOverlay, ANIMATION_DEFAULTS.MEDIUM, {BackgroundTransparency = 0.3})
 	Utils.tween(mainPanel, ANIMATION_DEFAULTS.SLOW, {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 980, 0, 860)
+		Size = UDim2.new(0, 980, 0, 860),
+		BackgroundTransparency = 0
 	})
 	
 	-- Play sound
