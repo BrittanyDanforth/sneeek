@@ -146,8 +146,8 @@ while true do
 	-- Gentle drop
 	orb.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
 
-	-- Start transparent for fade-in
-	orb.Transparency = 1
+	-- Start semi-transparent for fade-in
+	orb.Transparency = 0.7  -- More visible from the start
 
 	-- Set spawn time for cleanup
 	orb:SetAttribute("SpawnTime", tick())

@@ -157,8 +157,8 @@ while true do
 		offset.Z * 2
 	)
 
-	-- Start transparent for smooth fade-in
-	orb.Transparency = 1
+	-- Start semi-transparent for smooth fade-in
+	orb.Transparency = 0.7  -- More visible from the start
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())
