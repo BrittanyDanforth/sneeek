@@ -25,12 +25,12 @@ local function tween(instance: Instance?, info: TweenInfo, props: {[string]: any
 end
 
 local function setFont(guiObject: TextLabel | TextButton, weight: Enum.FontWeight, size: number)
-	guiObject.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", weight, Enum.FontStyle.Normal)
+	guiObject.FontFace = Style.fonts.display(weight)
 	guiObject.TextSize = size
 end
 
 local function blendTowardWhite(c: Color3, t: number): Color3
-	return Color3.new(c.R + (1 - c.R) * t, c.G + (1 - c.G) * t, c.B + (1 - c.B) * t)
+	return Style.blendTowardWhite(c, t)
 end
 
 local function getBlur()
@@ -70,20 +70,22 @@ local ASSETS = {
 	kuromiPattern = "rbxassetid://0",       -- dark repeating skull/chains pattern
 }
 
--- Theme
+-- Style Guide
+local Style = require(script.Parent:WaitForChild("ShopStyleGuide"))
+local Transitions = require(script.Parent:WaitForChild("SanrioShopTransitions"))
 local theme = {
-	bg       = Color3.fromRGB(253, 252, 250),
-	panel    = Color3.fromRGB(255, 255, 255),
-	panelAlt = Color3.fromRGB(246, 248, 252),
-	stroke   = Color3.fromRGB(222, 226, 235),
-	text     = Color3.fromRGB(35, 38, 46),
-	subtext  = Color3.fromRGB(120, 126, 140),
-	scrollbar= Color3.fromRGB(180, 185, 200),
+	bg       = Style.colors.background,
+	panel    = Style.colors.surface,
+	panelAlt = Style.colors.surfaceAlt,
+	stroke   = Style.colors.stroke,
+	text     = Style.colors.text,
+	subtext  = Style.colors.subtext,
+	scrollbar= Style.colors.scrollbar,
 
-	kitty    = Color3.fromRGB(255, 64, 64),
-	kuromiLav= Color3.fromRGB(200, 190, 255),
-	kuromiInk= Color3.fromRGB(38, 38, 46),
-	cinnaSky = Color3.fromRGB(186, 214, 255),
+	kitty    = Style.colors.kitty,
+	kuromiLav= Style.colors.kuromiLav,
+	kuromiInk= Style.colors.kuromiInk,
+	cinnaSky = Style.colors.cinnaSky,
 }
 
 -- Data
@@ -169,8 +171,8 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 	end
 end)
 
-local panelCorner = Instance.new("UICorner") panelCorner.CornerRadius = UDim.new(0, 24) panelCorner.Parent = panel
-local panelStroke = Instance.new("UIStroke") panelStroke.Color = theme.stroke panelStroke.Thickness = 1.5 panelStroke.Parent = panel
+local panelCorner = Style.applyCorner(panel, Style.radii.panel)
+local panelStroke = Style.applyStroke(panel, theme.stroke, Style.stroke.regular)
 
 local panelShadow = Instance.new("ImageLabel")
 	panelShadow.BackgroundTransparency = 1
@@ -193,8 +195,8 @@ local header = Instance.new("Frame")
 	header.ZIndex = 7
 	header.Parent = panel
 
-local headerCorner = Instance.new("UICorner") headerCorner.CornerRadius = UDim.new(0, 18) headerCorner.Parent = header
-local headerStroke = Instance.new("UIStroke") headerStroke.Color = theme.stroke headerStroke.Thickness = 1 headerStroke.Parent = header
+local headerCorner = Style.applyCorner(header, Style.radii.section)
+local headerStroke = Style.applyStroke(header, theme.stroke, Style.stroke.thin)
 
 local kittyBadge = Instance.new("ImageLabel")
 	kittyBadge.BackgroundTransparency = 1
@@ -248,6 +250,16 @@ local tabBar = Instance.new("Frame")
 	tabBar.BackgroundTransparency = 1
 	tabBar.ZIndex = 7
 	tabBar.Parent = panel
+
+local underline = Instance.new("Frame")
+underline.Name = "Underline"
+underline.BackgroundColor3 = theme.kitty
+underline.BorderSizePixel = 0
+underline.Size = UDim2.new(0, 0, 0, 3)
+underline.Position = UDim2.new(0, 0, 1, -2)
+underline.Visible = false
+underline.ZIndex = 7
+underline.Parent = tabBar
 
 local tabsList = Instance.new("UIListLayout")
 	tabsList.FillDirection = Enum.FillDirection.Horizontal
@@ -320,6 +332,7 @@ end
 local pageHome = makePage(); pageHome.Name = "Home"; pageHome.Parent = pages
 local pageCash = makePage(); pageCash.Name = "Cash"; pageCash.Parent = pages
 local pagePass = makePage(); pagePass.Name = "Pass"; pagePass.Parent = pages
+local currentPage: Frame? = nil
 
 local function showOnly(page: Frame)
 	pageHome.Visible = (page == pageHome)
@@ -600,8 +613,8 @@ local function buildHero(parent: Frame)
 	hero.ZIndex = 6
 	hero.Parent = parent
 
-	local heroCorner = Instance.new("UICorner") heroCorner.CornerRadius = UDim.new(0, 18) heroCorner.Parent = hero
-	local heroStroke = Instance.new("UIStroke") heroStroke.Color = theme.stroke heroStroke.Thickness = 1 heroStroke.Parent = hero
+	local heroCorner = Style.applyCorner(hero, Style.radii.section)
+local heroStroke = Style.applyStroke(hero, theme.stroke, Style.stroke.thin)
 
 	heroBadge = Instance.new("ImageLabel")
 	heroBadge.BackgroundTransparency = 1
@@ -1057,8 +1070,8 @@ local toggleBtn = Instance.new("ImageButton")
 	toggleBtn.Image = ""
 	toggleBtn.ZIndex = 10
 	toggleBtn.Parent = screenGui
-local toggleCorner = Instance.new("UICorner") toggleCorner.CornerRadius = UDim.new(1, 0) toggleCorner.Parent = toggleBtn
-local toggleStroke = Instance.new("UIStroke") toggleStroke.Color = theme.stroke toggleStroke.Thickness = 1 toggleStroke.Parent = toggleBtn
+local toggleCorner = Style.applyCorner(toggleBtn, Style.radii.pill)
+local toggleStroke = Style.applyStroke(toggleBtn, theme.stroke, Style.stroke.thin)
 
 local toggleIcon = Instance.new("ImageLabel")
 	toggleIcon.BackgroundTransparency = 1
@@ -1086,27 +1099,28 @@ local currentContext = "general"
 local shopOpenAt = 0
 
 local function selectTab(name: string)
-	styleTabIdle(tabHome)
-	styleTabIdle(tabCash)
-	styleTabIdle(tabPass)
+	styleTabIdle(tabHome); styleTabIdle(tabCash); styleTabIdle(tabPass)
 
+	local nextPage = pageHome
+	local btn = tabHome
+	local accent = theme.kitty
 	if name == "Home" then
 		styleTabSelected(tabHome, theme.kitty)
-		showOnly(pageHome)
-		currentTab = "Home"
-		currentContext = "general"
+		nextPage = pageHome; btn = tabHome; accent = theme.kitty
+		currentTab = "Home"; currentContext = "general"
 	elseif name == "Cash" then
 		styleTabSelected(tabCash, theme.cinnaSky)
-		showOnly(pageCash)
-		currentTab = "Cash"
-		currentContext = "cash"
+		nextPage = pageCash; btn = tabCash; accent = theme.cinnaSky
+		currentTab = "Cash"; currentContext = "cash"
 	elseif name == "Pass" then
 		styleTabSelected(tabPass, theme.kuromiLav)
-		showOnly(pagePass)
-		currentTab = "Pass"
-		currentContext = "pass"
+		nextPage = pagePass; btn = tabPass; accent = theme.kuromiLav
+		currentTab = "Pass"; currentContext = "pass"
 	end
-	-- removed immediate HK talker ping on tab switch
+	underline.BackgroundColor3 = accent
+	Transitions.moveUnderline(underline, btn)
+	Transitions.crossfade(currentPage, nextPage)
+	currentPage = nextPage
 end
 
 selectTab("Home")
