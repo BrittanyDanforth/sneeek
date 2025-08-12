@@ -147,8 +147,8 @@ while true do
 	local offset = patterns[dropPattern]
 	dropPattern = (dropPattern % #patterns) + 1
 
-	-- Normal spawn (no 180 degree rotation)
-	orb.CFrame = dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset
+	-- Spawn with 180 degree rotation (needed for this mesh)
+	orb.CFrame = (dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset) * CFrame.Angles(math.rad(180), 0, 0)
 
 	-- Float down gently
 	orb.AssemblyLinearVelocity = Vector3.new(
