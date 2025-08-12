@@ -137,11 +137,11 @@ while true do
 	pointLight.Color = Color3.fromRGB(180, 210, 235)  -- Softer blue
 	pointLight.Parent = orb
 
-	-- Position with small offset (FIXED ROTATION)
+	-- Position with small offset (WITH ROTATION)
 	local offsetX = math.random(-2, 2) * 0.1
 	local offsetZ = math.random(-2, 2) * 0.1
-	-- No rotation - spawn normally
-	orb.CFrame = dropPart.CFrame - Vector3.new(offsetX, 2, offsetZ)
+	-- Rotate 180 degrees to spawn right-side up
+	orb.CFrame = (dropPart.CFrame - Vector3.new(offsetX, 2, offsetZ)) * CFrame.Angles(math.rad(180), 0, 0)
 
 	-- Gentle drop
 	orb.AssemblyLinearVelocity = Vector3.new(0, -12, 0)
