@@ -461,7 +461,12 @@ local purchases = script.Parent:WaitForChild("Purchases")
 local purchasedObjects = script.Parent:WaitForChild("PurchasedObjects")
 
 -- Initial visibility
-updateButtonVisibility(buttons, ServerStorage.PlayerMoney:FindFirstChild(script.Parent.Owner.Value and script.Parent.Owner.Value.Name))
+local initialOwner = script.Parent.Owner.Value
+local initialStats = nil
+if initialOwner then
+	initialStats = ServerStorage.PlayerMoney:FindFirstChild(initialOwner.Name)
+end
+updateButtonVisibility(buttons, initialStats)
 
 -- Process each button
 for _, button in ipairs(buttons:GetChildren()) do
@@ -566,6 +571,12 @@ end
 
 -- CLEAN PURCHASE FUNCTION
 function processPurchase(button, playerStats)
+	-- Safety checks
+	if not button or not playerStats then
+		warn("processPurchase called with nil arguments")
+		return
+	end
+	
 	local price = button:FindFirstChild("Price")
 	price = price and price.Value or 0
 
