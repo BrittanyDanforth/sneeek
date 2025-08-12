@@ -144,6 +144,31 @@ local panel = Instance.new("Frame")
 	panel.ZIndex = 6
 	panel.Parent = screenGui
 
+-- Responsive scaling
+local uiScale = Instance.new("UIScale")
+uiScale.Parent = panel
+local function computeUIScale(): number
+	local cam = workspace.CurrentCamera
+	if not cam then return 1 end
+	local v = cam.ViewportSize
+	local minSide = math.min(v.X, v.Y)
+	return math.clamp(minSide/1080, 0.8, 1.15)
+end
+uiScale.Scale = computeUIScale()
+if workspace.CurrentCamera then
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		uiScale.Scale = computeUIScale()
+	end)
+end
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+	local cam = workspace.CurrentCamera
+	if cam then
+		cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+			uiScale.Scale = computeUIScale()
+		end)
+	end
+end)
+
 local panelCorner = Instance.new("UICorner") panelCorner.CornerRadius = UDim.new(0, 24) panelCorner.Parent = panel
 local panelStroke = Instance.new("UIStroke") panelStroke.Color = theme.stroke panelStroke.Thickness = 1.5 panelStroke.Parent = panel
 
