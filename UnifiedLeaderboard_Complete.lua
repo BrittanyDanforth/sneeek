@@ -348,6 +348,45 @@ end
 -- Clean up when player leaves
 local function onPlayerRemoving(player)
 	processedPlayers[player.Name] = nil
+	
+	-- RESET TYCOON'S CURRENCY WHEN OWNER LEAVES
+	-- Find all tycoons and reset the one owned by this player
+	local tycoonFolders = {
+		workspace:FindFirstChild("Zednov's Tycoon Kit") and workspace["Zednov's Tycoon Kit"]:FindFirstChild("Tycoons"),
+		workspace:FindFirstChild("SpidermanTycoon") and workspace.SpidermanTycoon:FindFirstChild("Spiderman tycoon") and workspace.SpidermanTycoon["Spiderman tycoon"]:FindFirstChild("Tycoons"),
+		workspace:FindFirstChild("Venom Tycoon") and workspace["Venom Tycoon"]:FindFirstChild("Zednov's Tycoon Kit [OPEN!]") and workspace["Venom Tycoon"]["Zednov's Tycoon Kit [OPEN!]"]:FindFirstChild("Tycoons"),
+		workspace:FindFirstChild("Cinnamoroll tycoon") and workspace["Cinnamoroll tycoon"]:FindFirstChild("Tycoons"),
+	}
+	
+	for _, tycoonsFolder in ipairs(tycoonFolders) do
+		if tycoonsFolder then
+			for _, tycoon in ipairs(tycoonsFolder:GetChildren()) do
+				local owner = tycoon:FindFirstChild("Owner")
+				if owner and owner.Value == player then
+					-- Reset the currency collector
+					local currencyToCollect = tycoon:FindFirstChild("CurrencyToCollect")
+					if currencyToCollect then
+						currencyToCollect.Value = 0
+						print("Reset", tycoon.Name, "currency to 0 (owner left)")
+					end
+					
+					-- Clear the owner value (tycoon becomes unclaimed)
+					owner.Value = nil
+					
+					-- Also clear the OwnsTycoon reference
+					local playerMoney = playerMoneyFolder:FindFirstChild(player.Name)
+					if playerMoney then
+						local ownsTycoon = playerMoney:FindFirstChild("OwnsTycoon")
+						if ownsTycoon then
+							ownsTycoon.Value = nil
+						end
+					end
+					
+					break -- Found the tycoon, no need to continue
+				end
+			end
+		end
+	end
 end
 
 -- Connect events
