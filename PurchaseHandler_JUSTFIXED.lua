@@ -20,52 +20,51 @@ local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- FIXED SETTINGS LOADING - Works in live games
+-- LIVE-SAFE SETTINGS LOADING WITH 20 SECOND DEADLINE
 local Settings
-local attempts = 0
+local deadline = os.clock() + 20
 
--- Method 1: Try global settings first
-while not Settings and attempts < 30 do
+repeat
+	-- Prefer the loader's BindableFunction (works even if _G isn't visible yet)
+	local bf = ReplicatedStorage:FindFirstChild("GetTycoonSettingsBF")
+	if bf then
+		local ok, res = pcall(function() return bf:Invoke(script.Parent) end)
+		if ok and res then 
+			Settings = res 
+			print("✅ PurchaseHandler: Got settings via BindableFunction")
+			break 
+		end
+	end
+
+	-- Try _G as second option
 	if _G.GetTycoonSettings then
-		Settings = _G.GetTycoonSettings(script.Parent)
-		if Settings then
-			print("✅ PurchaseHandler: Got settings from global system")
+		local ok, res = pcall(function() return _G.GetTycoonSettings(script.Parent) end)
+		if ok and res then
+			Settings = res
+			print("✅ PurchaseHandler: Got settings from _G")
 			break
 		end
 	end
-	
-	-- Method 2: Try direct path with pcall
-	if not Settings then
-		local success, result = pcall(function()
-			-- Try different paths
-			local paths = {
-				script.Parent.Parent.Parent:FindFirstChild("Settings"),
-				script.Parent.Parent:FindFirstChild("Settings"),
-				script.Parent:FindFirstChild("Settings")
-			}
-			
-			for _, settingsModule in ipairs(paths) do
-				if settingsModule and settingsModule:IsA("ModuleScript") then
-					return require(settingsModule)
-				end
-			end
-		end)
-		
-		if success and result then
-			Settings = result
-			print("✅ PurchaseHandler: Found Settings module directly")
-			break
+
+	-- Direct local Settings module as fallback
+	local mod = script.Parent:FindFirstChild("Settings")
+	if mod and mod:IsA("ModuleScript") then
+		local ok, res = pcall(require, mod)
+		if ok and res then 
+			Settings = res 
+			print("✅ PurchaseHandler: Got settings from local module")
+			break 
 		end
 	end
-	
-	attempts = attempts + 1
+
 	task.wait(0.1)
-end
+until Settings or os.clock() > deadline
 
 -- Fallback if still no settings
 if not Settings then
-	warn("⚠️ PurchaseHandler: Using fallback settings")
+	warn("⚠️ PurchaseHandler: Using fallback settings (loader not ready)")
 	Settings = {
 		Sounds = {
 			Purchase = 203785492,
@@ -749,6 +748,9 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gameP
 end)
 
 -- Handle dev product purchases
+-- REMOVED: ProcessReceipt is now handled by centralized ReceiptRouter
+-- This prevents multiple handlers competing in live games
+--[[
 MarketplaceService.ProcessReceipt = function(receiptInfo)
 	local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
 	if not player then
@@ -768,6 +770,7 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
+--]]
 
 -- Update button colors when money changes
 script.Parent.Owner.Changed:Connect(function()

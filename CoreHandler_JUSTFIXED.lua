@@ -10,46 +10,51 @@ local Teams = game:GetService("Teams")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- FIXED SETTINGS LOADING - Works in live games
+-- LIVE-SAFE SETTINGS LOADING WITH 20 SECOND DEADLINE
 local Settings
-local attempts = 0
+local deadline = os.clock() + 20
 
--- Method 1: Try global settings first
-while not Settings and attempts < 30 do
+repeat
+	-- Prefer the loader's BindableFunction (works even if _G isn't visible yet)
+	local bf = ReplicatedStorage:FindFirstChild("GetTycoonSettingsBF")
+	if bf then
+		local ok, res = pcall(function() return bf:Invoke(script.Parent) end)
+		if ok and res then 
+			Settings = res 
+			print("✅ CoreHandler: Got settings via BindableFunction")
+			break 
+		end
+	end
+
+	-- Try _G as second option
 	if _G.GetTycoonSettings then
-		Settings = _G.GetTycoonSettings(script.Parent)
-		if Settings then
-			print("✅ CoreHandler: Got settings from global system")
+		local ok, res = pcall(function() return _G.GetTycoonSettings(script.Parent) end)
+		if ok and res then
+			Settings = res
+			print("✅ CoreHandler: Got settings from _G")
 			break
 		end
 	end
-	
-	-- Method 2: Try direct path with pcall
-	if not Settings then
-		local success, result = pcall(function()
-			-- CoreHandler is usually at: Tycoon.CoreHandler
-			-- Settings is usually at: Tycoon.Settings
-			local settingsModule = script.Parent:FindFirstChild("Settings")
-			if settingsModule and settingsModule:IsA("ModuleScript") then
-				return require(settingsModule)
-			end
-		end)
-		
-		if success and result then
-			Settings = result
-			print("✅ CoreHandler: Found Settings module directly")
-			break
+
+	-- Direct local Settings module as fallback
+	local mod = script.Parent:FindFirstChild("Settings")
+	if mod and mod:IsA("ModuleScript") then
+		local ok, res = pcall(require, mod)
+		if ok and res then 
+			Settings = res 
+			print("✅ CoreHandler: Got settings from local module")
+			break 
 		end
 	end
-	
-	attempts = attempts + 1
+
 	task.wait(0.1)
-end
+until Settings or os.clock() > deadline
 
 -- Fallback if still no settings
 if not Settings then
-	warn("⚠️ CoreHandler: Using fallback settings")
+	warn("⚠️ CoreHandler: Using fallback settings (loader not ready)")
 	Settings = {
 		AutoAssignTeams = false,
 		CurrencyName = "Cash",
