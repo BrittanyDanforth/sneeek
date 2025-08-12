@@ -108,7 +108,7 @@ AssetManager.assets = {
 }
 
 function AssetManager.getAsset(name: string): string
-	return self.assets[name] or ""
+	return AssetManager.assets[name] or ""
 end
 
 function AssetManager.isValidAsset(id: string): boolean
@@ -141,7 +141,7 @@ ThemeManager.themes = {
 ThemeManager.currentTheme = "default"
 
 function ThemeManager.getColor(colorName: string): Color3
-	local theme = self.themes[self.currentTheme]
+	local theme = ThemeManager.themes[ThemeManager.currentTheme]
 	return theme[colorName] or Color3.new(1, 1, 1)
 end
 
