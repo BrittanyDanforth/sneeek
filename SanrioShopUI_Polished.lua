@@ -396,7 +396,7 @@ function UIFactory.addHoverEffects(button: GuiButton, props: {[string]: any}?)
 	local hoverBrightness = props and props.HoverBrightness or 1.1
 	
 	button.MouseEnter:Connect(function()
-		SoundManager:play("hover")
+		-- Removed annoying hover sound
 		Utils.tween(button, ANIMATION_DEFAULTS.FAST, {
 			Size = UDim2.new(
 				originalSize.X.Scale * hoverScale,
@@ -805,7 +805,7 @@ tabLayout.Padding = UDim.new(0, 10)
 tabLayout.Parent = tabBar
 
 -- Create tabs
-local homeTab = TabSystem:createTab("Home", AssetManager.assets.iconBag, ThemeManager.getColor("kitty"))
+local homeTab = TabSystem:createTab("Home", nil, ThemeManager.getColor("kitty"))  -- No icon for Home
 homeTab.Parent = tabBar
 
 local cashTab = TabSystem:createTab("Cash", AssetManager.assets.iconCash, ThemeManager.getColor("cinnaSky"))
@@ -1310,32 +1310,38 @@ local function buildCashPage()
 	bgGradient.Rotation = 90
 	bgGradient.Parent = bgOverlay
 	
-	-- Add floating cloud decorations
-	if AssetManager.isValidAsset(AssetManager.assets.cloudTexture) then
-		for i = 1, 3 do
-			local cloud = Instance.new("ImageLabel")
-			cloud.Name = "Cloud" .. i
-			cloud.BackgroundTransparency = 1
-			cloud.Image = AssetManager.assets.cloudTexture
-			cloud.ImageTransparency = 0.85
-			cloud.Size = UDim2.fromOffset(150 + i * 30, 80 + i * 15)
-			cloud.Position = UDim2.fromScale(0.1 + i * 0.3, 0.05 + i * 0.15)
-			cloud.ZIndex = 11
-			cloud.Parent = cashPage
+	-- Add cute pink cloud decorations
+	local pinkCloudId = "rbxassetid://4096004749"
+	for i = 1, 5 do
+		local cloud = Instance.new("ImageLabel")
+		cloud.Name = "PinkCloud" .. i
+		cloud.BackgroundTransparency = 1
+		cloud.Image = pinkCloudId
+		cloud.ImageTransparency = 0.7 + (i * 0.05)
+		cloud.Size = UDim2.fromOffset(80 + math.random(20, 60), 60 + math.random(10, 30))
+		cloud.Position = UDim2.fromScale(
+			math.random() * 0.9,
+			math.random() * 0.8
+		)
+		cloud.ZIndex = 11
+		cloud.Parent = cashPage
+		
+		-- Gentle floating animation
+		task.spawn(function()
+			local startPos = cloud.Position
+			local speed = 0.3 + math.random() * 0.2
+			local offsetX = math.random() * math.pi * 2
+			local offsetY = math.random() * math.pi * 2
 			
-			-- Floating animation
-			task.spawn(function()
-				local startX = cloud.Position.X.Scale
-				while cloud.Parent do
-					local t = tick()
-					cloud.Position = UDim2.fromScale(
-						startX + math.sin(t * 0.2 + i) * 0.05,
-						cloud.Position.Y.Scale + math.sin(t * 0.3 + i * 2) * 0.02
-					)
-					task.wait(0.1)
-				end
-			end)
-		end
+			while cloud.Parent do
+				local t = tick() * speed
+				cloud.Position = UDim2.fromScale(
+					startPos.X.Scale + math.sin(t + offsetX) * 0.03,
+					startPos.Y.Scale + math.sin(t * 1.5 + offsetY) * 0.02
+				)
+				task.wait(0.1)
+			end
+		end)
 	end
 	
 	-- Create scrolling frame for cash items
@@ -1427,12 +1433,12 @@ local function buildGamepassesPage()
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
 		Image = "rbxassetid://5806227330",  -- Sanrio Babey Kuromi
-		Size = UDim2.fromOffset(180, 180),
-		Position = UDim2.new(0, -20, 0, -20),
+		Size = UDim2.fromOffset(200, 200),
+		Position = UDim2.new(0, 20, 0, 20),  -- Moved to visible position
 		AnchorPoint = Vector2.new(0, 0),
 		BackgroundTransparency = 1,
-		ImageTransparency = 0.15,
-		ZIndex = 12
+		ImageTransparency = 0.2,  -- More visible
+		ZIndex = 13  -- Higher z-index
 	})
 	kuromiCharacter.Parent = passPage
 	
@@ -1455,11 +1461,11 @@ local function buildGamepassesPage()
 	-- Add a glow effect behind Kuromi
 	local glowFrame = UIFactory.createFrame({
 		Name = "KuromiGlow",
-		Size = UDim2.fromOffset(220, 220),
-		Position = UDim2.new(0, -40, 0, -40),
+		Size = UDim2.fromOffset(240, 240),
+		Position = UDim2.new(0, 0, 0, 0),  -- Adjusted to match new position
 		BackgroundColor3 = ThemeManager.getColor("kuromiLav"),
 		BackgroundTransparency = 0.7,
-		ZIndex = 11
+		ZIndex = 12
 	})
 	glowFrame.Parent = passPage
 	
