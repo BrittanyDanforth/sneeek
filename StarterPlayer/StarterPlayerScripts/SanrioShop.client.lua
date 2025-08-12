@@ -1,10 +1,9 @@
 --[[
-  🧷 Sanrio Character Takeover Shop – Sticker Book Edition + Built‑in Hello Kitty Chat Bubble (Polished)
-  - Fonts use FontFace (no deprecated Enum.Font)
-  - Stable hero CTA connections (no duplicate prompts)
-  - Debounced show/hide, robust tween helpers
-  - Consistent theming per section (Cinnamoroll for cash, Kuromi for passes)
-  - Hello Kitty bubble z-ordering and typewriter cancellation fixed
+  🧷 Sanrio Character Takeover Shop – Polished Tabbed Layout
+  - Home tab: Big hero at top, rotating through ALL items
+  - Cash tab: Cinnamoroll-themed grid
+  - Gamepasses tab: Kuromi-themed grid
+  - Stable events, debounced show/hide, FontFace, robust Hello Kitty bubble
 ]]
 
 -- Services
@@ -16,7 +15,7 @@ local Lighting = game:GetService("Lighting")
 
 local localPlayer = Players.LocalPlayer
 
--- Utility: guarded tween (returns tween; safely handles missing instance)
+-- Utils
 local function tween(instance: Instance?, info: TweenInfo, props: {[string]: any})
 	if not instance then return nil end
 	local t = TweenService:Create(instance, info, props)
@@ -24,18 +23,15 @@ local function tween(instance: Instance?, info: TweenInfo, props: {[string]: any
 	return t
 end
 
--- Utility: modern font
 local function setFont(guiObject: TextLabel | TextButton, weight: Enum.FontWeight, size: number)
 	guiObject.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", weight, Enum.FontStyle.Normal)
 	guiObject.TextSize = size
 end
 
--- Utility: colors
 local function blendTowardWhite(c: Color3, t: number): Color3
 	return Color3.new(c.R + (1 - c.R) * t, c.G + (1 - c.G) * t, c.B + (1 - c.B) * t)
 end
 
--- Lighting blur (singleton)
 local function getBlur()
 	local blur = Lighting:FindFirstChild("SanrioShopBlur")
 	if blur and blur:IsA("BlurEffect") then return blur end
@@ -46,7 +42,7 @@ local function getBlur()
 	return blur
 end
 
--- Assets (replace if desired)
+-- Assets
 local ASSETS = {
 	paperTexture = "rbxassetid://0",
 	tapeHello = "rbxassetid://0",
@@ -102,12 +98,7 @@ local shopData = {
 	}
 }
 
-local specialsRefs = {
-	{source = "cash", idx = 2, label = "Starter Boost"},
-	{source = "gamepasses", idx = 1, label = "Top Pick"},
-}
-
--- Root GUI
+-- GUI Root
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SanrioShopUI"
 screenGui.ResetOnSpawn = false
@@ -139,7 +130,7 @@ local dim = Instance.new("Frame")
 	dim.ZIndex = 5
 	dim.Parent = screenGui
 
--- Main panel
+-- Panel
 local panel = Instance.new("Frame")
 	panel.Name = "Panel"
 	panel.Size = UDim2.new(0, 740, 0, 720)
@@ -153,7 +144,6 @@ local panel = Instance.new("Frame")
 local panelCorner = Instance.new("UICorner") panelCorner.CornerRadius = UDim.new(0, 24) panelCorner.Parent = panel
 local panelStroke = Instance.new("UIStroke") panelStroke.Color = theme.stroke panelStroke.Thickness = 1.5 panelStroke.Parent = panel
 
--- Soft shadow
 local panelShadow = Instance.new("ImageLabel")
 	panelShadow.BackgroundTransparency = 1
 	panelShadow.Image = "rbxassetid://6015897843"
@@ -197,7 +187,6 @@ local title = Instance.new("TextLabel")
 	title.Parent = header
 setFont(title, Enum.FontWeight.SemiBold, 30)
 
--- Close button
 local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "Close"
 	closeBtn.Size = UDim2.new(0, 36, 0, 36)
@@ -218,191 +207,95 @@ local closeIcon = Instance.new("ImageLabel")
 	closeIcon.ZIndex = 9
 	closeIcon.Parent = closeBtn
 
--- Washi header factory
-local function makeTapeHeader(parent: Instance, text: string, tapeImage: string)
-	local container = Instance.new("Frame")
-	container.BackgroundTransparency = 1
-	container.Size = UDim2.new(1, -24, 0, 42)
-	container.ZIndex = 7
-	container.Parent = parent
+-- Tabs
+local TABBAR_Y = 12 + 78 + 8
+local tabBar = Instance.new("Frame")
+	tabBar.Name = "TabBar"
+	tabBar.Size = UDim2.new(1, -24, 0, 44)
+	tabBar.Position = UDim2.new(0, 12, 0, TABBAR_Y)
+	tabBar.BackgroundTransparency = 1
+	tabBar.ZIndex = 7
+	tabBar.Parent = panel
 
-	if tapeImage ~= "rbxassetid://0" then
-		local tape = Instance.new("ImageLabel")
-		tape.BackgroundTransparency = 1
-		tape.Image = tapeImage
-		tape.Size = UDim2.new(0, 180, 0, 28)
-		tape.Position = UDim2.new(0, 8, 0, 2)
-		tape.Rotation = math.random(-2, 2)
-		tape.ImageTransparency = 0.1
-		tape.ZIndex = 7
-		tape.Parent = container
-	end
+local tabsList = Instance.new("UIListLayout")
+	tabsList.FillDirection = Enum.FillDirection.Horizontal
+	tabsList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	tabsList.VerticalAlignment = Enum.VerticalAlignment.Center
+	tabsList.Padding = UDim.new(0, 8)
+	tabsList.Parent = tabBar
 
-	local lbl = Instance.new("TextLabel")
-	lbl.BackgroundTransparency = 1
-	lbl.Position = UDim2.new(0, 16, 0, 0)
-	lbl.Size = UDim2.new(1, -24, 1, 0)
-	lbl.Text = text
-	lbl.TextColor3 = theme.text
-	lbl.TextXAlignment = Enum.TextXAlignment.Left
-	lbl.ZIndex = 8
-	lbl.Parent = container
-	setFont(lbl, Enum.FontWeight.SemiBold, 22)
-
-	return container
+local function makeTabButton(text: string)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 132, 1, 0)
+	btn.BackgroundColor3 = theme.panel
+	btn.AutoButtonColor = false
+	btn.Text = text
+	btn.TextColor3 = theme.text
+	btn.ZIndex = 8
+	setFont(btn, Enum.FontWeight.SemiBold, 18)
+	local c = Instance.new("UICorner") c.CornerRadius = UDim.new(1, 0) c.Parent = btn
+	local s = Instance.new("UIStroke") s.Color = theme.stroke s.Thickness = 1 s.Parent = btn
+	return btn
 end
 
--- Hero banner
-local hero = Instance.new("Frame")
-	hero.Name = "Hero"
-	hero.Size = UDim2.new(1, -24, 0, 156)
-	hero.Position = UDim2.new(0, 12, 0, 102)
-	hero.BackgroundColor3 = theme.panelAlt
-	hero.BorderSizePixel = 0
-	hero.ZIndex = 6
-	hero.Parent = panel
+local tabHome = makeTabButton("Home")
+local tabCash = makeTabButton("Cash")
+local tabPass = makeTabButton("Gamepasses")
 
-local heroCorner = Instance.new("UICorner") heroCorner.CornerRadius = UDim.new(0, 18) heroCorner.Parent = hero
-local heroStroke = Instance.new("UIStroke") heroStroke.Color = theme.stroke heroStroke.Thickness = 1 heroStroke.Parent = hero
+tabHome.Parent = tabBar
+local spacer = Instance.new("Frame") spacer.Size = UDim2.new(0, 8, 1, 0) spacer.BackgroundTransparency = 1 spacer.Parent = tabBar
 
-local heroBadge = Instance.new("ImageLabel")
-	heroBadge.BackgroundTransparency = 1
-	heroBadge.Size = UDim2.new(0, 56, 0, 56)
-	heroBadge.Position = UDim2.new(0, 18, 0.5, -28)
-	heroBadge.ZIndex = 7
-	heroBadge.Parent = hero
+tabCash.Parent = tabBar
+local spacer2 = Instance.new("Frame") spacer2.Size = UDim2.new(0, 8, 1, 0) spacer2.BackgroundTransparency = 1 spacer2.Parent = tabBar
 
-local heroTitle = Instance.new("TextLabel")
-	heroTitle.BackgroundTransparency = 1
-	heroTitle.Position = UDim2.new(0, 90, 0, 24)
-	heroTitle.Size = UDim2.new(1, -240, 0, 32)
-	heroTitle.TextXAlignment = Enum.TextXAlignment.Left
-	heroTitle.TextColor3 = theme.text
-	heroTitle.ZIndex = 7
-	heroTitle.Parent = hero
-setFont(heroTitle, Enum.FontWeight.SemiBold, 26)
+tabPass.Parent = tabBar
 
-local heroDesc = Instance.new("TextLabel")
-	heroDesc.BackgroundTransparency = 1
-	heroDesc.Position = UDim2.new(0, 90, 0, 62)
-	heroDesc.Size = UDim2.new(1, -240, 0, 26)
-	heroDesc.TextXAlignment = Enum.TextXAlignment.Left
-	heroDesc.TextColor3 = theme.subtext
-	heroDesc.ZIndex = 7
-	heroDesc.Parent = hero
-setFont(heroDesc, Enum.FontWeight.Regular, 18)
+local function styleTabSelected(btn: TextButton, accent: Color3)
+	btn.TextColor3 = accent
+	for _, c in ipairs(btn:GetChildren()) do
+		if c:IsA("UIStroke") then c.Color = accent end
+	end
+	btn.BackgroundColor3 = blendTowardWhite(accent, 0.92)
+end
 
-local heroCTA = Instance.new("TextButton")
-	heroCTA.BackgroundColor3 = theme.panel
-	heroCTA.AutoButtonColor = false
-	heroCTA.Size = UDim2.new(0, 160, 0, 44)
-	heroCTA.Position = UDim2.new(1, -176, 0.5, -22)
-	heroCTA.Text = "Get"
-	heroCTA.TextColor3 = theme.text
-	heroCTA.ZIndex = 8
-	heroCTA.Parent = hero
-local heroCTACorner = Instance.new("UICorner") heroCTACorner.CornerRadius = UDim.new(1, 0) heroCTACorner.Parent = heroCTA
-local heroCTAStroke = Instance.new("UIStroke") heroCTAStroke.Color = theme.stroke heroCTAStroke.Thickness = 1 heroCTAStroke.Parent = heroCTA
-setFont(heroCTA, Enum.FontWeight.Bold, 20)
+local function styleTabIdle(btn: TextButton)
+	btn.TextColor3 = theme.text
+	for _, c in ipairs(btn:GetChildren()) do
+		if c:IsA("UIStroke") then c.Color = theme.stroke end
+	end
+	btn.BackgroundColor3 = theme.panel
+end
 
--- Content area
-local content = Instance.new("Frame")
-	content.Name = "Content"
-	content.Size = UDim2.new(1, -24, 1, -(102 + 156 + 24 + 18))
-	content.Position = UDim2.new(0, 12, 0, 102 + 156 + 12)
-	content.BackgroundTransparency = 1
-	content.ZIndex = 6
-	content.Parent = panel
+-- Pages container
+local CONTENT_TOP = TABBAR_Y + 44 + 8
+local pages = Instance.new("Frame")
+	pages.Name = "Pages"
+	pages.BackgroundTransparency = 1
+	pages.Size = UDim2.new(1, -24, 1, -(CONTENT_TOP + 12))
+	pages.Position = UDim2.new(0, 12, 0, CONTENT_TOP)
+	pages.ZIndex = 6
+	pages.Parent = panel
 
--- Sections
-local headerKitty = makeTapeHeader(content, "Specials (Hello Kitty)", ASSETS.tapeHello)
+local function makePage()
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(1, 0, 1, 0)
+	f.BackgroundTransparency = 1
+	f.Visible = false
+	f.ZIndex = 6
+	return f
+end
 
-local kittyScroll = Instance.new("ScrollingFrame")
-	kittyScroll.Name = "KittyScroll"
-	kittyScroll.Size = UDim2.new(1, 0, 0, 160)
-	kittyScroll.Position = UDim2.new(0, 0, 0, 42)
-	kittyScroll.BackgroundTransparency = 1
-	kittyScroll.ScrollBarThickness = 6
-	kittyScroll.ScrollBarImageColor3 = theme.scrollbar
-	kittyScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.Always
-	kittyScroll.ScrollingDirection = Enum.ScrollingDirection.X
-	kittyScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	kittyScroll.ZIndex = 6
-	kittyScroll.Parent = content
-local kittyList = Instance.new("UIListLayout") kittyList.FillDirection = Enum.FillDirection.Horizontal kittyList.Padding = UDim.new(0, 12) kittyList.Parent = kittyScroll
-local kittyPad = Instance.new("UIPadding") kittyPad.PaddingLeft = UDim.new(0, 6) kittyPad.Parent = kittyScroll
+local pageHome = makePage(); pageHome.Name = "Home"; pageHome.Parent = pages
+local pageCash = makePage(); pageCash.Name = "Cash"; pageCash.Parent = pages
+local pagePass = makePage(); pagePass.Name = "Pass"; pagePass.Parent = pages
 
-local melodyHeader = makeTapeHeader(content, "Cash Bundles (Cinnamoroll)", ASSETS.tapeCinna)
-melodyHeader.Position = UDim2.new(0, 0, 0, 42 + 160 + 18)
+local function showOnly(page: Frame)
+	pageHome.Visible = (page == pageHome)
+	pageCash.Visible = (page == pageCash)
+	pagePass.Visible = (page == pagePass)
+end
 
-local cashScroll = Instance.new("ScrollingFrame")
-	cashScroll.Name = "CashScroll"
-	cashScroll.Size = UDim2.new(1, 0, 0, 160)
-	cashScroll.Position = UDim2.new(0, 0, 0, 42 + 160 + 18 + 42)
-	cashScroll.BackgroundTransparency = 1
-	cashScroll.ScrollBarThickness = 6
-	cashScroll.ScrollBarImageColor3 = theme.scrollbar
-	cashScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.Always
-	cashScroll.ScrollingDirection = Enum.ScrollingDirection.X
-	cashScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	cashScroll.ZIndex = 6
-	cashScroll.Parent = content
-local cashList = Instance.new("UIListLayout") cashList.FillDirection = Enum.FillDirection.Horizontal cashList.Padding = UDim.new(0, 12) cashList.Parent = cashScroll
-local cashPad = Instance.new("UIPadding") cashPad.PaddingLeft = UDim.new(0, 6) cashPad.Parent = cashScroll
-
-local kuromiHeader = makeTapeHeader(content, "Gamepasses (Kuromi)", ASSETS.tapeKuromi)
-kuromiHeader.Position = UDim2.new(0, 0, 0, 42 + 160 + 18 + 42 + 160 + 18)
-
-local passScroll = Instance.new("ScrollingFrame")
-	passScroll.Name = "PassScroll"
-	passScroll.Size = UDim2.new(1, 0, 0, 160)
-	passScroll.Position = UDim2.new(0, 0, 0, 42 + 160 + 18 + 42 + 160 + 18 + 42)
-	passScroll.BackgroundTransparency = 1
-	passScroll.ScrollBarThickness = 6
-	passScroll.ScrollBarImageColor3 = theme.scrollbar
-	passScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.Always
-	passScroll.ScrollingDirection = Enum.ScrollingDirection.X
-	passScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	passScroll.ZIndex = 6
-	passScroll.Parent = content
-local passList = Instance.new("UIListLayout") passList.FillDirection = Enum.FillDirection.Horizontal passList.Padding = UDim.new(0, 12) passList.Parent = passScroll
-local passPad = Instance.new("UIPadding") passPad.PaddingLeft = UDim.new(0, 6) passPad.Parent = passScroll
-
--- Toggle button
-local toggleBtn = Instance.new("ImageButton")
-	toggleBtn.Name = "ShopToggle"
-	toggleBtn.AnchorPoint = Vector2.new(1, 1)
-	toggleBtn.Size = UDim2.new(0, 138, 0, 46)
-	toggleBtn.Position = UDim2.new(1, -16, 1, -16)
-	toggleBtn.BackgroundColor3 = theme.panel
-	toggleBtn.AutoButtonColor = false
-	toggleBtn.Image = ""
-	toggleBtn.ZIndex = 10
-	toggleBtn.Parent = screenGui
-local toggleCorner = Instance.new("UICorner") toggleCorner.CornerRadius = UDim.new(1, 0) toggleCorner.Parent = toggleBtn
-local toggleStroke = Instance.new("UIStroke") toggleStroke.Color = theme.stroke toggleStroke.Thickness = 1 toggleStroke.Parent = toggleBtn
-
-local toggleIcon = Instance.new("ImageLabel")
-	toggleIcon.BackgroundTransparency = 1
-	toggleIcon.Image = (ASSETS.badgeHello ~= "rbxassetid://0") and ASSETS.badgeHello or ASSETS.iconBag
-	toggleIcon.Size = UDim2.new(0, 20, 0, 20)
-	toggleIcon.Position = UDim2.new(0, 12, 0.5, -10)
-	toggleIcon.ImageColor3 = (ASSETS.badgeHello ~= "rbxassetid://0") and theme.kitty or theme.text
-	toggleIcon.ZIndex = 11
-	toggleIcon.Parent = toggleBtn
-
-local toggleText = Instance.new("TextLabel")
-	toggleText.BackgroundTransparency = 1
-	toggleText.Size = UDim2.new(1, -44, 1, 0)
-	toggleText.Position = UDim2.new(0, 40, 0, 0)
-	toggleText.Text = "Shop"
-	toggleText.TextColor3 = theme.text
-	toggleText.TextXAlignment = Enum.TextXAlignment.Left
-	toggleText.ZIndex = 11
-	toggleText.Parent = toggleBtn
-setFont(toggleText, Enum.FontWeight.SemiBold, 18)
-
--- Sticker card
+-- Sticker Card
 local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, isPass: boolean, nameTextColor: Color3?)
 	local outer = Instance.new("Frame")
 	outer.Size = UDim2.new(0, 230, 0, 140)
@@ -506,76 +399,130 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 		end
 	end)
 
-	outer.MouseEnter:Connect(function()
-		outer.ZIndex = 9
-		inner.ZIndex = 10
-		tween(outer, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 1.5, Position = UDim2.new(outer.Position.X.Scale, outer.Position.X.Offset, outer.Position.Y.Scale, outer.Position.Y.Offset - 2)})
-		tween(outerShadow, TweenInfo.new(0.14), {ImageTransparency = 0.65})
-	end)
-	outer.MouseLeave:Connect(function()
-		tween(outer, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0, Position = UDim2.new(outer.Position.X.Scale, outer.Position.X.Offset, outer.Position.Y.Scale, outer.Position.Y.Offset + 2)})
-		tween(outerShadow, TweenInfo.new(0.14), {ImageTransparency = 0.78})
-	end)
-
 	return outer
 end
 
--- Fill helpers
-local function specialsFromRefs()
-	local arr = {}
-	for _, s in ipairs(specialsRefs) do
-		local src = (s.source == "cash") and shopData.cash or shopData.gamepasses
-		local item = src[s.idx]
-		if item then
-			local copy = {}
-			for k, v in pairs(item) do copy[k] = v end
-			copy.name = (s.label or "Special") .. ": " .. item.name
-			copy.color = blendTowardWhite(copy.color, 0.15)
-			table.insert(arr, copy)
-		end
-	end
-	return arr
-end
+-- Grid page builder
+local function buildGrid(parent: Frame, items: {any}, isPass: boolean, char: {badgeId: string?, accent: Color3?, accentAdjust: ((Color3) -> Color3)?, darkText: Color3?})
+	for _, c in ipairs(parent:GetChildren()) do if c:IsA("ScrollingFrame") then c:Destroy() end end
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Size = UDim2.new(1, 0, 1, 0)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.BackgroundTransparency = 1
+	scroll.ScrollBarThickness = 8
+	scroll.ScrollBarImageColor3 = theme.scrollbar
+	scroll.ZIndex = 6
+	scroll.Parent = parent
+	local pad = Instance.new("UIPadding") pad.PaddingTop = UDim.new(0, 6) pad.PaddingLeft = UDim.new(0, 6) pad.PaddingRight = UDim.new(0, 6) pad.PaddingBottom = UDim.new(0, 6) pad.Parent = scroll
+	local grid = Instance.new("UIGridLayout")
+	grid.CellSize = UDim2.new(0, 230, 0, 140)
+	grid.CellPadding = UDim2.new(0, 12, 0, 12)
+	grid.SortOrder = Enum.SortOrder.LayoutOrder
+	grid.Parent = scroll
 
-local function clearScroll(scroll: ScrollingFrame)
-	for _, child in ipairs(scroll:GetChildren()) do
-		if child:IsA("Frame") then child:Destroy() end
-	end
-end
-
-local function fillScroll(scroll: ScrollingFrame, list: UIListLayout, items: {any}, isPass: boolean, char: {badgeId: string?, accent: Color3?, accentAdjust: ((Color3) -> Color3)?, darkText: Color3?})
-	clearScroll(scroll)
 	for _, item in ipairs(items) do
 		local accent = char.accent or item.color
 		if char.accentAdjust then accent = char.accentAdjust(accent) end
 		local card = makeStickerCard(char.badgeId or "rbxassetid://0", accent, item, isPass, char.darkText)
 		card.Parent = scroll
 	end
-	task.wait()
-	scroll.CanvasSize = UDim2.new(0, list.AbsoluteContentSize.X + 12, 0, 0)
+	-- update canvas size after render
+	task.delay(0.03, function()
+		scroll.CanvasSize = UDim2.new(0, 0, 0, grid.AbsoluteContentSize.Y + 12)
+	end)
 end
 
--- Character themes per section
-local charKitty  = { badgeId = ASSETS.badgeHello,  accent = theme.kitty }
+-- Pages content
+-- Home hero (only element on Home)
+local hero: Frame
+local heroBadge: ImageLabel
+local heroTitle: TextLabel
+local heroDesc: TextLabel
+local heroCTA: TextButton
+local heroCTAStroke: UIStroke
+
+local function buildHero(parent: Frame)
+	hero = Instance.new("Frame")
+	hero.Name = "Hero"
+	hero.Size = UDim2.new(1, -24, 0, 156)
+	hero.Position = UDim2.new(0, 12, 0, 0)
+	hero.BackgroundColor3 = theme.panelAlt
+	hero.BorderSizePixel = 0
+	hero.ZIndex = 6
+	hero.Parent = parent
+
+	local heroCorner = Instance.new("UICorner") heroCorner.CornerRadius = UDim.new(0, 18) heroCorner.Parent = hero
+	local heroStroke = Instance.new("UIStroke") heroStroke.Color = theme.stroke heroStroke.Thickness = 1 heroStroke.Parent = hero
+
+	heroBadge = Instance.new("ImageLabel")
+	heroBadge.BackgroundTransparency = 1
+	heroBadge.Size = UDim2.new(0, 56, 0, 56)
+	heroBadge.Position = UDim2.new(0, 18, 0.5, -28)
+	heroBadge.ZIndex = 7
+	heroBadge.Parent = hero
+
+	heroTitle = Instance.new("TextLabel")
+	heroTitle.BackgroundTransparency = 1
+	heroTitle.Position = UDim2.new(0, 90, 0, 24)
+	heroTitle.Size = UDim2.new(1, -240, 0, 32)
+	heroTitle.TextXAlignment = Enum.TextXAlignment.Left
+	heroTitle.TextColor3 = theme.text
+	heroTitle.ZIndex = 7
+	heroTitle.Parent = hero
+	setFont(heroTitle, Enum.FontWeight.SemiBold, 26)
+
+	heroDesc = Instance.new("TextLabel")
+	heroDesc.BackgroundTransparency = 1
+	heroDesc.Position = UDim2.new(0, 90, 0, 62)
+	heroDesc.Size = UDim2.new(1, -240, 0, 26)
+	heroDesc.TextXAlignment = Enum.TextXAlignment.Left
+	heroDesc.TextColor3 = theme.subtext
+	heroDesc.ZIndex = 7
+	heroDesc.Parent = hero
+	setFont(heroDesc, Enum.FontWeight.Regular, 18)
+
+	heroCTA = Instance.new("TextButton")
+	heroCTA.BackgroundColor3 = theme.panel
+	heroCTA.AutoButtonColor = false
+	heroCTA.Size = UDim2.new(0, 160, 0, 44)
+	heroCTA.Position = UDim2.new(1, -176, 0.5, -22)
+	heroCTA.Text = "Get"
+	heroCTA.TextColor3 = theme.text
+	heroCTA.ZIndex = 8
+	heroCTA.Parent = hero
+	local heroCTACorner = Instance.new("UICorner") heroCTACorner.CornerRadius = UDim.new(1, 0) heroCTACorner.Parent = heroCTA
+	heroCTAStroke = Instance.new("UIStroke") heroCTAStroke.Color = theme.stroke heroCTAStroke.Thickness = 1 heroCTAStroke.Parent = heroCTA
+	setFont(heroCTA, Enum.FontWeight.Bold, 20)
+end
+
+-- Build pages
+buildHero(pageHome)
+
 local charCinna  = { badgeId = ASSETS.badgeCinna,  accent = theme.cinnaSky }
 local charKuromi = { badgeId = ASSETS.badgeKuromi, accentAdjust = function(_) return theme.kuromiLav end, darkText = theme.kuromiInk }
 
-local function populateAll()
-	fillScroll(kittyScroll, kittyList, specialsFromRefs(), false, charKitty)
-	fillScroll(cashScroll,  cashList,  shopData.cash,      false, charCinna)
-	fillScroll(passScroll,  passList,  shopData.gamepasses, true,  charKuromi)
+buildGrid(pageCash, shopData.cash, false, charCinna)
+buildGrid(pagePass, shopData.gamepasses, true, charKuromi)
+
+-- Hero rotation built from all items
+local heroRot = {}
+for _, item in ipairs(shopData.cash) do
+	table.insert(heroRot, {
+		badge = ASSETS.badgeCinna,
+		title = item.name,
+		desc = "Quick boost to help you progress",
+		color = item.color or theme.cinnaSky,
+		ref = {source = "cash", id = item.id, isPass = false},
+	})
 end
-
--- Hero rotation with single connection management
-local heroRot = {
-	{who = "Hello Kitty", badge = ASSETS.badgeHello,  title = "Welcome!",     desc = "Handpicked specials for you", color = theme.kitty,     ref = {source = "cash", idx = 2, isPass = false}},
-	{who = "Cinnamoroll", badge = ASSETS.badgeCinna,  title = "Cash Treats",  desc = "Sweet bundles to boost you",  color = theme.cinnaSky,  ref = {source = "cash", idx = 4, isPass = false}},
-	{who = "Kuromi",      badge = ASSETS.badgeKuromi, title = "Power Passes", desc = "Mischievous upgrades",        color = theme.kuromiLav, ref = {source = "gamepasses", idx = 1, isPass = true}},
-}
-
-local function refItemOf(ref)
-	local src = (ref.source == "cash") and shopData.cash or shopData.gamepasses
-	return src[ref.idx], ref.isPass
+for _, item in ipairs(shopData.gamepasses) do
+	table.insert(heroRot, {
+		badge = ASSETS.badgeKuromi,
+		title = item.name,
+		desc = "Upgrade your power, permanently",
+		color = item.color or theme.kuromiLav,
+		ref = {source = "gamepasses", id = item.id, isPass = true},
+	})
 end
 
 local heroConn: RBXScriptConnection? = nil
@@ -593,14 +540,11 @@ local function setHero(idx: number)
 	heroCTAStroke.Color = h.color
 
 	if heroConn then heroConn:Disconnect() heroConn = nil end
-	local refItem, isPass = refItemOf(h.ref)
 	heroConn = heroCTA.MouseButton1Click:Connect(function()
-		if refItem then
-			if isPass then
-				MarketplaceService:PromptGamePassPurchase(localPlayer, refItem.id)
-			else
-				MarketplaceService:PromptProductPurchase(localPlayer, refItem.id)
-			end
+		if h.ref.isPass then
+			MarketplaceService:PromptGamePassPurchase(localPlayer, h.ref.id)
+		else
+			MarketplaceService:PromptProductPurchase(localPlayer, h.ref.id)
 		end
 	end)
 end
@@ -617,7 +561,7 @@ task.spawn(function()
 	end
 end)
 
--- Hello Kitty Bubble (robust)
+-- Hello Kitty Bubble
 local function createHelloKittyBubble(parentPanel: Frame)
 	local messagesGeneral = {
 		"Taking a little break? 🎀",
@@ -726,7 +670,7 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	textLabel.Parent = bubble
 	setFont(textLabel, Enum.FontWeight.Regular, 18)
 
-	-- Breathing animation (gentle)
+	-- Breathing animation
 	task.spawn(function()
 		while true do
 			if portrait.Visible then
@@ -763,7 +707,7 @@ local function createHelloKittyBubble(parentPanel: Frame)
 	local function hide()
 		if not showing then return end
 		showing = false
-		typewriterToken += 1 -- cancel typing
+		typewriterToken += 1
 		tween(textLabel, TweenInfo.new(0.12), {TextTransparency = 1})
 		tween(group, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 280, 0, 90), Position = UDim2.new(0, 56, 1, -16)})
 		task.wait(0.12)
@@ -831,13 +775,76 @@ end
 
 local hkBubble = createHelloKittyBubble(panel)
 
--- Hover context
-local currentContext = "general"
-kittyScroll.MouseEnter:Connect(function() currentContext = "general" end)
-cashScroll.MouseEnter:Connect(function() currentContext = "cash" end)
-passScroll.MouseEnter:Connect(function() currentContext = "pass" end)
+-- Toggle button
+local toggleBtn = Instance.new("ImageButton")
+	toggleBtn.Name = "ShopToggle"
+	toggleBtn.AnchorPoint = Vector2.new(1, 1)
+	toggleBtn.Size = UDim2.new(0, 138, 0, 46)
+	toggleBtn.Position = UDim2.new(1, -16, 1, -16)
+	toggleBtn.BackgroundColor3 = theme.panel
+	toggleBtn.AutoButtonColor = false
+	toggleBtn.Image = ""
+	toggleBtn.ZIndex = 10
+	toggleBtn.Parent = screenGui
+local toggleCorner = Instance.new("UICorner") toggleCorner.CornerRadius = UDim.new(1, 0) toggleCorner.Parent = toggleBtn
+local toggleStroke = Instance.new("UIStroke") toggleStroke.Color = theme.stroke toggleStroke.Thickness = 1 toggleStroke.Parent = toggleBtn
 
--- Debounce show/hide
+local toggleIcon = Instance.new("ImageLabel")
+	toggleIcon.BackgroundTransparency = 1
+	toggleIcon.Image = (ASSETS.badgeHello ~= "rbxassetid://0") and ASSETS.badgeHello or ASSETS.iconBag
+	toggleIcon.Size = UDim2.new(0, 20, 0, 20)
+	toggleIcon.Position = UDim2.new(0, 12, 0.5, -10)
+	toggleIcon.ImageColor3 = (ASSETS.badgeHello ~= "rbxassetid://0") and theme.kitty or theme.text
+	toggleIcon.ZIndex = 11
+	toggleIcon.Parent = toggleBtn
+
+local toggleText = Instance.new("TextLabel")
+	toggleText.BackgroundTransparency = 1
+	toggleText.Size = UDim2.new(1, -44, 1, 0)
+	toggleText.Position = UDim2.new(0, 40, 0, 0)
+	toggleText.Text = "Shop"
+	toggleText.TextColor3 = theme.text
+	toggleText.TextXAlignment = Enum.TextXAlignment.Left
+	toggleText.ZIndex = 11
+	toggleText.Parent = toggleBtn
+setFont(toggleText, Enum.FontWeight.SemiBold, 18)
+
+-- Tabs logic
+local currentTab = "Home"
+local currentContext = "general"
+
+local function selectTab(name: string)
+	styleTabIdle(tabHome)
+	styleTabIdle(tabCash)
+	styleTabIdle(tabPass)
+
+	if name == "Home" then
+		styleTabSelected(tabHome, theme.kitty)
+		showOnly(pageHome)
+		currentTab = "Home"
+		currentContext = "general"
+	elseif name == "Cash" then
+		styleTabSelected(tabCash, theme.cinnaSky)
+		showOnly(pageCash)
+		currentTab = "Cash"
+		currentContext = "cash"
+	elseif name == "Pass" then
+		styleTabSelected(tabPass, theme.kuromiLav)
+		showOnly(pagePass)
+		currentTab = "Pass"
+		currentContext = "pass"
+	end
+end
+
+selectTab("Home")
+
+tabHome.MouseButton1Click:Connect(function() selectTab("Home") end)
+
+tabCash.MouseButton1Click:Connect(function() selectTab("Cash") end)
+
+tabPass.MouseButton1Click:Connect(function() selectTab("Pass") end)
+
+-- Show / Hide
 local isAnimating = false
 
 local function showShop()
@@ -856,8 +863,9 @@ local function showShop()
 		Size = UDim2.new(0, 740, 0, 720),
 	})
 
-	populateAll()
-	task.delay(0.7, function() hkBubble.Show(currentContext) end)
+	-- Home default
+	selectTab("Home")
+	task.delay(0.6, function() hkBubble.Show(currentContext) end)
 	isAnimating = false
 end
 
@@ -908,4 +916,4 @@ UserInputService.InputBegan:Connect(function(input, gp)
 	end
 end)
 
-print("🧷 Shop + Hello Kitty Bubble loaded (polished)")
+print("🧷 Tabbed Sanrio Shop loaded (Home + Cash + Gamepasses)")
