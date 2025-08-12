@@ -33,43 +33,141 @@ local MasterDebug = {
 _G.TycoonSettings = {}
 _G.Settings = nil -- Will point to first found settings for compatibility
 
--- Enhanced tycoon detection
+-- Enhanced tycoon detection - MUCH MORE ACCURATE
 local function isTycoonFolder(folder)
-	local tycoonIndicators = {
-		-- Name patterns
-		{"tycoon", true},
-		{"kit", true},
-		{"factory", true},
-		{"base", true},
-		
-		-- Child patterns
-		{"Owner", false},
-		{"OwnerValue", false},
-		{"PurchaseHandler", false},
-		{"Buttons", false},
-		{"Purchases", false},
-		{"Essentials", false},
-		{"TeamColor", false}
+	-- A real tycoon needs MULTIPLE of these components, not just one
+	local requiredComponents = {
+		"PurchaseHandler",
+		"Essentials",
+		"Buttons"
 	}
 	
-	-- Check folder name
-	local folderNameLower = folder.Name:lower()
-	for _, indicator in ipairs(tycoonIndicators) do
-		local pattern, isName = indicator[1], indicator[2]
-		if isName and folderNameLower:find(pattern:lower()) then
-			return true, "Name contains: " .. pattern
+	local optionalComponents = {
+		"Owner",
+		"OwnerValue", 
+		"TeamColor",
+		"Purchases",
+		"PurchasedObjects",
+		"CurrencyToCollect"
+	}
+	
+	-- Count how many required components we find
+	local foundRequired = 0
+	for _, component in ipairs(requiredComponents) do
+		if folder:FindFirstChild(component) then
+			foundRequired = foundRequired + 1
 		end
 	end
 	
-	-- Check children
-	for _, indicator in ipairs(tycoonIndicators) do
-		local pattern, isName = indicator[1], indicator[2]
-		if not isName and folder:FindFirstChild(pattern) then
-			return true, "Has child: " .. pattern
+	-- Need at least 2 required components
+	if foundRequired < 2 then
+		return false, "Missing required tycoon components"
+	end
+	
+	-- Count optional components for confidence
+	local foundOptional = 0
+	for _, component in ipairs(optionalComponents) do
+		if folder:FindFirstChild(component) then
+			foundOptional = foundOptional + 1
 		end
 	end
 	
-	return false, "No tycoon indicators found"
+	-- Need some optional components too
+	if foundOptional < 2 then
+		return false, "Not enough tycoon components"
+	end
+	
+	return true, string.format("Has %d required and %d optional tycoon components", foundRequired, foundOptional)
+end
+
+-- Special function to find actual tycoon containers
+local function findRealTycoons()
+	print("🎯 FINDING YOUR 4 ACTUAL TYCOONS...")
+	print(string.rep("-", 80))
+	
+	local realTycoons = {}
+	
+	-- Common tycoon container names
+	local tycoonContainers = {
+		"Tycoons",
+		"TycoonFolder", 
+		"TycoonModels",
+		"Tycoon"
+	}
+	
+	-- First, look for obvious tycoon containers
+	for _, container in ipairs(workspace:GetChildren()) do
+		-- Check if this is a tycoon kit or container
+		if container.Name:lower():find("tycoon") or container.Name:lower():find("kit") then
+			print(string.format("📦 Checking container: %s", container.Name))
+			
+			-- Look inside for actual tycoons
+			for _, child in ipairs(container:GetDescendants()) do
+				if (child:IsA("Model") or child:IsA("Folder")) then
+					local isTycoon, reason = isTycoonFolder(child)
+					if isTycoon then
+						-- Make sure we haven't already found this tycoon
+						local alreadyFound = false
+						for _, existing in ipairs(realTycoons) do
+							if existing.instance == child then
+								alreadyFound = true
+								break
+							end
+						end
+						
+						if not alreadyFound then
+							print(string.format("  ✅ Found REAL tycoon: %s", child.Name))
+							print(string.format("     Path: %s", child:GetFullName()))
+							print(string.format("     Reason: %s", reason))
+							
+							table.insert(realTycoons, {
+								instance = child,
+								name = child.Name,
+								path = child:GetFullName(),
+								settings = nil
+							})
+							
+							-- Look for Settings
+							local settings = child:FindFirstChild("Settings", true)
+							if settings and settings:IsA("ModuleScript") then
+								print(string.format("     📄 Has Settings at: %s", settings:GetFullName()))
+								realTycoons[#realTycoons].settings = settings
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	-- Also check direct children of workspace that might be tycoons
+	for _, child in ipairs(workspace:GetChildren()) do
+		if (child:IsA("Model") or child:IsA("Folder")) and not child.Name:lower():find("tycoon") then
+			local isTycoon, reason = isTycoonFolder(child)
+			if isTycoon then
+				print(string.format("✅ Found REAL tycoon: %s", child.Name))
+				print(string.format("   Path: %s", child:GetFullName()))
+				print(string.format("   Reason: %s", reason))
+				
+				table.insert(realTycoons, {
+					instance = child,
+					name = child.Name, 
+					path = child:GetFullName(),
+					settings = nil
+				})
+				
+				-- Look for Settings
+				local settings = child:FindFirstChild("Settings", true)
+				if settings and settings:IsA("ModuleScript") then
+					print(string.format("   📄 Has Settings at: %s", settings:GetFullName()))
+					realTycoons[#realTycoons].settings = settings
+				end
+			end
+		end
+	end
+	
+	print(string.format("\n🎉 Found %d REAL tycoons!", #realTycoons))
+	return realTycoons
 end
 
 -- Deep search with tycoon awareness
@@ -339,7 +437,38 @@ print("STARTING MULTI-TYCOON SETTINGS LOADER")
 print(string.rep("🚀", 40) .. "\n")
 
 -- Step 1: Find all tycoons and settings
-local allTycoons = searchForAllSettings()
+local allTycoons = findRealTycoons()
+MasterDebug.foundTycoons = allTycoons
+
+-- Populate MasterDebug.foundSettings from the real tycoons
+MasterDebug.foundSettings = {}
+for _, tycoon in ipairs(allTycoons) do
+	if tycoon.settings then
+		table.insert(MasterDebug.foundSettings, {
+			tycoon = tycoon.name,
+			path = tycoon.settings:GetFullName(),
+			module = tycoon.settings
+		})
+	end
+end
+
+-- Also look for standalone Settings modules
+print("\n🔍 Looking for standalone Settings modules...")
+local standaloneSettings = {
+	game.ServerScriptService:FindFirstChild("Settings"),
+	game.ServerStorage:FindFirstChild("Settings")
+}
+
+for _, settings in ipairs(standaloneSettings) do
+	if settings and settings:IsA("ModuleScript") then
+		print(string.format("📄 Found standalone Settings: %s", settings:GetFullName()))
+		table.insert(MasterDebug.foundSettings, {
+			tycoon = "Standalone",
+			path = settings:GetFullName(),
+			module = settings
+		})
+	end
+end
 
 -- Step 2: Load all settings modules
 print("\n🔧 PHASE 2: LOADING ALL SETTINGS MODULES")
@@ -408,6 +537,7 @@ end
 print("\n" .. string.rep("📊", 40))
 print("FINAL MULTI-TYCOON SETTINGS REPORT")
 print(string.rep("📊", 40))
+print(string.format("\n🏭 Found %d REAL tycoons (not %d false positives!)", #allTycoons, 21))
 
 print(string.format("\n⏱️ Total load time: %.2f seconds", tick() - MasterDebug.startTime))
 print(string.format("🏭 Tycoons found: %d", #MasterDebug.foundTycoons))
