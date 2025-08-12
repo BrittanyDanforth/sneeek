@@ -1310,39 +1310,64 @@ local function buildCashPage()
 	bgGradient.Rotation = 90
 	bgGradient.Parent = bgOverlay
 	
-	-- Add cute pink cloud decorations
+	-- Add static cloud decorations
 	local pinkCloudId = "rbxassetid://4096004749"
-	for i = 1, 5 do
-		local cloud = Instance.new("ImageLabel")
-		cloud.Name = "PinkCloud" .. i
-		cloud.BackgroundTransparency = 1
-		cloud.Image = pinkCloudId
-		cloud.ImageTransparency = 0.7 + (i * 0.05)
-		cloud.Size = UDim2.fromOffset(80 + math.random(20, 60), 60 + math.random(10, 30))
-		cloud.Position = UDim2.fromScale(
-			math.random() * 0.9,
-			math.random() * 0.8
-		)
-		cloud.ZIndex = 11
-		cloud.Parent = cashPage
-		
-		-- Gentle floating animation
-		task.spawn(function()
-			local startPos = cloud.Position
-			local speed = 0.3 + math.random() * 0.2
-			local offsetX = math.random() * math.pi * 2
-			local offsetY = math.random() * math.pi * 2
-			
-			while cloud.Parent do
-				local t = tick() * speed
-				cloud.Position = UDim2.fromScale(
-					startPos.X.Scale + math.sin(t + offsetX) * 0.03,
-					startPos.Y.Scale + math.sin(t * 1.5 + offsetY) * 0.02
-				)
-				task.wait(0.1)
-			end
-		end)
-	end
+	
+	-- White clouds on top right
+	local whiteCloud1 = Instance.new("ImageLabel")
+	whiteCloud1.Name = "WhiteCloud1"
+	whiteCloud1.BackgroundTransparency = 1
+	whiteCloud1.Image = pinkCloudId
+	whiteCloud1.ImageColor3 = Color3.new(1, 1, 1)  -- White tint
+	whiteCloud1.ImageTransparency = 0.7
+	whiteCloud1.Size = UDim2.fromOffset(120, 80)
+	whiteCloud1.Position = UDim2.new(1, -140, 0, 40)
+	whiteCloud1.ZIndex = 11
+	whiteCloud1.Parent = cashPage
+	
+	local whiteCloud2 = Instance.new("ImageLabel")
+	whiteCloud2.Name = "WhiteCloud2"
+	whiteCloud2.BackgroundTransparency = 1
+	whiteCloud2.Image = pinkCloudId
+	whiteCloud2.ImageColor3 = Color3.new(1, 1, 1)  -- White tint
+	whiteCloud2.ImageTransparency = 0.75
+	whiteCloud2.Size = UDim2.fromOffset(100, 70)
+	whiteCloud2.Position = UDim2.new(1, -80, 0, 120)
+	whiteCloud2.ZIndex = 11
+	whiteCloud2.Parent = cashPage
+	
+	-- Pink clouds on bottom left
+	local pinkCloud1 = Instance.new("ImageLabel")
+	pinkCloud1.Name = "PinkCloud1"
+	pinkCloud1.BackgroundTransparency = 1
+	pinkCloud1.Image = pinkCloudId
+	pinkCloud1.ImageTransparency = 0.65
+	pinkCloud1.Size = UDim2.fromOffset(130, 85)
+	pinkCloud1.Position = UDim2.new(0, 30, 1, -120)
+	pinkCloud1.ZIndex = 11
+	pinkCloud1.Parent = cashPage
+	
+	local pinkCloud2 = Instance.new("ImageLabel")
+	pinkCloud2.Name = "PinkCloud2"
+	pinkCloud2.BackgroundTransparency = 1
+	pinkCloud2.Image = pinkCloudId
+	pinkCloud2.ImageTransparency = 0.7
+	pinkCloud2.Size = UDim2.fromOffset(110, 75)
+	pinkCloud2.Position = UDim2.new(0, 150, 1, -80)
+	pinkCloud2.ZIndex = 11
+	pinkCloud2.Parent = cashPage
+	
+	-- One more white cloud in middle-ish area
+	local whiteCloud3 = Instance.new("ImageLabel")
+	whiteCloud3.Name = "WhiteCloud3"
+	whiteCloud3.BackgroundTransparency = 1
+	whiteCloud3.Image = pinkCloudId
+	whiteCloud3.ImageColor3 = Color3.new(1, 1, 1)  -- White tint
+	whiteCloud3.ImageTransparency = 0.8
+	whiteCloud3.Size = UDim2.fromOffset(90, 60)
+	whiteCloud3.Position = UDim2.new(0.7, 0, 0.4, 0)
+	whiteCloud3.ZIndex = 11
+	whiteCloud3.Parent = cashPage
 	
 	-- Create scrolling frame for cash items
 	local cashScroll = UIFactory.createScrollingFrame({
