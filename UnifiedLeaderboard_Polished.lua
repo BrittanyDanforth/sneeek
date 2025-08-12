@@ -111,6 +111,23 @@ local function loadSettings()
 	return false
 end
 
+-- Create Global Money API IMMEDIATELY (before anything else)
+-- This ensures MoneyShop can find it
+_G.AddPlayerMoney = function(playerName, amount)
+	-- Will be properly implemented below
+	return false
+end
+
+_G.SetPlayerMoney = function(playerName, amount)
+	return false
+end
+
+_G.GetPlayerMoney = function(playerName)
+	return 0
+end
+
+print("💰 Global Money API created (placeholder)")
+
 -- Initialize
 task.wait(0.1)
 cleanupOldScripts()
@@ -251,7 +268,7 @@ for _, player in pairs(Players:GetPlayers()) do
 	task.spawn(createPlayerStats, player)
 end
 
--- Global Money API
+-- Update Global Money API with real implementation
 _G.AddPlayerMoney = function(playerName, amount)
 	local moneyValue = getOrCreatePlayerMoney(playerName)
 	moneyValue.Value = moneyValue.Value + amount
@@ -268,6 +285,8 @@ _G.GetPlayerMoney = function(playerName)
 	local moneyValue = playerMoneyFolder:FindFirstChild(playerName)
 	return moneyValue and moneyValue.Value or 0
 end
+
+print("💰 Global Money API updated with real implementation")
 
 -- Ready message
 print("⭐ UNIFIED LEADERBOARD READY!")
