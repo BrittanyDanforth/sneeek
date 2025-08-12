@@ -105,7 +105,7 @@ AssetManager.assets = {
 	starPattern = "rbxassetid://6022668898",   -- Star pattern
 	hkCuteFace = "rbxassetid://14978925654",  -- Hello Kitty cute face
 	cinnamorollFly = "rbxassetid://15011356128",  -- Cinnamoroll flying
-	melodyFlower = "rbxassetid://17398525031"  -- My Melody with flower
+	melodyFlower = "rbxassetid://17398525031",  -- My Melody with flower
 	
 	-- Sound effects (using actual Roblox sounds)
 	soundClick = "rbxassetid://876939830",
