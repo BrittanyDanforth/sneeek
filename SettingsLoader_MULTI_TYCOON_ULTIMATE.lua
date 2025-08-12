@@ -127,23 +127,30 @@ local function findRealTycoons()
 								settings = nil
 							})
 							
-							-- Look for Settings
-							local settings = child:FindFirstChild("Settings", true)
-							if settings and settings:IsA("ModuleScript") then
-								print(string.format("     📄 Has Settings at: %s", settings:GetFullName()))
-								realTycoons[#realTycoons].settings = settings
-							else
-								print("     ⚠️ No Settings module found in this tycoon")
-								-- Let's check parent containers too
-								local parent = child.Parent
-								while parent and parent ~= workspace do
-									local parentSettings = parent:FindFirstChild("Settings")
-									if parentSettings and parentSettings:IsA("ModuleScript") then
-										print(string.format("     📄 Found Settings in parent at: %s", parentSettings:GetFullName()))
-										realTycoons[#realTycoons].settings = parentSettings
-										break
-									end
-									parent = parent.Parent
+							-- Look for Settings - check parent first since that's where they usually are
+							local settingsFound = false
+							
+							-- First check the tycoon kit/container parent
+							local parent = child.Parent
+							while parent and parent ~= workspace and not settingsFound do
+								local parentSettings = parent:FindFirstChild("Settings")
+								if parentSettings and parentSettings:IsA("ModuleScript") then
+									print(string.format("     📄 Found Settings at: %s", parentSettings:GetFullName()))
+									realTycoons[#realTycoons].settings = parentSettings
+									settingsFound = true
+									break
+								end
+								parent = parent.Parent
+							end
+							
+							-- If not found in parent, check inside the tycoon itself
+							if not settingsFound then
+								local settings = child:FindFirstChild("Settings", true)
+								if settings and settings:IsA("ModuleScript") then
+									print(string.format("     📄 Found Settings at: %s", settings:GetFullName()))
+									realTycoons[#realTycoons].settings = settings
+								else
+									print("     ❌ No Settings module found for this tycoon!")
 								end
 							end
 						end
@@ -169,23 +176,30 @@ local function findRealTycoons()
 					settings = nil
 				})
 				
-				-- Look for Settings
-				local settings = child:FindFirstChild("Settings", true)
-				if settings and settings:IsA("ModuleScript") then
-					print(string.format("   📄 Has Settings at: %s", settings:GetFullName()))
-					realTycoons[#realTycoons].settings = settings
-				else
-					print("   ⚠️ No Settings module found in this tycoon")
-					-- Let's check parent containers too
-					local parent = child.Parent
-					while parent and parent ~= workspace do
-						local parentSettings = parent:FindFirstChild("Settings")
-						if parentSettings and parentSettings:IsA("ModuleScript") then
-							print(string.format("   📄 Found Settings in parent at: %s", parentSettings:GetFullName()))
-							realTycoons[#realTycoons].settings = parentSettings
-							break
-						end
-						parent = parent.Parent
+				-- Look for Settings - check parent first since that's where they usually are
+				local settingsFound = false
+				
+				-- First check the tycoon kit/container parent
+				local parent = child.Parent
+				while parent and parent ~= workspace and not settingsFound do
+					local parentSettings = parent:FindFirstChild("Settings")
+					if parentSettings and parentSettings:IsA("ModuleScript") then
+						print(string.format("   📄 Found Settings at: %s", parentSettings:GetFullName()))
+						realTycoons[#realTycoons].settings = parentSettings
+						settingsFound = true
+						break
+					end
+					parent = parent.Parent
+				end
+				
+				-- If not found in parent, check inside the tycoon itself
+				if not settingsFound then
+					local settings = child:FindFirstChild("Settings", true)
+					if settings and settings:IsA("ModuleScript") then
+						print(string.format("   📄 Found Settings at: %s", settings:GetFullName()))
+						realTycoons[#realTycoons].settings = settings
+					else
+						print("   ❌ No Settings module found for this tycoon!")
 					end
 				end
 			end
