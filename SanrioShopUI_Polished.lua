@@ -1485,24 +1485,35 @@ local function buildGamepassesPage()
 	})
 	bgOverlay.Parent = passPage
 	
-	-- Add edgy star decorations
+	-- Add edgy star decorations with rounded corners
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
+		-- Create a container frame with rounded corners to clip the stars
+		local starsContainer = UIFactory.createFrame({
+			Name = "StarsContainer",
+			Size = UDim2.new(1, -24, 1, -24),
+			Position = UDim2.new(0, 12, 0, 12),
+			BackgroundTransparency = 1,
+			CornerRadius = UDim.new(0, 18),  -- Same radius as bgOverlay
+			ZIndex = 11
+		})
+		starsContainer.Parent = passPage
+		
 		local stars = Instance.new("ImageLabel")
 		stars.Name = "StarPattern"
 		stars.BackgroundTransparency = 1
 		stars.Image = AssetManager.assets.starPattern
-		stars.ImageTransparency = 0.9
+		stars.ImageTransparency = 0.6  -- Your original transparency
 		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
 		stars.ScaleType = Enum.ScaleType.Tile
-		stars.TileSize = UDim2.fromOffset(100, 100)
+		stars.TileSize = UDim2.fromOffset(900, 900)  -- Your original tile size
 		stars.Size = UDim2.fromScale(1, 1)
 		stars.ZIndex = 11
-		stars.Parent = passPage
+		stars.Parent = starsContainer
 		
-		-- Rotating stars effect
+		-- Rotating stars effect (keeping it at 0 as you had)
 		task.spawn(function()
 			while stars.Parent do
-				stars.Rotation = stars.Rotation + 0.1
+				stars.Rotation = stars.Rotation + 0
 				task.wait(0.1)
 			end
 		end)
