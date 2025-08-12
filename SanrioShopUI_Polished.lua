@@ -1344,6 +1344,72 @@ local function buildGamepassesPage()
 		end)
 	end
 	
+	-- Add Kuromi character image
+	local kuromiCharacter = UIFactory.createImageLabel({
+		Name = "KuromiCharacter",
+		Image = "rbxassetid://5806227330",  -- Sanrio Babey Kuromi
+		Size = UDim2.fromOffset(180, 180),
+		Position = UDim2.new(0, -20, 0, -20),
+		AnchorPoint = Vector2.new(0, 0),
+		BackgroundTransparency = 1,
+		ImageTransparency = 0.15,
+		ZIndex = 12
+	})
+	kuromiCharacter.Parent = passPage
+	
+	-- Add subtle floating animation to Kuromi
+	task.spawn(function()
+		local startPos = kuromiCharacter.Position
+		while kuromiCharacter.Parent do
+			local t = tick()
+			kuromiCharacter.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + math.sin(t * 0.8) * 5,
+				startPos.Y.Scale,
+				startPos.Y.Offset + math.cos(t * 0.8) * 3
+			)
+			kuromiCharacter.Rotation = math.sin(t * 0.5) * 5
+			task.wait(0.1)
+		end
+	end)
+	
+	-- Add a glow effect behind Kuromi
+	local glowFrame = UIFactory.createFrame({
+		Name = "KuromiGlow",
+		Size = UDim2.fromOffset(220, 220),
+		Position = UDim2.new(0, -40, 0, -40),
+		BackgroundColor3 = ThemeManager.getColor("kuromiLav"),
+		BackgroundTransparency = 0.7,
+		ZIndex = 11
+	})
+	glowFrame.Parent = passPage
+	
+	local glowCorner = Instance.new("UICorner")
+	glowCorner.CornerRadius = UDim.new(1, 0)
+	glowCorner.Parent = glowFrame
+	
+	local glowGradient = Instance.new("UIGradient")
+	glowGradient.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(0.5, 0.7),
+		NumberSequenceKeypoint.new(1, 1)
+	}
+	glowGradient.Parent = glowFrame
+	
+	-- Pulsing glow animation
+	task.spawn(function()
+		while glowFrame.Parent do
+			Utils.tween(glowFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+				BackgroundTransparency = 0.6
+			})
+			task.wait(2)
+			Utils.tween(glowFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+				BackgroundTransparency = 0.8
+			})
+			task.wait(2)
+		end
+	end)
+	
 	-- Create scrolling frame for gamepass items
 	local passScroll = UIFactory.createScrollingFrame({
 		Name = "PassScroll",
