@@ -56,8 +56,18 @@ local ASSETS = {
 	iconCash   = "rbxassetid://10709728059",
 	iconPass   = "rbxassetid://10709727148",
 
-	-- Hello Kitty portrait for the talker
-	hkPortrait = "rbxassetid://8399407650",
+	-- Optional themed assets
+	hkPortrait    = "rbxassetid://8399407650",
+	hkBowPattern  = "rbxassetid://0",       -- light gray bow tile for Home background
+	bannerPlaid   = "rbxassetid://0",       -- faint red/white plaid for hero banner
+	hkBowLarge    = "rbxassetid://0",       -- large bow graphic in hero corner
+	skyTexture    = "rbxassetid://0",       -- painted sky for Cinnamoroll background
+	cloudNineSlice= "rbxassetid://0",       -- 9-slice cloud frame for cash cards
+	iconStar      = "rbxassetid://0",
+	iconTeacup    = "rbxassetid://0",
+	iconRoll      = "rbxassetid://0",
+	iconSkull     = "rbxassetid://0",       -- Kuromi skull
+	kuromiPattern = "rbxassetid://0",       -- dark repeating skull/chains pattern
 }
 
 -- Theme
@@ -184,11 +194,14 @@ local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "Close"
 	closeBtn.Size = UDim2.new(0, 40, 0, 40)
 	closeBtn.Position = UDim2.new(1, -56, 0.5, -20)
-	closeBtn.BackgroundTransparency = 1
-	closeBtn.Text = ""
+	closeBtn.BackgroundColor3 = Color3.fromRGB(235, 60, 60)
+	closeBtn.Text = "X"
+	closeBtn.TextColor3 = Color3.new(1,1,1)
 	closeBtn.AutoButtonColor = false
 	closeBtn.ZIndex = 9
 	closeBtn.Parent = header
+local closeRound = Instance.new("UICorner") closeRound.CornerRadius = UDim.new(1,0) closeRound.Parent = closeBtn
+setFont(closeBtn, Enum.FontWeight.Bold, 20)
 
 local closeIcon = Instance.new("ImageLabel")
 	closeIcon.BackgroundTransparency = 1
@@ -304,42 +317,102 @@ end
 local cashOverlay = makeOverlay(pageCash, theme.cinnaSky)
 local passOverlay = makeOverlay(pagePass, theme.kuromiLav)
 
--- Sticker Card (bigger)
+-- Animated sky background for Cash tab
+if ASSETS.skyTexture ~= "rbxassetid://0" then
+	local sky = Instance.new("ImageLabel")
+	sky.Name = "SkyBg"
+	sky.BackgroundTransparency = 1
+	sky.Image = ASSETS.skyTexture
+	sky.ImageTransparency = 0.07
+	sky.Size = UDim2.new(1.4, 0, 1.2, 0)
+	sky.Position = UDim2.new(-0.2, 0, -0.1, 0)
+	sky.ZIndex = 4
+	sky.Parent = pageCash
+	task.spawn(function()
+		local dir = 1
+		while true do
+			local x = sky.Position.X.Scale
+			if x > -0.05 then dir = -1 elseif x < -0.25 then dir = 1 end
+			sky.Position = UDim2.new(x + dir*0.0008, 0, sky.Position.Y.Scale, 0)
+			task.wait(0.016)
+		end
+	end)
+end
+
+-- Kuromi dark mode background pattern
+local kuromiBg = Instance.new("Frame")
+kuromiBg.BackgroundColor3 = Color3.fromRGB(22,22,26)
+kuromiBg.BorderSizePixel = 0
+kuromiBg.Size = UDim2.new(1, 0, 1, 0)
+kuromiBg.ZIndex = 4
+kuromiBg.Parent = pagePass
+if ASSETS.kuromiPattern ~= "rbxassetid://0" then
+	local pat = Instance.new("ImageLabel")
+	pat.BackgroundTransparency = 1
+	pat.Image = ASSETS.kuromiPattern
+	pat.ImageTransparency = 0.88
+	pat.ImageColor3 = Color3.fromRGB(180, 170, 200)
+	pat.ScaleType = Enum.ScaleType.Tile
+	pat.TileSize = UDim2.fromOffset(80, 80)
+	pat.Size = UDim2.new(1,0,1,0)
+	pat.ZIndex = 4
+	pat.Parent = pagePass
+end
+
+-- Sticker Card (bigger) with style variants: "cash" (cloud), "pass" (edgy)
 local CARD_W, CARD_H = 320, 180
 
-local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, isPass: boolean, nameTextColor: Color3?)
+local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, isPass: boolean, nameTextColor: Color3?, style: string?, indexForAlt: number?)
+	style = style or (isPass and "pass" or "cash")
 	local outer = Instance.new("Frame")
 	outer.Size = UDim2.new(0, CARD_W, 0, CARD_H)
-	outer.BackgroundColor3 = Color3.new(1, 1, 1)
+	outer.BackgroundTransparency = 1
 	outer.BorderSizePixel = 0
 	outer.ZIndex = 6
-	local outerCorner = Instance.new("UICorner") outerCorner.CornerRadius = UDim.new(0, 20) outerCorner.Parent = outer
-	local outerShadow = Instance.new("ImageLabel")
-	outerShadow.BackgroundTransparency = 1
-	outerShadow.Image = "rbxassetid://6015897843"
-	outerShadow.ImageTransparency = 0.76
-	outerShadow.ScaleType = Enum.ScaleType.Slice
-	outerShadow.SliceCenter = Rect.new(49, 49, 450, 450)
-	outerShadow.Size = UDim2.new(1, 30, 1, 30)
-	outerShadow.Position = UDim2.new(0, -15, 0, -10)
-	outerShadow.ZIndex = 5
-	outerShadow.Parent = outer
+
+	-- Background container depending on style
+	local bg
+	if style == "cash" and ASSETS.cloudNineSlice ~= "rbxassetid://0" then
+		bg = Instance.new("ImageLabel")
+		bg.Name = "CloudBG"
+		bg.BackgroundTransparency = 1
+		bg.Image = ASSETS.cloudNineSlice
+		bg.ScaleType = Enum.ScaleType.Slice
+		bg.SliceCenter = Rect.new(24,24,104,104)
+		bg.Size = UDim2.new(1, 0, 1, 0)
+		bg.ZIndex = 6
+		bg.Parent = outer
+	else
+		bg = Instance.new("Frame")
+		bg.BackgroundColor3 = (style == "pass") and Color3.fromRGB(28,28,34) or Color3.new(1,1,1)
+		bg.Size = UDim2.new(1, 0, 1, 0)
+		bg.BorderSizePixel = 0
+		bg.ZIndex = 6
+		bg.Parent = outer
+		local bgCorner = Instance.new("UICorner") bgCorner.CornerRadius = UDim.new(0, 20) bgCorner.Parent = bg
+	end
+
+	local bgStroke = Instance.new("UIStroke")
+	bgStroke.Thickness = (style == "pass") and 3 or 1
+	bgStroke.Color = (style == "pass") and Color3.fromRGB(255, 80, 180) or theme.stroke
+	bgStroke.Transparency = (style == "pass") and 0.15 or 0.3
+	bgStroke.Parent = bg
 
 	local inner = Instance.new("Frame")
 	inner.Size = UDim2.new(1, -18, 1, -18)
 	inner.Position = UDim2.new(0, 9, 0, 9)
-	inner.BackgroundColor3 = theme.panelAlt
+	inner.BackgroundColor3 = (style == "pass") and Color3.fromRGB(34,34,42) or theme.panelAlt
 	inner.BorderSizePixel = 0
-	inner.ZIndex = 6
-	inner.Parent = outer
+	inner.ZIndex = 7
+	inner.Parent = bg
 	local innerCorner = Instance.new("UICorner") innerCorner.CornerRadius = UDim.new(0, 16) innerCorner.Parent = inner
-	local innerStroke = Instance.new("UIStroke") innerStroke.Color = theme.stroke innerStroke.Thickness = 1 innerStroke.Parent = inner
+	local innerStroke = Instance.new("UIStroke") innerStroke.Color = (style == "pass") and Color3.fromRGB(200, 120, 220) or theme.stroke innerStroke.Thickness = 1 innerStroke.Parent = inner
 
 	local stripe = Instance.new("Frame")
 	stripe.Size = UDim2.new(1, 0, 0, 6)
 	stripe.BackgroundColor3 = accent
 	stripe.BorderSizePixel = 0
-	stripe.ZIndex = 6
+	stripe.ZIndex = 7
 	stripe.Parent = inner
 
 	if charBadgeId ~= "rbxassetid://0" then
@@ -348,59 +421,90 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 		badge.Image = charBadgeId
 		badge.Size = UDim2.new(0, 26, 0, 26)
 		badge.Position = UDim2.new(1, -34, 0, 10)
-		badge.ZIndex = 7
+		badge.ZIndex = 8
 		badge.Parent = inner
 	end
 
 	local icon = Instance.new("ImageLabel")
 	icon.BackgroundTransparency = 1
-	icon.Image = isPass and ASSETS.iconPass or ASSETS.iconCash
-	icon.ImageColor3 = accent
+	if style == "pass" and ASSETS.iconSkull ~= "rbxassetid://0" then
+		icon.Image = ASSETS.iconSkull
+	else
+		local cashIcons = {ASSETS.iconStar, ASSETS.iconTeacup, ASSETS.iconRoll, ASSETS.iconCash}
+		local pick = cashIcons[math.random(1, #cashIcons)] or ASSETS.iconCash
+		icon.Image = pick ~= "rbxassetid://0" and pick or (isPass and ASSETS.iconPass or ASSETS.iconCash)
+	end
+	icon.ImageColor3 = (style == "pass") and Color3.fromRGB(240,240,255) or accent
 	icon.Size = UDim2.new(0, 46, 0, 46)
 	icon.Position = UDim2.new(0, 14, 0, 24)
-	icon.ZIndex = 7
+	icon.ZIndex = 8
 	icon.Parent = inner
 
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
 	name.Text = data.name
-	name.TextColor3 = nameTextColor or theme.text
+	name.TextColor3 = nameTextColor or ((style == "pass") and Color3.fromRGB(240,240,250) or theme.text)
 	name.TextXAlignment = Enum.TextXAlignment.Left
 	name.Position = UDim2.new(0, 72, 0, 22)
 	name.Size = UDim2.new(1, -84, 0, 26)
-	name.ZIndex = 7
+	name.ZIndex = 8
 	name.Parent = inner
-	setFont(name, Enum.FontWeight.SemiBold, 20)
+	if style == "pass" then
+		name.FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		name.TextSize = 20
+	else
+		setFont(name, Enum.FontWeight.SemiBold, 20)
+	end
 
 	local sub = Instance.new("TextLabel")
 	sub.BackgroundTransparency = 1
 	sub.Text = isPass and "Gamepass" or "Cash Bundle"
-	sub.TextColor3 = theme.subtext
+	sub.TextColor3 = (style == "pass") and Color3.fromRGB(200,200,220) or theme.subtext
 	sub.TextXAlignment = Enum.TextXAlignment.Left
 	sub.Position = UDim2.new(0, 72, 0, 52)
 	sub.Size = UDim2.new(1, -84, 0, 20)
-	sub.ZIndex = 7
+	sub.ZIndex = 8
 	sub.Parent = inner
-	setFont(sub, Enum.FontWeight.Regular, 16)
+	if style == "pass" then
+		sub.FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		sub.TextSize = 16
+	else
+		setFont(sub, Enum.FontWeight.Regular, 16)
+	end
 
 	local cta = Instance.new("TextButton")
 	cta.AutoButtonColor = false
 	cta.Size = UDim2.new(0, 146, 0, 42)
 	cta.Position = UDim2.new(0, 14, 1, -54)
-	cta.BackgroundColor3 = blendTowardWhite(accent, 0.85)
+	cta.BackgroundColor3 = (style == "pass") and Color3.fromRGB(44,44,52) or blendTowardWhite(accent, 0.85)
 	cta.Text = isPass and ("R$ " .. tostring(data.price)) or "Get"
-	cta.TextColor3 = accent
-	cta.ZIndex = 8
+	cta.TextColor3 = (style == "pass") and Color3.fromRGB(240,240,255) or accent
+	cta.ZIndex = 9
 	cta.Parent = inner
 	local ctaCorner = Instance.new("UICorner") ctaCorner.CornerRadius = UDim.new(1, 0) ctaCorner.Parent = cta
-	local ctaStroke = Instance.new("UIStroke") ctaStroke.Color = accent ctaStroke.Thickness = 2 ctaStroke.Transparency = 0.15 ctaStroke.Parent = cta
-	setFont(cta, Enum.FontWeight.Bold, 20)
+	local ctaStroke = Instance.new("UIStroke") ctaStroke.Color = accent ctaStroke.Thickness = (style == "pass") and 2 or 2 ctaStroke.Transparency = 0.15 ctaStroke.Parent = cta
+	if style == "pass" then
+		cta.FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		cta.TextSize = 20
+	else
+		setFont(cta, Enum.FontWeight.Bold, 20)
+	end
 
 	cta.MouseEnter:Connect(function()
-		tween(cta, TweenInfo.new(0.12), {BackgroundColor3 = blendTowardWhite(accent, 0.9)})
+		if style == "cash" then
+			tween(outer, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(outer.Position.X.Scale, outer.Position.X.Offset, outer.Position.Y.Scale, outer.Position.Y.Offset - 4)})
+		else
+			tween(bgStroke, TweenInfo.new(0.1), {Thickness = 4})
+		end
+		tween(cta, TweenInfo.new(0.12), {BackgroundColor3 = (style == "pass") and Color3.fromRGB(52,52,62) or blendTowardWhite(accent, 0.9)})
 	end)
 	cta.MouseLeave:Connect(function()
-		tween(cta, TweenInfo.new(0.12), {BackgroundColor3 = blendTowardWhite(accent, 0.85)})
+		if style == "cash" then
+			tween(outer, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(outer.Position.X.Scale, outer.Position.X.Offset, outer.Position.Y.Scale, outer.Position.Y.Offset + 4)})
+		else
+			tween(bgStroke, TweenInfo.new(0.1), {Thickness = 3})
+		end
+		tween(cta, TweenInfo.new(0.12), {BackgroundColor3 = (style == "pass") and Color3.fromRGB(44,44,52) or blendTowardWhite(accent, 0.85)})
 	end)
 	cta.MouseButton1Click:Connect(function()
 		if isPass then
@@ -409,6 +513,11 @@ local function makeStickerCard(charBadgeId: string, accent: Color3, data: any, i
 			MarketplaceService:PromptProductPurchase(localPlayer, data.id)
 		end
 	end)
+
+	-- Alternate tilt for pass cards
+	if style == "pass" and indexForAlt then
+		outer.Rotation = (indexForAlt % 2 == 0) and 2.5 or -2.5
+	end
 
 	return outer
 end
@@ -433,10 +542,11 @@ local function buildGrid(parent: Frame, items: {any}, isPass: boolean, char: {ba
 	grid.SortOrder = Enum.SortOrder.LayoutOrder
 	grid.Parent = scroll
 
-	for _, item in ipairs(items) do
+	for idx, item in ipairs(items) do
 		local accent = char.accent or item.color
 		if char.accentAdjust then accent = char.accentAdjust(accent) end
-		local card = makeStickerCard(char.badgeId or "rbxassetid://0", accent, item, isPass, char.darkText)
+		local styleName = isPass and "pass" or "cash"
+		local card = makeStickerCard(char.badgeId or "rbxassetid://0", accent, item, isPass, char.darkText, styleName, idx)
 		card.Parent = scroll
 	end
 	-- update canvas size after render
@@ -510,6 +620,90 @@ end
 
 -- Build pages
 buildHero(pageHome)
+
+-- Home tab: subtle bow pattern background
+if ASSETS.hkBowPattern ~= "rbxassetid://0" then
+	local homePattern = Instance.new("ImageLabel")
+	homePattern.Name = "HomePattern"
+	homePattern.BackgroundTransparency = 1
+	homePattern.Image = ASSETS.hkBowPattern
+	homePattern.ImageColor3 = Color3.fromRGB(215,215,215)
+	homePattern.ImageTransparency = 0.85
+	homePattern.ScaleType = Enum.ScaleType.Tile
+	homePattern.TileSize = UDim2.fromOffset(96,96)
+	homePattern.Size = UDim2.new(1, 0, 1, 0)
+	homePattern.ZIndex = 5
+	homePattern.Parent = pageHome
+end
+
+-- Upgrade banner textures (plaid + bow)
+if ASSETS.bannerPlaid ~= "rbxassetid://0" then
+	local plaid = Instance.new("ImageLabel")
+	plaid.BackgroundTransparency = 1
+	plaid.Image = ASSETS.bannerPlaid
+	plaid.ImageTransparency = 0.92
+	plaid.ScaleType = Enum.ScaleType.Tile
+	plaid.TileSize = UDim2.fromOffset(80,80)
+	plaid.Size = UDim2.new(1, 0, 1, 0)
+	plaid.ZIndex = 6
+	plaid.Parent = hero
+end
+if ASSETS.hkBowLarge ~= "rbxassetid://0" then
+	local bigBow = Instance.new("ImageLabel")
+	bigBow.BackgroundTransparency = 1
+	bigBow.Image = ASSETS.hkBowLarge
+	bigBow.Size = UDim2.new(0, 110, 0, 110)
+	bigBow.Position = UDim2.new(1, -120, 0, 10)
+	bigBow.ZIndex = 7
+	bigBow.Parent = hero
+end
+
+-- Home: Kitty's Favorites horizontal list
+local function buildTopPicks(parent: Frame)
+	local y = hero.AbsoluteSize.Y + 16
+	local section = Instance.new("Frame")
+	section.Name = "TopPicks"
+	section.BackgroundTransparency = 1
+	section.Size = UDim2.new(1, -24, 0, 200)
+	section.Position = UDim2.new(0, 12, 0, 236)
+	section.ZIndex = 6
+	section.Parent = parent
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.Text = "Kitty's Favorites"
+	titleLbl.TextColor3 = theme.text
+	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+	titleLbl.Position = UDim2.new(0, 0, 0, 0)
+	titleLbl.Size = UDim2.new(1, 0, 0, 26)
+	setFont(titleLbl, Enum.FontWeight.SemiBold, 22)
+	titleLbl.Parent = section
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.BackgroundTransparency = 1
+	scroll.Size = UDim2.new(1, 0, 1, -28)
+	scroll.Position = UDim2.new(0, 0, 0, 28)
+	scroll.ScrollBarThickness = 6
+	scroll.ScrollingDirection = Enum.ScrollingDirection.X
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.ZIndex = 6
+	scroll.Parent = section
+	local list = Instance.new("UIListLayout") list.FillDirection = Enum.FillDirection.Horizontal list.Padding = UDim.new(0, 12) list.Parent = scroll
+	local pad = Instance.new("UIPadding") pad.PaddingLeft = UDim.new(0, 6) pad.Parent = scroll
+	local picks = {}
+	for i = 1, math.min(2, #shopData.cash) do table.insert(picks, {item=shopData.cash[i], isPass=false}) end
+	for i = 1, math.min(2, #shopData.gamepasses) do table.insert(picks, {item=shopData.gamepasses[i], isPass=true}) end
+	for idx, p in ipairs(picks) do
+		local styleName = p.isPass and "pass" or "cash"
+		local accent = p.item.color
+		local badgeId = p.isPass and ASSETS.badgeKuromi or ASSETS.badgeCinna
+		local card = makeStickerCard(badgeId, accent, p.item, p.isPass, nil, styleName, idx)
+		card.Parent = scroll
+	end
+	task.delay(0.05, function()
+		scroll.CanvasSize = UDim2.new(0, list.AbsoluteContentSize.X + 12, 0, 0)
+	end)
+end
+
+buildTopPicks(pageHome)
 
 local charCinna  = { badgeId = ASSETS.badgeCinna,  accent = theme.cinnaSky }
 local charKuromi = { badgeId = ASSETS.badgeKuromi, accentAdjust = function(_) return theme.kuromiLav end, darkText = theme.kuromiInk }
@@ -903,6 +1097,7 @@ local isAnimating = false
 local function showShop()
 	if isAnimating or panel.Visible then return end
 	isAnimating = true
+	toggleBtn.Visible = false
 	dim.Visible = true
 	panel.Visible = true
 	dim.BackgroundTransparency = 1
@@ -936,6 +1131,7 @@ local function hideShop()
 	dim.Visible = false
 	panel.Visible = false
 	shopOpenAt = 0
+	toggleBtn.Visible = true
 	isAnimating = false
 end
 
