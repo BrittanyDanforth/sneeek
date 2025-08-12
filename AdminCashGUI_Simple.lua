@@ -30,31 +30,31 @@ local function isAdmin(player)
 end
 
 -- Create beautiful notification
-local function notify(player, message, isSuccess, amount)
+local function notify(player, message, isSuccess, amount, title)
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "CashNotification"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 1000
 	gui.Parent = player:WaitForChild("PlayerGui")
 	
-	-- Main container
+	-- Main container (smaller, sleeker)
 	local container = Instance.new("Frame")
-	container.Size = UDim2.new(0, 500, 0, 140)
-	container.Position = UDim2.new(0.5, 0, 0, -150) -- Start off-screen
+	container.Size = UDim2.new(0, 380, 0, 80)
+	container.Position = UDim2.new(0.5, 0, 0, -100) -- Start off-screen
 	container.AnchorPoint = Vector2.new(0.5, 0)
 	container.BackgroundTransparency = 1
 	container.Parent = gui
 	
-	-- Shadow/glow effect
+	-- Shadow/glow effect (subtle)
 	local glow = Instance.new("ImageLabel")
 	glow.Name = "Glow"
-	glow.Size = UDim2.new(1, 80, 1, 80)
+	glow.Size = UDim2.new(1, 40, 1, 40)
 	glow.Position = UDim2.new(0.5, 0, 0.5, 0)
 	glow.AnchorPoint = Vector2.new(0.5, 0.5)
 	glow.BackgroundTransparency = 1
 	glow.Image = "rbxassetid://6015897843"
 	glow.ImageColor3 = isSuccess and Color3.fromRGB(120, 255, 120) or Color3.fromRGB(255, 120, 120)
-	glow.ImageTransparency = 0.5
+	glow.ImageTransparency = 0.7
 	glow.ScaleType = Enum.ScaleType.Slice
 	glow.SliceCenter = Rect.new(49, 49, 450, 450)
 	glow.ZIndex = 1
@@ -70,7 +70,7 @@ local function notify(player, message, isSuccess, amount)
 	
 	-- Rounded corners
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 20)
+	corner.CornerRadius = UDim.new(0, 16)
 	corner.Parent = frame
 	
 	-- Gradient background
@@ -91,118 +91,84 @@ local function notify(player, message, isSuccess, amount)
 	gradient.Rotation = 90
 	gradient.Parent = frame
 	
-	-- Border stroke
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = isSuccess and Color3.fromRGB(100, 220, 100) or Color3.fromRGB(220, 100, 100)
-	stroke.Thickness = 2
-	stroke.Transparency = 0.5
-	stroke.Parent = frame
+	-- Status bar (sleek side indicator)
+	local statusBar = Instance.new("Frame")
+	statusBar.Size = UDim2.new(0, 5, 1, 0)
+	statusBar.Position = UDim2.new(0, 0, 0, 0)
+	statusBar.BackgroundColor3 = isSuccess and Color3.fromRGB(100, 220, 100) or Color3.fromRGB(220, 100, 100)
+	statusBar.BorderSizePixel = 0
+	statusBar.ZIndex = 3
+	statusBar.Parent = frame
 	
-	-- Icon background circle
-	local iconBg = Instance.new("Frame")
-	iconBg.Size = UDim2.new(0, 80, 0, 80)
-	iconBg.Position = UDim2.new(0, 30, 0.5, 0)
-	iconBg.AnchorPoint = Vector2.new(0, 0.5)
-	iconBg.BackgroundColor3 = isSuccess and Color3.fromRGB(100, 220, 100) or Color3.fromRGB(220, 100, 100)
-	iconBg.BorderSizePixel = 0
-	iconBg.ZIndex = 3
-	iconBg.Parent = frame
+	local statusCorner = Instance.new("UICorner")
+	statusCorner.CornerRadius = UDim.new(0, 16)
+	statusCorner.Parent = statusBar
 	
-	local iconCorner = Instance.new("UICorner")
-	iconCorner.CornerRadius = UDim.new(1, 0)
-	iconCorner.Parent = iconBg
-	
-	-- Icon
-	local icon = Instance.new("TextLabel")
-	icon.Size = UDim2.new(1, 0, 1, 0)
-	icon.BackgroundTransparency = 1
-	icon.Text = isSuccess and "💰" or "❌"
-	icon.TextScaled = true
-	icon.TextColor3 = Color3.new(1, 1, 1)
-	icon.Font = Enum.Font.SourceSansBold
-	icon.ZIndex = 4
-	icon.Parent = iconBg
-	
-	-- Message container
+	-- Message container with UIListLayout
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, -150, 1, -20)
-	textContainer.Position = UDim2.new(0, 130, 0, 10)
+	textContainer.Size = UDim2.new(1, -80, 1, -20)
+	textContainer.Position = UDim2.new(0, 25, 0, 10)
 	textContainer.BackgroundTransparency = 1
 	textContainer.ZIndex = 3
 	textContainer.Parent = frame
 	
+	-- UIListLayout for perfect text alignment
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.FillDirection = Enum.FillDirection.Vertical
+	listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	listLayout.Padding = UDim.new(0, 2)
+	listLayout.Parent = textContainer
+	
 	-- Main text
 	local mainText = Instance.new("TextLabel")
-	mainText.Size = UDim2.new(1, 0, 0.5, 0)
-	mainText.Position = UDim2.new(0, 0, 0, 5)
+	mainText.Size = UDim2.new(1, 0, 0, 24)
 	mainText.BackgroundTransparency = 1
-	mainText.Text = isSuccess and "Cash Received!" or "Action Failed"
+	mainText.Text = title or (isSuccess and "Cash Received!" or "Action Failed")
 	mainText.TextScaled = true
 	mainText.TextColor3 = Color3.fromRGB(50, 50, 50)
 	mainText.Font = Enum.Font.SourceSansBold
+	mainText.TextXAlignment = Enum.TextXAlignment.Left
+	mainText.LayoutOrder = 1
 	mainText.ZIndex = 4
 	mainText.Parent = textContainer
 	
 	-- Detail text
 	local detailText = Instance.new("TextLabel")
-	detailText.Size = UDim2.new(1, 0, 0.4, 0)
-	detailText.Position = UDim2.new(0, 0, 0.5, 0)
+	detailText.Size = UDim2.new(1, 0, 0, 18)
 	detailText.BackgroundTransparency = 1
 	detailText.Text = message
 	detailText.TextScaled = true
 	detailText.TextColor3 = Color3.fromRGB(100, 100, 100)
 	detailText.Font = Enum.Font.SourceSans
+	detailText.TextXAlignment = Enum.TextXAlignment.Left
+	detailText.LayoutOrder = 2
 	detailText.ZIndex = 4
 	detailText.Parent = textContainer
 	
-	-- Amount display (if provided)
+	-- Amount display (if provided, show on the right)
 	if amount and isSuccess then
-		-- Cash amount in big text
+		-- Cash amount positioned on the right
 		local amountLabel = Instance.new("TextLabel")
-		amountLabel.Size = UDim2.new(0.5, 0, 0.4, 0)
-		amountLabel.Position = UDim2.new(1, -10, 0.5, 0)
+		amountLabel.Size = UDim2.new(0, 100, 1, -20)
+		amountLabel.Position = UDim2.new(1, -20, 0.5, 0)
 		amountLabel.AnchorPoint = Vector2.new(1, 0.5)
 		amountLabel.BackgroundTransparency = 1
 		amountLabel.Text = "+$" .. tostring(amount)
 		amountLabel.TextScaled = true
 		amountLabel.TextColor3 = Color3.fromRGB(50, 200, 50)
 		amountLabel.Font = Enum.Font.SourceSansBold
+		amountLabel.TextXAlignment = Enum.TextXAlignment.Right
 		amountLabel.ZIndex = 4
-		amountLabel.Parent = frame
-		
-		-- Add shimmer effect
-		local shimmer = Instance.new("Frame")
-		shimmer.Size = UDim2.new(0, 100, 2, 0)
-		shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
-		shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
-		shimmer.BackgroundTransparency = 0.8
-		shimmer.BorderSizePixel = 0
-		shimmer.ZIndex = 5
-		shimmer.Parent = frame
-		
-		local shimmerGradient = Instance.new("UIGradient")
-		shimmerGradient.Transparency = NumberSequence.new{
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.5, 0),
-			NumberSequenceKeypoint.new(1, 1)
-		}
-		shimmerGradient.Rotation = 45
-		shimmerGradient.Parent = shimmer
-		
-		-- Animate shimmer
-		local shimmerTween = TweenService:Create(shimmer, 
-			TweenInfo.new(1, Enum.EasingStyle.Linear), 
-			{Position = UDim2.new(1.5, 0, 0, 0)}
-		)
-		shimmerTween:Play()
+		amountLabel.Parent = frame -- Parent to frame, not textContainer
 	end
 	
-	-- Sparkle particles (for success)
-	if isSuccess then
-		for i = 1, 5 do
+	-- Subtle sparkle particles (for success)
+	if isSuccess and amount then
+		for i = 1, 3 do
 			local sparkle = Instance.new("Frame")
-			sparkle.Size = UDim2.new(0, 6, 0, 6)
-			sparkle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+			sparkle.Size = UDim2.new(0, 4, 0, 4)
+			sparkle.Position = UDim2.new(0.7 + math.random() * 0.2, 0, 0.3 + math.random() * 0.4, 0)
 			sparkle.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
 			sparkle.BorderSizePixel = 0
 			sparkle.ZIndex = 6
@@ -213,11 +179,10 @@ local function notify(player, message, isSuccess, amount)
 			sparkleCorner.Parent = sparkle
 			
 			-- Animate sparkles
-			local startPos = sparkle.Position
-			local endPos = UDim2.new(startPos.X.Scale, 0, startPos.Y.Scale - 0.3, 0)
+			local endPos = UDim2.new(sparkle.Position.X.Scale, 0, sparkle.Position.Y.Scale - 0.2, 0)
 			
 			local sparkleTween = TweenService:Create(sparkle,
-				TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 				{Position = endPos, BackgroundTransparency = 1}
 			)
 			sparkleTween:Play()
@@ -226,50 +191,34 @@ local function notify(player, message, isSuccess, amount)
 	
 	-- Animate entrance
 	local slideIn = TweenService:Create(container,
-		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Position = UDim2.new(0.5, 0, 0, 50)}
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Position = UDim2.new(0.5, 0, 0, 20)}
 	)
 	
 	local fadeIn = TweenService:Create(glow,
 		TweenInfo.new(0.3, Enum.EasingStyle.Quad),
-		{ImageTransparency = 0.3}
-	)
-	
-	-- Icon bounce animation
-	local iconBounce = TweenService:Create(iconBg,
-		TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{Size = UDim2.new(0, 90, 0, 90)}
-	)
-	
-	local iconBounceBack = TweenService:Create(iconBg,
-		TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = UDim2.new(0, 80, 0, 80)}
+		{ImageTransparency = 0.5}
 	)
 	
 	slideIn:Play()
 	fadeIn:Play()
-	wait(0.2)
-	iconBounce:Play()
-	iconBounce.Completed:Connect(function()
-		iconBounceBack:Play()
-	end)
 	
 	-- Auto dismiss
-	wait(3.5)
+	wait(3)
 	
 	-- Animate exit
 	local slideOut = TweenService:Create(container,
-		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In),
-		{Position = UDim2.new(0.5, 0, 0, -150)}
+		TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+		{Position = UDim2.new(0.5, 0, 0, -100)}
 	)
 	
 	local fadeOut = TweenService:Create(frame,
-		TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+		TweenInfo.new(0.2, Enum.EasingStyle.Quad),
 		{BackgroundTransparency = 1}
 	)
 	
 	local glowFadeOut = TweenService:Create(glow,
-		TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+		TweenInfo.new(0.2, Enum.EasingStyle.Quad),
 		{ImageTransparency = 1}
 	)
 	
@@ -356,8 +305,7 @@ Players.PlayerAdded:Connect(function(player)
 			-- Add cash
 			targetMoney.Value = targetMoney.Value + amount
 			
-			-- Notify both players with beautiful notifications
-			notify(player, "Successfully sent to " .. targetPlayer.Name, true)
+			-- Only notify the target player (no admin confirmation spam)
 			notify(targetPlayer, "From " .. player.Name, true, amount)
 			
 			print("SUCCESS: Gave $" .. amount .. " to " .. targetPlayer.Name)
@@ -365,14 +313,14 @@ Players.PlayerAdded:Connect(function(player)
 		
 		-- Help command
 		if message:lower() == "!help" and isAdmin(player) then
-			notify(player, "Commands: !givecash username amount", true)
+			notify(player, "Commands: !givecash username amount", true, nil, "Admin Help")
 		end
 	end)
 	
 	-- Welcome admins with style
 	if isAdmin(player) then
 		wait(3)
-		notify(player, "Type !help for commands", true)
+		notify(player, "Type !help for commands", true, nil, "Welcome, Admin!")
 	end
 end)
 
