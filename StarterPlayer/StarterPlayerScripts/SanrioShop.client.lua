@@ -713,7 +713,7 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 
 	local showing = false
 	local typeToken = 0
-	local hideDelayThread: thread? = nil
+	local hideToken = 0
 
 	local function pick(context: string): string
 		if context == "cash" then
@@ -740,8 +740,7 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 		if not showing then return end
 		showing = false
 		typeToken += 1
-		if hideDelayThread and coroutine.status(hideDelayThread) ~= "dead" then task.cancel(hideDelayThread) end
-		hideDelayThread = nil
+		hideToken += 1
 		tween(textLabel, TweenInfo.new(0.1), {TextTransparency = 1})
 		tween(group, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 320, 0, 90)})
 		tween(portrait, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), ImageTransparency = 1})
@@ -774,8 +773,10 @@ local function createHKTalkerStandalone(rootGui: ScreenGui)
 			typeText(msg, 0.03)
 		end)
 
-		if hideDelayThread and coroutine.status(hideDelayThread) ~= "dead" then task.cancel(hideDelayThread) end
-		hideDelayThread = task.delay(6, function()
+		hideToken += 1
+		local myToken = hideToken
+		task.delay(6, function()
+			if myToken ~= hideToken then return end
 			-- auto hide after 6s
 			hide()
 		end)
