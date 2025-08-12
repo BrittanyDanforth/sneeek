@@ -1311,7 +1311,7 @@ local function buildCashPage()
 	bgGradient.Parent = bgOverlay
 	
 	-- Add static cloud decorations
-	local pinkCloudId = "rbxassetid://4096004749"
+	local pinkCloudId = "rbxassetid://172318263"  -- A working cloud image
 	
 	-- White clouds on top right
 	local whiteCloud1 = Instance.new("ImageLabel")
@@ -1319,7 +1319,7 @@ local function buildCashPage()
 	whiteCloud1.BackgroundTransparency = 1
 	whiteCloud1.Image = pinkCloudId
 	whiteCloud1.ImageColor3 = Color3.new(1, 1, 1)  -- White tint
-	whiteCloud1.ImageTransparency = 0.7
+	whiteCloud1.ImageTransparency = 0.3  -- More visible
 	whiteCloud1.Size = UDim2.fromOffset(120, 80)
 	whiteCloud1.Position = UDim2.new(1, -140, 0, 40)
 	whiteCloud1.ZIndex = 11
@@ -1341,7 +1341,7 @@ local function buildCashPage()
 	pinkCloud1.Name = "PinkCloud1"
 	pinkCloud1.BackgroundTransparency = 1
 	pinkCloud1.Image = pinkCloudId
-	pinkCloud1.ImageTransparency = 0.65
+	pinkCloud1.ImageTransparency = 0.2  -- More visible
 	pinkCloud1.Size = UDim2.fromOffset(130, 85)
 	pinkCloud1.Position = UDim2.new(0, 30, 1, -120)
 	pinkCloud1.ZIndex = 11
@@ -1457,7 +1457,7 @@ local function buildGamepassesPage()
 	-- Add Kuromi character image
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
-		Image = "rbxassetid://5806227330",  -- Sanrio Babey Kuromi
+		Image = "rbxassetid://5806227295",  -- Converted to proper image ID
 		Size = UDim2.fromOffset(200, 200),
 		Position = UDim2.new(0, 20, 0, 20),  -- Moved to visible position
 		AnchorPoint = Vector2.new(0, 0),
@@ -1947,7 +1947,7 @@ function ShopManager:open()
 	})
 	
 	-- Play sound
-	SoundManager:play("open")
+	SoundManager:play("click")  -- Use click sound instead of weird open sound
 	
 	-- Select default tab
 	TabSystem:selectTab("Home")
@@ -1978,7 +1978,7 @@ function ShopManager:close()
 	})
 	
 	-- Play sound
-	SoundManager:play("close")
+	SoundManager:play("click")  -- Use click sound for close too
 	
 	task.wait(0.2)
 	
