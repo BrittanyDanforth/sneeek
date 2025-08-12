@@ -147,8 +147,8 @@ while true do
 	local offset = patterns[dropPattern]
 	dropPattern = (dropPattern % #patterns) + 1
 
-	-- Spawn with 180 degree rotation (needed for this mesh)
-	orb.CFrame = (dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset) * CFrame.Angles(math.rad(180), 0, 0)
+	-- Spawn with 180 degree rotation + turn to face forward
+	orb.CFrame = (dropPart.CFrame - Vector3.new(0, 1.75, 0) + offset) * CFrame.Angles(math.rad(180), math.rad(180), 0)
 
 	-- Float down gently
 	orb.AssemblyLinearVelocity = Vector3.new(
@@ -157,8 +157,8 @@ while true do
 		offset.Z * 2
 	)
 
-	-- Semi-transparent cloud
-	orb.Transparency = 0  -- FULLY SOLID
+	-- Start transparent for smooth fade-in
+	orb.Transparency = 1
 
 	-- Set spawn time
 	orb:SetAttribute("SpawnTime", tick())
@@ -166,10 +166,19 @@ while true do
 	-- Parent to storage
 	orb.Parent = PartStorage
 
-	-- Bounce spawn animation
+	-- Smooth fade-in with bounce animation
 	mesh.Scale = Vector3.new(0.5, 0.5, 0.5)
+	
+	-- Fade in
+	local fadeTween = TweenService:Create(orb,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Transparency = 0}
+	)
+	fadeTween:Play()
+	
+	-- Bounce scale
 	local spawnTween = TweenService:Create(mesh,
-		TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
+		TweenInfo.new(0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out),
 		{Scale = Vector3.new(2, 2, 2)}
 	)
 	spawnTween:Play()
