@@ -14,11 +14,15 @@ local PRODUCT_TO_CASH = {
 	[3366420800] = 25000,   -- 25k Cash
 }
 
--- Wait a moment for tycoon scripts to set up their ProcessReceipt
-task.wait(2)
+-- Create a RemoteFunction for UI to check if product is money product
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local isMoneyProduct = Instance.new("RemoteFunction")
+isMoneyProduct.Name = "IsMoneyProduct"
+isMoneyProduct.Parent = ReplicatedStorage
 
--- Store the existing ProcessReceipt (from tycoon)
-local existingProcessReceipt = MarketplaceService.ProcessReceipt
+isMoneyProduct.OnServerInvoke = function(player, productId)
+	return PRODUCT_TO_CASH[productId] ~= nil
+end
 
 -- Wait for PlayerMoney folder
 local playerMoneyFolder
@@ -121,13 +125,9 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 		
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	else
-		-- Not a money shop product - pass to tycoon handler
-		if existingProcessReceipt then
-			return existingProcessReceipt(receiptInfo)
-		else
-			-- No other handler exists
-			return Enum.ProductPurchaseDecision.NotProcessedYet
-		end
+		-- Not a money shop product - let tycoon handle it
+		-- Return NotProcessedYet so other scripts can process it
+		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 end
 
