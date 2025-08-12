@@ -387,38 +387,88 @@ for _, button in ipairs(buttons:GetChildren()) do
 
 		-- DEPENDENCY SYSTEM - Check if button has dependency
 		local dependency = button:FindFirstChild("Dependency")
-		if dependency and dependency.Value then
+		if dependency and dependency.Value and dependency.Value ~= "" then
 			-- Hide button until dependency is purchased
 			head.CanCollide = false
 			head.Transparency = 1
 			
-			-- Wait for dependency to be purchased
+			-- Create a connection to check for dependency
 			task.spawn(function()
-				purchasedObjects:WaitForChild(dependency.Value)
+				-- First check if dependency already exists
+				local dependencyMet = false
 				
-				-- Fade in button when dependency is met
-				if Settings.ButtonsFadeIn then
-					-- Start at 70% transparent for smooth fade
-					head.Transparency = 0.7
-					TweenService:Create(head,
-						TweenInfo.new(Settings.FadeInTime or 0.5, Enum.EasingStyle.Quad),
-						{Transparency = 0}
-					):Play()
-					task.wait(Settings.FadeInTime or 0.5)
+				-- Check by name first
+				if purchasedObjects:FindFirstChild(dependency.Value) then
+					dependencyMet = true
 				else
-					head.Transparency = 0
+					-- Check if any purchased object matches the dependency
+					for _, obj in ipairs(purchasedObjects:GetChildren()) do
+						local objButton = buttons:FindFirstChild(dependency.Value)
+						if objButton then
+							local objName = objButton:FindFirstChild("Object")
+							if objName and objName.Value and obj.Name == objName.Value then
+								dependencyMet = true
+								break
+							end
+						end
+					end
 				end
-				head.CanCollide = true
 				
-				-- Update colors now that button is visible
-				local owner = script.Parent.Owner.Value
-				if owner then
-					local stats = ServerStorage.PlayerMoney:FindFirstChild(owner.Name)
-					updateButtonColors(buttons, stats)
+				if not dependencyMet then
+					-- Wait for dependency with a timeout to prevent infinite yield
+					local connection
+					connection = purchasedObjects.ChildAdded:Connect(function(child)
+						-- Check if this satisfies the dependency
+						local depButton = buttons:FindFirstChild(dependency.Value)
+						if depButton then
+							local depObjName = depButton:FindFirstChild("Object")
+							if depObjName and depObjName.Value == child.Name then
+								dependencyMet = true
+								connection:Disconnect()
+							end
+						elseif child.Name == dependency.Value then
+							dependencyMet = true
+							connection:Disconnect()
+						end
+					end)
+					
+					-- Wait with timeout (max 5 minutes)
+					local waited = 0
+					while not dependencyMet and waited < 300 do
+						task.wait(0.5)
+						waited = waited + 0.5
+					end
+					
+					if connection then
+						connection:Disconnect()
+					end
 				end
 				
-				-- Add hover effect after button is visible
-				addSimpleHoverEffect(button)
+				if dependencyMet then
+					-- Fade in button when dependency is met
+					if Settings.ButtonsFadeIn then
+						-- Start at 70% transparent for smooth fade
+						head.Transparency = 0.7
+						TweenService:Create(head,
+							TweenInfo.new(Settings.FadeInTime or 0.5, Enum.EasingStyle.Quad),
+							{Transparency = 0}
+						):Play()
+						task.wait(Settings.FadeInTime or 0.5)
+					else
+						head.Transparency = 0
+					end
+					head.CanCollide = true
+					
+					-- Update colors now that button is visible
+					local owner = script.Parent.Owner.Value
+					if owner then
+						local stats = ServerStorage.PlayerMoney:FindFirstChild(owner.Name)
+						updateButtonColors(buttons, stats)
+					end
+					
+					-- Add hover effect after button is visible
+					addSimpleHoverEffect(button)
+				end
 			end)
 		else
 			-- No dependency - button is immediately visible
@@ -522,13 +572,18 @@ function processPurchase(button, playerStats)
 	-- Deduct cost
 	playerStats.Value = playerStats.Value - price
 
-	-- Mark as purchased
+	-- Mark as purchased (track both button name and object name)
 	purchasedItems[button.Name] = true
+	if objectName then
+		purchasedItems[objectName] = true
+	end
 
 	-- Spawn object
 	if objectName and Objects[objectName] then
 		local newObject = Objects[objectName]:Clone()
 		newObject.Parent = purchasedObjects
+		
+		print("🎁 Spawned: " .. objectName .. " (from button: " .. button.Name .. ")")
 
 		-- WHITE DOORS for Cinnamoroll theme
 		if objectName:find("Door") or objectName:find("door") then
@@ -667,3 +722,16 @@ end)
 print("✅ Balanced Purchase Handler with DEPENDENCY SYSTEM loaded!")
 print("✨ Uses Dependency objects inside buttons, not PROGRESSION_DATA!")
 print("🎯 70% less effects, no green lights, white doors, cleaner animations!")
+
+-- Debug: Print button dependencies
+task.wait(1)
+print("\n📋 Button Dependencies:")
+for _, button in ipairs(buttons:GetChildren()) do
+	local dep = button:FindFirstChild("Dependency")
+	local obj = button:FindFirstChild("Object")
+	if dep and dep.Value and dep.Value ~= "" then
+		print("  " .. button.Name .. " → depends on: " .. dep.Value .. " (spawns: " .. (obj and obj.Value or "nothing") .. ")")
+	else
+		print("  " .. button.Name .. " → no dependency (spawns: " .. (obj and obj.Value or "nothing") .. ")")
+	end
+end
