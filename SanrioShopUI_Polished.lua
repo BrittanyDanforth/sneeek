@@ -1369,6 +1369,61 @@ local function buildCashPage()
 	whiteCloud3.ZIndex = 11
 	whiteCloud3.Parent = cashPage
 	
+	-- Additional clouds for better spread
+	-- More white clouds
+	local whiteCloud4 = Instance.new("ImageLabel")
+	whiteCloud4.Name = "WhiteCloud4"
+	whiteCloud4.BackgroundTransparency = 1
+	whiteCloud4.Image = pinkCloudId
+	whiteCloud4.ImageColor3 = Color3.new(1, 1, 1)
+	whiteCloud4.ImageTransparency = 0.5
+	whiteCloud4.Size = UDim2.fromOffset(85, 55)
+	whiteCloud4.Position = UDim2.new(1, -200, 0, 200)
+	whiteCloud4.ZIndex = 11
+	whiteCloud4.Parent = cashPage
+	
+	local whiteCloud5 = Instance.new("ImageLabel")
+	whiteCloud5.Name = "WhiteCloud5"
+	whiteCloud5.BackgroundTransparency = 1
+	whiteCloud5.Image = pinkCloudId
+	whiteCloud5.ImageColor3 = Color3.new(1, 1, 1)
+	whiteCloud5.ImageTransparency = 0.6
+	whiteCloud5.Size = UDim2.fromOffset(75, 50)
+	whiteCloud5.Position = UDim2.new(0.85, 0, 0.25, 0)
+	whiteCloud5.ZIndex = 11
+	whiteCloud5.Parent = cashPage
+	
+	-- More pink clouds
+	local pinkCloud3 = Instance.new("ImageLabel")
+	pinkCloud3.Name = "PinkCloud3"
+	pinkCloud3.BackgroundTransparency = 1
+	pinkCloud3.Image = pinkCloudId
+	pinkCloud3.ImageTransparency = 0.3
+	pinkCloud3.Size = UDim2.fromOffset(95, 65)
+	pinkCloud3.Position = UDim2.new(0, 20, 1, -200)
+	pinkCloud3.ZIndex = 11
+	pinkCloud3.Parent = cashPage
+	
+	local pinkCloud4 = Instance.new("ImageLabel")
+	pinkCloud4.Name = "PinkCloud4"
+	pinkCloud4.BackgroundTransparency = 1
+	pinkCloud4.Image = pinkCloudId
+	pinkCloud4.ImageTransparency = 0.35
+	pinkCloud4.Size = UDim2.fromOffset(80, 55)
+	pinkCloud4.Position = UDim2.new(0.3, 0, 0.6, 0)
+	pinkCloud4.ZIndex = 11
+	pinkCloud4.Parent = cashPage
+	
+	local pinkCloud5 = Instance.new("ImageLabel")
+	pinkCloud5.Name = "PinkCloud5"
+	pinkCloud5.BackgroundTransparency = 1
+	pinkCloud5.Image = pinkCloudId
+	pinkCloud5.ImageTransparency = 0.4
+	pinkCloud5.Size = UDim2.fromOffset(70, 45)
+	pinkCloud5.Position = UDim2.new(0.15, 0, 0.35, 0)
+	pinkCloud5.ZIndex = 11
+	pinkCloud5.Parent = cashPage
+	
 	-- Create scrolling frame for cash items
 	local cashScroll = UIFactory.createScrollingFrame({
 		Name = "CashScroll",
@@ -1454,19 +1509,19 @@ local function buildGamepassesPage()
 		end)
 	end
 	
-	-- Add Kuromi character image
+		-- Add Kuromi character image (no circular glow)
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
 		Image = "rbxassetid://5806227295",  -- Converted to proper image ID
-		Size = UDim2.fromOffset(200, 200),
-		Position = UDim2.new(0, 20, 0, 20),  -- Moved to visible position
+		Size = UDim2.fromOffset(180, 180),
+		Position = UDim2.new(0, -50, 0, 20),  -- More to the left
 		AnchorPoint = Vector2.new(0, 0),
 		BackgroundTransparency = 1,
-		ImageTransparency = 0.2,  -- More visible
+		ImageTransparency = 0.15,  -- More visible
 		ZIndex = 13  -- Higher z-index
 	})
 	kuromiCharacter.Parent = passPage
-	
+
 	-- Add subtle floating animation to Kuromi
 	task.spawn(function()
 		local startPos = kuromiCharacter.Position
@@ -1480,43 +1535,6 @@ local function buildGamepassesPage()
 			)
 			kuromiCharacter.Rotation = math.sin(t * 0.5) * 5
 			task.wait(0.1)
-		end
-	end)
-	
-	-- Add a glow effect behind Kuromi
-	local glowFrame = UIFactory.createFrame({
-		Name = "KuromiGlow",
-		Size = UDim2.fromOffset(240, 240),
-		Position = UDim2.new(0, 0, 0, 0),  -- Adjusted to match new position
-		BackgroundColor3 = ThemeManager.getColor("kuromiLav"),
-		BackgroundTransparency = 0.7,
-		ZIndex = 12
-	})
-	glowFrame.Parent = passPage
-	
-	local glowCorner = Instance.new("UICorner")
-	glowCorner.CornerRadius = UDim.new(1, 0)
-	glowCorner.Parent = glowFrame
-	
-	local glowGradient = Instance.new("UIGradient")
-	glowGradient.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0.5),
-		NumberSequenceKeypoint.new(0.5, 0.7),
-		NumberSequenceKeypoint.new(1, 1)
-	}
-	glowGradient.Parent = glowFrame
-	
-	-- Pulsing glow animation
-	task.spawn(function()
-		while glowFrame.Parent do
-			Utils.tween(glowFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-				BackgroundTransparency = 0.6
-			})
-			task.wait(2)
-			Utils.tween(glowFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-				BackgroundTransparency = 0.8
-			})
-			task.wait(2)
 		end
 	end)
 	
