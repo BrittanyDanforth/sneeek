@@ -853,9 +853,12 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	
 	local theme = cardTheme[itemType] or cardTheme.cash
 	
+	-- Make cash cards bigger
+	local cardSize = itemType == "cash" and UDim2.new(0, 380, 0, 220) or UDim2.new(0, 320, 0, 180)
+	
 	local card = UIFactory.createFrame({
 		Name = "ItemCard",
-		Size = UDim2.new(0, 320, 0, 180),
+		Size = cardSize,
 		BackgroundColor3 = theme.bg,
 		CornerRadius = UDim.new(0, 20),
 		Stroke = {Color = theme.stroke, Thickness = itemType == "pass" and 3 or 1, Transparency = itemType == "pass" and 0.15 or 0.3},
@@ -1431,7 +1434,7 @@ local function buildCashPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
+			CellSize = UDim2.new(0, 380, 0, 220),  -- Bigger size for cash cards
 			CellPadding = UDim2.new(0, 16, 0, 16),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
@@ -1458,33 +1461,29 @@ end
 
 -- Build Gamepasses Page
 local function buildGamepassesPage()
-	-- Add dark themed background
-	local bgFrame = UIFactory.createFrame({
-		Name = "BgFrame",
-		BackgroundColor3 = Color3.fromRGB(22, 22, 26),
+	-- Add Kuromi themed background
+	local bgImage = UIFactory.createImageLabel({
+		Name = "KuromiBackground",
+		Size = UDim2.new(1, 0, 1, 0),
+		Position = UDim2.new(0, 0, 0, 0),
+		Image = "rbxassetid://129173330481899",  -- Custom Kuromi background
+		ScaleType = Enum.ScaleType.Crop,
+		ImageTransparency = 0.2,  -- Slight transparency so content is readable
 		ZIndex = 11
 	})
-	bgFrame.Parent = passPage
+	bgImage.Parent = passPage
 	
+	-- Add a dark overlay for better contrast
 	local bgOverlay = UIFactory.createFrame({
 		Name = "BgOverlay",
 		Size = UDim2.new(1, -24, 1, -24),
 		Position = UDim2.new(0, 12, 0, 12),
-		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("kuromiLav"), Color3.new(1, 1, 1), 0.85),
+		BackgroundColor3 = Color3.fromRGB(20, 20, 26),
+		BackgroundTransparency = 0.3,  -- Semi-transparent overlay
 		CornerRadius = UDim.new(0, 18),
 		ZIndex = 11
 	})
 	bgOverlay.Parent = passPage
-	
-	-- Add gradient with darker tones
-	local bgGradient = Instance.new("UIGradient")
-	bgGradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 34, 42)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(44, 44, 52)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 28, 34))
-	}
-	bgGradient.Rotation = 135
-	bgGradient.Parent = bgOverlay
 	
 	-- Add edgy star decorations
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
