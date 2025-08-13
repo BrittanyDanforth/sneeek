@@ -1314,7 +1314,7 @@ local function buildCashPage()
 	bgGradient.Parent = bgOverlay
 	
 	-- Add static cloud decorations
-	local pinkCloudId = "rbxassetid://172318263"  -- A working cloud image
+	local pinkCloudId = "rbxassetid://4096004749"  -- Your pink and white cloud image
 	
 	-- White clouds on top right
 	local whiteCloud1 = Instance.new("ImageLabel")
@@ -1522,7 +1522,7 @@ local function buildGamepassesPage()
 		-- Add Kuromi character image (no circular glow)
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
-		Image = "rbxassetid://5806227295",  -- Converted to proper image ID
+		Image = "rbxassetid://5806227330",  -- Your Kuromi image ID
 		Size = UDim2.fromOffset(180, 180),
 		Position = UDim2.new(0, -50, 0, 20),  -- More to the left
 		AnchorPoint = Vector2.new(0, 0),
