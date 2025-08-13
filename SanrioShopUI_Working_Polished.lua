@@ -1049,9 +1049,42 @@ local function buildHomePage()
 				})
 				task.wait(1.5)
 			end
-		end)
+				end)
 	end
-
+	
+	-- Soft background overlay for Home
+	local homeBgOverlay = UIFactory.createFrame({
+		Name = "HomeBg",
+		Size = UDim2.new(1, -24, 1, -24),
+		Position = UDim2.new(0, 12, 0, 12),
+		BackgroundColor3 = ThemeManager.getColor("panelAlt"),
+		CornerRadius = UDim.new(0, 18),
+		ZIndex = 10
+	})
+	homeBgOverlay.Parent = homePage
+	local homeBgGrad = Instance.new("UIGradient")
+	homeBgGrad.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Utils.blendColor(ThemeManager.getColor("kitty"), Color3.new(1,1,1), 0.97)),
+		ColorSequenceKeypoint.new(1, Color3.new(1,1,1))
+	}
+	homeBgGrad.Rotation = 90
+	homeBgGrad.Parent = homeBgOverlay
+	
+	-- Subtle cloud band at the top
+	if AssetManager.isValidAsset(AssetManager.assets.cloudTexture) then
+		local clouds = UIFactory.createImageLabel({
+			Name = "CloudBand",
+			Image = AssetManager.assets.cloudTexture,
+			ImageTransparency = 0.9,
+			Size = UDim2.new(1, 0, 0, 120),
+			Position = UDim2.new(0, 0, 0, 12),
+			ScaleType = Enum.ScaleType.Tile,
+			ZIndex = 11
+		})
+		clouds.TileSize = UDim2.fromOffset(256, 128)
+		clouds.Parent = homePage
+	end
+	
 	-- Hero section
 	local heroSection = UIFactory.createFrame({
 		Name = "HeroSection",
@@ -1476,7 +1509,7 @@ local function buildGamepassesPage()
 	})
 	bgOverlay.Parent = passPage
 
-	-- Add gradient with darker tones
+		-- Add gradient with darker tones
 	local bgGradient = Instance.new("UIGradient")
 	bgGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 34, 42)),
@@ -1485,30 +1518,24 @@ local function buildGamepassesPage()
 	}
 	bgGradient.Rotation = 135
 	bgGradient.Parent = bgOverlay
-
-	-- Add edgy star decorations
+	bgOverlay.ClipsDescendants = true
+	
+	-- Add soft star decorations with rounded corners
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
-		local stars = Instance.new("ImageLabel")
-		stars.Name = "StarPattern"
-		stars.BackgroundTransparency = 1
-		stars.Image = AssetManager.assets.starPattern
-		stars.ImageTransparency = 0.6
-		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
-		stars.ScaleType = Enum.ScaleType.Tile
-		stars.TileSize = UDim2.fromOffset(900, 900)
-		stars.Size = UDim2.fromScale(1, 1)
-		stars.ZIndex = 11
-		stars.Parent = passPage
-
-		-- Rotating stars effect
-		task.spawn(function()
-			while stars.Parent do
-				stars.Rotation = stars.Rotation + 0
-				task.wait(0.1)
-			end
-		end)
+		local stars = UIFactory.createImageLabel({
+			Name = "StarPattern",
+			Image = AssetManager.assets.starPattern,
+			ImageTransparency = 0.7,
+			ImageColor3 = ThemeManager.getColor("kuromiLav"),
+			ScaleType = Enum.ScaleType.Tile,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 11,
+			CornerRadius = UDim.new(0, 18)
+		})
+		stars.TileSize = UDim2.fromOffset(720, 720)
+		stars.Parent = bgOverlay
 	end
-
+	
 	-- Add Kuromi character image (no circular glow)
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
