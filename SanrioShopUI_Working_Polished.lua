@@ -247,6 +247,9 @@ function UIFactory.createFrame(props: {[string]: any}): Frame
 		UIFactory.addShadow(frame, props.Shadow)
 	end
 
+	-- NEW: allow clipping children if requested
+	frame.ClipsDescendants = props.ClipsDescendants or false
+	
 	return frame
 end
 
@@ -265,9 +268,11 @@ function UIFactory.createTextLabel(props: {[string]: any}): TextLabel
 	label.TextScaled = props.TextScaled or false
 	label.TextWrapped = props.TextWrapped ~= false
 	label.RichText = props.RichText or false
-
+	-- NEW: support text truncation
+	label.TextTruncate = props.TextTruncate or Enum.TextTruncate.None
+	
 	Utils.setFont(label, props.FontWeight or Enum.FontWeight.Regular, props.TextSize or 14)
-
+	
 	return label
 end
 
@@ -652,7 +657,7 @@ function TabSystem:createTab(name: string, icon: string?, accent: Color3?)
 	local tabButton = UIFactory.createTextButton({
 		Name = name .. "Tab",
 		Text = name,
-		Size = UDim2.new(0, 156, 1, 0),
+		Size = UDim2.new(0, 176, 1, 0),
 		BackgroundColor3 = ThemeManager.getColor("panel"),
 		TextColor3 = ThemeManager.getColor("text"),
 		CornerRadius = UDim.new(1, 0),
@@ -683,6 +688,8 @@ function TabSystem:createTab(name: string, icon: string?, accent: Color3?)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			FontWeight = Enum.FontWeight.Medium,
 			TextSize = 20,
+			TextWrapped = false,
+			TextTruncate = Enum.TextTruncate.AtEnd,
 			ZIndex = 13
 		})
 		textLabel.Parent = tabButton
@@ -848,6 +855,7 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Position = UDim2.new(0, 9, 0, 9),
 		BackgroundColor3 = itemType == "pass" and Color3.fromRGB(34, 34, 42) or ThemeManager.getColor("panelAlt"),
 		CornerRadius = UDim.new(0, 16),
+		ClipsDescendants = true,
 		Stroke = {Color = itemType == "pass" and Color3.fromRGB(200, 120, 220) or ThemeManager.getColor("stroke")},
 		ZIndex = 13
 	})
@@ -856,8 +864,9 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	-- Accent stripe
 	local stripe = UIFactory.createFrame({
 		Name = "Stripe",
-		Size = UDim2.new(1, 0, 0, 6),
+		Size = UDim2.new(1, 0, 0, 8),
 		BackgroundColor3 = themeData.accent or theme.icon,
+		CornerRadius = UDim.new(0, 16),
 		ZIndex = 14
 	})
 	stripe.Parent = inner
@@ -896,6 +905,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Size = UDim2.new(1, -160, 0, 28),
 		FontWeight = Enum.FontWeight.SemiBold,
 		TextSize = 20,
+		TextWrapped = false,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		ZIndex = 15
 	})
 	itemName.Parent = inner
