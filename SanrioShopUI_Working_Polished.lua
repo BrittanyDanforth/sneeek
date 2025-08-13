@@ -1521,40 +1521,19 @@ local function buildGamepassesPage()
 	bgGradient.Parent = bgOverlay
 	bgOverlay.ClipsDescendants = true
 	
-	-- Soft star field (no sharp corners)
-	local starField = UIFactory.createFrame({
-		Name = "StarField",
-		Size = UDim2.new(1, -24, 1, -24),
-		Position = UDim2.new(0, 12, 0, 12),
-		BackgroundTransparency = 1,
-		CornerRadius = UDim.new(0, 18),
-		ZIndex = 10
-	})
-	starField.ClipsDescendants = true
-	starField.Parent = bgOverlay
-	
-	for i = 1, 60 do
-		local s = Instance.new("Frame")
-		s.Name = "Star"..i
-		local size = math.random(2, 3)
-		s.Size = UDim2.fromOffset(size, size)
-		s.Position = UDim2.fromScale(math.random(), math.random())
-		s.BackgroundColor3 = ThemeManager.getColor("kuromiLav")
-		s.BackgroundTransparency = 0.4
-		s.BorderSizePixel = 0
-		s.ZIndex = 11
-		local c = Instance.new("UICorner")
-		c.CornerRadius = UDim.new(1, 0)
-		c.Parent = s
-		s.Parent = starField
-		task.spawn(function()
-			local offset = math.random()
-			while s.Parent do
-				local t = tick() + offset
-				s.BackgroundTransparency = 0.5 + math.sin(t * 1.2) * 0.3
-				task.wait(0.25)
-			end
-		end)
+	-- Star background image (restored)
+	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
+		local starsBg = UIFactory.createImageLabel({
+			Name = "StarBackground",
+			Image = AssetManager.assets.starPattern,
+			ImageTransparency = 0.6,
+			ImageColor3 = ThemeManager.getColor("kuromiLav"),
+			ScaleType = Enum.ScaleType.Tile,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 10
+		})
+		starsBg.TileSize = UDim2.fromOffset(720, 720)
+		starsBg.Parent = bgOverlay
 	end
 	
 	-- Add Kuromi character image (no circular glow)
