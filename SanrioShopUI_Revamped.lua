@@ -878,48 +878,30 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	})
 	inner.Parent = card
 
-	-- Accent stripe (rounded capsule with soft glow)
+	-- Accent outline around the entire card (replaces top stripe)
 	local accentColor = themeData.accent or theme.icon
 
-	local accentGlow = Instance.new("ImageLabel")
-	accentGlow.Name = "AccentGlow"
-	accentGlow.BackgroundTransparency = 1
-	accentGlow.Image = "rbxassetid://6015897843"
-	accentGlow.ScaleType = Enum.ScaleType.Slice
-	accentGlow.SliceCenter = Rect.new(49, 49, 450, 450)
-	accentGlow.ImageColor3 = accentColor
-	accentGlow.ImageTransparency = 0.85
-	accentGlow.Size = UDim2.new(1, 36, 0, 36)
-	accentGlow.Position = UDim2.new(0, -18, 0, 2)
-	accentGlow.ZIndex = 14
-	accentGlow.Parent = inner
+	local accentOutline = Instance.new("UIStroke")
+	accentOutline.Name = "AccentOutline"
+	accentOutline.Color = accentColor
+	accentOutline.Thickness = 2
+	accentOutline.Transparency = 0.15
+	accentOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	accentOutline.Parent = card
 
-	local accent = Instance.new("Frame")
-	accent.Name = "Accent"
-	accent.Size = UDim2.new(1, -24, 0, 12)
-	accent.Position = UDim2.new(0, 12, 0, 12)
-	accent.BackgroundColor3 = accentColor
-	accent.ZIndex = 15
-	accent.Parent = inner
-
-	local accentCorner = Instance.new("UICorner")
-	accentCorner.CornerRadius = UDim.new(1, 0)
-	accentCorner.Parent = accent
-
-	local accentStroke = Instance.new("UIStroke")
-	accentStroke.Color = Utils.blendColor(accentColor, Color3.new(1, 1, 1), 0.35)
-	accentStroke.Thickness = 1.5
-	accentStroke.Transparency = 0.35
-	accentStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	accentStroke.Parent = accent
-
-	local accentGradient = Instance.new("UIGradient")
-	accentGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Utils.blendColor(Color3.new(1,1,1), accentColor, 0.75)),
-		ColorSequenceKeypoint.new(1, accentColor)
-	})
-	accentGradient.Rotation = 0
-	accentGradient.Parent = accent
+	-- Subtle halo behind the card for depth
+	local accentHalo = Instance.new("ImageLabel")
+	accentHalo.Name = "AccentHalo"
+	accentHalo.BackgroundTransparency = 1
+	accentHalo.Image = "rbxassetid://6015897843"
+	accentHalo.ScaleType = Enum.ScaleType.Slice
+	accentHalo.SliceCenter = Rect.new(49, 49, 450, 450)
+	accentHalo.ImageColor3 = accentColor
+	accentHalo.ImageTransparency = 0.92
+	accentHalo.Size = UDim2.new(1, 36, 1, 36)
+	accentHalo.Position = UDim2.new(0, -18, 0, -18)
+	accentHalo.ZIndex = card.ZIndex - 1
+	accentHalo.Parent = card
 
 	-- Character badge
 	if themeData.badge and AssetManager.isValidAsset(themeData.badge) then
@@ -1091,7 +1073,7 @@ local function buildHomePage()
 		pattern.Parent = homePage
 	end
 
-	-- Add cute Hello Kitty decoration
+	-- Add cute Hello Kitty decoration (face) + bow sticker
 	if AssetManager.isValidAsset(AssetManager.assets.hkCuteFace) then
 		local hkDecor = UIFactory.createImageLabel({
 			Name = "HelloKittyDecor",
@@ -1104,6 +1086,20 @@ local function buildHomePage()
 			ZIndex = 12
 		})
 		hkDecor.Parent = homePage
+
+		-- Extra bow sticker near the hero title
+		if AssetManager.isValidAsset(AssetManager.assets.hkBowPattern) then
+			local bow = UIFactory.createImageLabel({
+				Name = "HelloKittyBow",
+				Image = AssetManager.assets.hkBowPattern,
+				Size = UDim2.fromOffset(42, 42),
+				Position = UDim2.new(0, 82, 0, 8),
+				BackgroundTransparency = 1,
+				ImageTransparency = 0.08,
+				ZIndex = 14
+			})
+			bow.Parent = homePage
+		end
 
 		-- Bouncing animation
 		task.spawn(function()
