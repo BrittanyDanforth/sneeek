@@ -247,6 +247,9 @@ function UIFactory.createFrame(props: {[string]: any}): Frame
 		UIFactory.addShadow(frame, props.Shadow)
 	end
 
+	-- NEW: allow clipping children if requested
+	frame.ClipsDescendants = props.ClipsDescendants or false
+	
 	return frame
 end
 
@@ -265,9 +268,11 @@ function UIFactory.createTextLabel(props: {[string]: any}): TextLabel
 	label.TextScaled = props.TextScaled or false
 	label.TextWrapped = props.TextWrapped ~= false
 	label.RichText = props.RichText or false
-
+	-- NEW: support text truncation
+	label.TextTruncate = props.TextTruncate or Enum.TextTruncate.None
+	
 	Utils.setFont(label, props.FontWeight or Enum.FontWeight.Regular, props.TextSize or 14)
-
+	
 	return label
 end
 
@@ -583,7 +588,7 @@ end
 -- Create header
 local header = UIFactory.createFrame({
 	Name = "Header",
-	Size = UDim2.new(1, -24, 0, 88),
+	Size = UDim2.new(1, -24, 0, 64),
 	Position = UDim2.new(0, 12, 0, 12),
 	BackgroundColor3 = ThemeManager.getColor("panelAlt"),
 	CornerRadius = UDim.new(0, 18),
@@ -602,41 +607,19 @@ headerGradient.Rotation = 90
 headerGradient.Parent = header
 
 -- Header content
-local kittyBadge = UIFactory.createImageLabel({
-	Name = "KittyBadge",
-	Image = AssetManager.assets.badgeHello,
-	Size = UDim2.new(0, 46, 0, 46),
-	Position = UDim2.new(0, 16, 0.5, 0),
-	AnchorPoint = Vector2.new(0, 0.5),
-	ZIndex = 12
-})
+	local kittyBadge = UIFactory.createImageLabel({
+		Name = "KittyBadge",
+		Image = AssetManager.assets.badgeHello,
+		Size = UDim2.new(0, 40, 0, 40),
+		Position = UDim2.new(0, 16, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		ZIndex = 12
+	})
 kittyBadge.Parent = header
 
--- Animate badge rotation
-task.spawn(function()
-	while true do
-		Utils.tween(kittyBadge, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-			Rotation = 5
-		})
-		task.wait(2)
-		Utils.tween(kittyBadge, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-			Rotation = -5
-		})
-		task.wait(2)
-	end
-end)
+	-- No rotation animation; static header badge
 
-local title = UIFactory.createTextLabel({
-	Name = "Title",
-	Text = "Sanrio Shop",
-	Position = UDim2.new(0, 72, 0, 0),
-	Size = UDim2.new(1, -140, 1, 0),
-	TextXAlignment = Enum.TextXAlignment.Left,
-	FontWeight = Enum.FontWeight.Bold,
-	TextSize = 36,
-	ZIndex = 12
-})
-title.Parent = header
+
 
 -- Close button with improved styling
 local closeButton = UIFactory.createTextButton({
@@ -674,7 +657,7 @@ function TabSystem:createTab(name: string, icon: string?, accent: Color3?)
 	local tabButton = UIFactory.createTextButton({
 		Name = name .. "Tab",
 		Text = name,
-		Size = UDim2.new(0, 156, 1, 0),
+		Size = UDim2.new(0, 176, 1, 0),
 		BackgroundColor3 = ThemeManager.getColor("panel"),
 		TextColor3 = ThemeManager.getColor("text"),
 		CornerRadius = UDim.new(1, 0),
@@ -705,6 +688,8 @@ function TabSystem:createTab(name: string, icon: string?, accent: Color3?)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			FontWeight = Enum.FontWeight.Medium,
 			TextSize = 20,
+			TextWrapped = false,
+			TextTruncate = Enum.TextTruncate.AtEnd,
 			ZIndex = 13
 		})
 		textLabel.Parent = tabButton
@@ -791,7 +776,7 @@ end
 local tabBar = UIFactory.createFrame({
 	Name = "TabBar",
 	Size = UDim2.new(1, -24, 0, 52),
-	Position = UDim2.new(0, 12, 0, 110),
+	Position = UDim2.new(0, 12, 0, 88),
 	BackgroundTransparency = 1,
 	ZIndex = 11
 })
@@ -817,8 +802,8 @@ passTab.Parent = tabBar
 -- Create pages container
 local pagesContainer = UIFactory.createFrame({
 	Name = "PagesContainer",
-	Size = UDim2.new(1, -24, 1, -174),
-	Position = UDim2.new(0, 12, 0, 174),
+	Size = UDim2.new(1, -24, 1, -150),
+	Position = UDim2.new(0, 12, 0, 150),
 	BackgroundTransparency = 1,
 	ZIndex = 10
 })
@@ -855,7 +840,7 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 
 	local card = UIFactory.createFrame({
 		Name = "ItemCard",
-		Size = UDim2.new(0, 320, 0, 180),
+		Size = UDim2.new(0, 360, 0, 210),
 		BackgroundColor3 = theme.bg,
 		CornerRadius = UDim.new(0, 20),
 		Stroke = {Color = theme.stroke, Thickness = itemType == "pass" and 3 or 1, Transparency = itemType == "pass" and 0.15 or 0.3},
@@ -870,6 +855,7 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Position = UDim2.new(0, 9, 0, 9),
 		BackgroundColor3 = itemType == "pass" and Color3.fromRGB(34, 34, 42) or ThemeManager.getColor("panelAlt"),
 		CornerRadius = UDim.new(0, 16),
+		ClipsDescendants = true,
 		Stroke = {Color = itemType == "pass" and Color3.fromRGB(200, 120, 220) or ThemeManager.getColor("stroke")},
 		ZIndex = 13
 	})
@@ -878,8 +864,9 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	-- Accent stripe
 	local stripe = UIFactory.createFrame({
 		Name = "Stripe",
-		Size = UDim2.new(1, 0, 0, 6),
+		Size = UDim2.new(1, 0, 0, 8),
 		BackgroundColor3 = themeData.accent or theme.icon,
+		CornerRadius = UDim.new(0, 16),
 		ZIndex = 14
 	})
 	stripe.Parent = inner
@@ -902,8 +889,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Name = "Icon",
 		Image = iconImage,
 		ImageColor3 = theme.icon,
-		Size = UDim2.new(0, 46, 0, 46),
-		Position = UDim2.new(0, 14, 0, 24),
+		Size = UDim2.new(0, 56, 0, 56),
+		Position = UDim2.new(0, 14, 0, 22),
 		ZIndex = 15
 	})
 	icon.Parent = inner
@@ -914,10 +901,12 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Text = itemData.name,
 		TextColor3 = itemType == "pass" and Color3.fromRGB(240, 240, 250) or ThemeManager.getColor("text"),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 72, 0, 22),
-		Size = UDim2.new(1, -84, 0, 26),
+		Position = UDim2.new(0, 80, 0, 18),
+		Size = UDim2.new(1, -160, 0, 28),
 		FontWeight = Enum.FontWeight.SemiBold,
 		TextSize = 20,
+		TextWrapped = false,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		ZIndex = 15
 	})
 	itemName.Parent = inner
@@ -928,8 +917,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Text = itemData.description or (itemType == "pass" and "Gamepass" or "Cash Bundle"),
 		TextColor3 = itemType == "pass" and Color3.fromRGB(200, 200, 220) or ThemeManager.getColor("subtext"),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 72, 0, 52),
-		Size = UDim2.new(1, -84, 0, 40),
+		Position = UDim2.new(0, 80, 0, 50),
+		Size = UDim2.new(1, -160, 0, 44),
 		FontWeight = Enum.FontWeight.Regular,
 		TextSize = 14,
 		TextWrapped = true,
@@ -940,8 +929,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	-- Purchase button
 	local purchaseButton = UIFactory.createTextButton({
 		Name = "PurchaseButton",
-		Size = UDim2.new(0, 146, 0, 42),
-		Position = UDim2.new(0, 14, 1, -54),
+		Size = UDim2.new(0, 170, 0, 48),
+		Position = UDim2.new(0, 14, 1, -60),
 		BackgroundColor3 = theme.button,
 		Text = itemType == "pass" and ("R$ " .. tostring(itemData.price)) or "Purchase",
 		TextColor3 = itemType == "pass" and Color3.fromRGB(240, 240, 255) or (themeData.accent or theme.icon),
@@ -1049,9 +1038,42 @@ local function buildHomePage()
 				})
 				task.wait(1.5)
 			end
-		end)
+				end)
 	end
-
+	
+	-- Soft background overlay for Home
+	local homeBgOverlay = UIFactory.createFrame({
+		Name = "HomeBg",
+		Size = UDim2.new(1, -24, 1, -24),
+		Position = UDim2.new(0, 12, 0, 12),
+		BackgroundColor3 = ThemeManager.getColor("panelAlt"),
+		CornerRadius = UDim.new(0, 18),
+		ZIndex = 10
+	})
+	homeBgOverlay.Parent = homePage
+	local homeBgGrad = Instance.new("UIGradient")
+	homeBgGrad.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Utils.blendColor(ThemeManager.getColor("kitty"), Color3.new(1,1,1), 0.97)),
+		ColorSequenceKeypoint.new(1, Color3.new(1,1,1))
+	}
+	homeBgGrad.Rotation = 90
+	homeBgGrad.Parent = homeBgOverlay
+	
+	-- Subtle cloud band at the top
+	if AssetManager.isValidAsset(AssetManager.assets.cloudTexture) then
+		local clouds = UIFactory.createImageLabel({
+			Name = "CloudBand",
+			Image = AssetManager.assets.cloudTexture,
+			ImageTransparency = 0.9,
+			Size = UDim2.new(1, 0, 0, 120),
+			Position = UDim2.new(0, 0, 0, 12),
+			ScaleType = Enum.ScaleType.Tile,
+			ZIndex = 11
+		})
+		clouds.TileSize = UDim2.fromOffset(256, 128)
+		clouds.Parent = homePage
+	end
+	
 	-- Hero section
 	local heroSection = UIFactory.createFrame({
 		Name = "HeroSection",
@@ -1431,8 +1453,8 @@ local function buildCashPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1445,6 +1467,7 @@ local function buildCashPage()
 			badge = AssetManager.assets.badgeCinna,
 			accent = ThemeManager.getColor("cinnaSky")
 		})
+		card.Rotation = 0
 		card.Parent = cashScroll
 	end
 
@@ -1462,6 +1485,7 @@ local function buildGamepassesPage()
 	local bgFrame = UIFactory.createFrame({
 		Name = "BgFrame",
 		BackgroundColor3 = Color3.fromRGB(22, 22, 26),
+		CornerRadius = UDim.new(0, 18),
 		ZIndex = 11
 	})
 	bgFrame.Parent = passPage
@@ -1474,9 +1498,9 @@ local function buildGamepassesPage()
 		CornerRadius = UDim.new(0, 18),
 		ZIndex = 11
 	})
-	bgOverlay.Parent = passPage
+	bgOverlay.Parent = bgFrame
 
-	-- Add gradient with darker tones
+		-- Add gradient with darker tones
 	local bgGradient = Instance.new("UIGradient")
 	bgGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 34, 42)),
@@ -1485,58 +1509,35 @@ local function buildGamepassesPage()
 	}
 	bgGradient.Rotation = 135
 	bgGradient.Parent = bgOverlay
-
-	-- Add edgy star decorations
+	bgOverlay.ClipsDescendants = true
+	
+	-- Star background image (restored)
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
-		local stars = Instance.new("ImageLabel")
-		stars.Name = "StarPattern"
-		stars.BackgroundTransparency = 1
-		stars.Image = AssetManager.assets.starPattern
-		stars.ImageTransparency = 0.6
-		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
-		stars.ScaleType = Enum.ScaleType.Tile
-		stars.TileSize = UDim2.fromOffset(900, 900)
-		stars.Size = UDim2.fromScale(1, 1)
-		stars.ZIndex = 11
-		stars.Parent = passPage
-
-		-- Rotating stars effect
-		task.spawn(function()
-			while stars.Parent do
-				stars.Rotation = stars.Rotation + 0
-				task.wait(0.1)
-			end
-		end)
+		local starsBg = UIFactory.createImageLabel({
+			Name = "StarBackground",
+			Image = AssetManager.assets.starPattern,
+			ImageTransparency = 0.6,
+			ImageColor3 = ThemeManager.getColor("kuromiLav"),
+			ScaleType = Enum.ScaleType.Tile,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 10
+		})
+		starsBg.TileSize = UDim2.fromOffset(720, 720)
+		starsBg.Parent = bgOverlay
 	end
-
-	-- Add Kuromi character image (no circular glow)
+	
+		-- Add Kuromi character image (static sticker in top-left)
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
-		Image = "rbxassetid://5806227321",  -- Converted to proper image ID
+		Image = "rbxassetid://5806227321",
 		Size = UDim2.fromOffset(180, 180),
-		Position = UDim2.new(0, -17, 0, 20),  -- More to the left
+		Position = UDim2.new(0, -17, 0, 20),
 		AnchorPoint = Vector2.new(0, 0),
 		BackgroundTransparency = 1,
-		ImageTransparency = 0.15,  -- More visible
-		ZIndex = 13  -- Higher z-index
+		ImageTransparency = 0.15,
+		ZIndex = 13
 	})
 	kuromiCharacter.Parent = passPage
-
-	-- Add subtle floating animation to Kuromi
-	task.spawn(function()
-		local startPos = kuromiCharacter.Position
-		while kuromiCharacter.Parent do
-			local t = tick()
-			kuromiCharacter.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + math.sin(t * 0.8) * 5,
-				startPos.Y.Scale,
-				startPos.Y.Offset + math.cos(t * 0.8) * 3
-			)
-			kuromiCharacter.Rotation = math.sin(t * 0.5) * 5
-			task.wait(0.1)
-		end
-	end)
 
 	-- Create scrolling frame for gamepass items
 	local passScroll = UIFactory.createScrollingFrame({
@@ -1545,8 +1546,8 @@ local function buildGamepassesPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1560,8 +1561,8 @@ local function buildGamepassesPage()
 			accent = ThemeManager.getColor("kuromiLav")
 		})
 
-		-- Add slight rotation for visual interest
-		card.Rotation = (idx % 2 == 0) and 2 or -2
+		-- Keep gamepass cards straight
+		card.Rotation = 0
 		card.Parent = passScroll
 	end
 
