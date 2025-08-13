@@ -853,12 +853,9 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 
 	local theme = cardTheme[itemType] or cardTheme.cash
 
-	-- Make cash cards bigger
-	local cardSize = itemType == "cash" and UDim2.new(0, 380, 0, 220) or UDim2.new(0, 320, 0, 180)
-
 	local card = UIFactory.createFrame({
 		Name = "ItemCard",
-		Size = cardSize,
+		Size = UDim2.new(0, 320, 0, 180),
 		BackgroundColor3 = theme.bg,
 		CornerRadius = UDim.new(0, 20),
 		Stroke = {Color = theme.stroke, Thickness = itemType == "pass" and 3 or 1, Transparency = itemType == "pass" and 0.15 or 0.3},
@@ -1314,7 +1311,7 @@ local function buildCashPage()
 	bgGradient.Parent = bgOverlay
 
 	-- Add static cloud decorations
-	local pinkCloudId = "rbxassetid://4096004749"  -- Your correct cloud image
+	local pinkCloudId = "rbxassetid://4096004729"  -- A working cloud image
 
 	-- White clouds on top right
 	local whiteCloud1 = Instance.new("ImageLabel")
@@ -1434,7 +1431,7 @@ local function buildCashPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 380, 0, 220),  -- Bigger size for cash cards
+			CellSize = UDim2.new(0, 320, 0, 180),
 			CellPadding = UDim2.new(0, 16, 0, 16),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
@@ -1469,24 +1466,11 @@ local function buildGamepassesPage()
 	})
 	bgFrame.Parent = passPage
 
-	-- Add Kuromi themed background
-	local bgImage = UIFactory.createImageLabel({
-		Name = "KuromiBackground",
-		Size = UDim2.new(1, 0, 1, 0),
-		Position = UDim2.new(0, 0, 0, 0),
-		Image = "rbxassetid://129173330481899",  -- Custom Kuromi background
-		ScaleType = Enum.ScaleType.Crop,
-		ImageTransparency = 0.2,  -- Slight transparency so content is readable
-		ZIndex = 11
-	})
-	bgImage.Parent = passPage
-
 	local bgOverlay = UIFactory.createFrame({
 		Name = "BgOverlay",
 		Size = UDim2.new(1, -24, 1, -24),
 		Position = UDim2.new(0, 12, 0, 12),
 		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("kuromiLav"), Color3.new(1, 1, 1), 0.85),
-		BackgroundTransparency = 0.3,  -- Semi-transparent overlay
 		CornerRadius = UDim.new(0, 18),
 		ZIndex = 11
 	})
@@ -1502,32 +1486,21 @@ local function buildGamepassesPage()
 	bgGradient.Rotation = 135
 	bgGradient.Parent = bgOverlay
 
-	-- Add edgy star decorations with rounded corners
+	-- Add edgy star decorations
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
-		-- Create a container frame with rounded corners to clip the stars
-		local starsContainer = UIFactory.createFrame({
-			Name = "StarsContainer",
-			Size = UDim2.new(1, -24, 1, -24),
-			Position = UDim2.new(0, 12, 0, 12),
-			BackgroundTransparency = 1,
-			CornerRadius = UDim.new(0, 18),  -- Same radius as bgOverlay
-			ZIndex = 11
-		})
-		starsContainer.Parent = passPage
-
 		local stars = Instance.new("ImageLabel")
 		stars.Name = "StarPattern"
 		stars.BackgroundTransparency = 1
 		stars.Image = AssetManager.assets.starPattern
-		stars.ImageTransparency = 0.6  -- Your original transparency
+		stars.ImageTransparency = 0.6
 		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
 		stars.ScaleType = Enum.ScaleType.Tile
-		stars.TileSize = UDim2.fromOffset(900, 900)  -- Your original tile size
+		stars.TileSize = UDim2.fromOffset(900, 900)
 		stars.Size = UDim2.fromScale(1, 1)
 		stars.ZIndex = 11
-		stars.Parent = starsContainer  -- Parent to the container for clipping
+		stars.Parent = passPage
 
-		-- Rotating stars effect (keeping it at 0 as you had)
+		-- Rotating stars effect
 		task.spawn(function()
 			while stars.Parent do
 				stars.Rotation = stars.Rotation + 0
@@ -1539,7 +1512,7 @@ local function buildGamepassesPage()
 	-- Add Kuromi character image (no circular glow)
 	local kuromiCharacter = UIFactory.createImageLabel({
 		Name = "KuromiCharacter",
-		Image = "rbxassetid://5806227330",  -- Your Kuromi image ID
+		Image = "rbxassetid://5806227321",  -- Converted to proper image ID
 		Size = UDim2.fromOffset(180, 180),
 		Position = UDim2.new(0, -17, 0, 20),  -- More to the left
 		AnchorPoint = Vector2.new(0, 0),
