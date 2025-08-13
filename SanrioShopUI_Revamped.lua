@@ -102,7 +102,7 @@ AssetManager.assets = {
 	-- Additional themed assets
 	hkBowPattern = "rbxassetid://6022668879",  -- Bow pattern
 	cloudTexture = "rbxassetid://7149254641",  -- Cloud texture for Cinnamoroll
-	starPattern = "rbxassetid://6022668898",   -- Star pattern
+	starPattern = "rbxassetid://121915223943271",   -- Star pattern
 	hkCuteFace = "rbxassetid://14978925654",  -- Hello Kitty cute face
 	cinnamorollFly = "rbxassetid://15011356128",  -- Cinnamoroll flying
 	melodyFlower = "rbxassetid://17398525031",  -- My Melody with flower
@@ -878,48 +878,30 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	})
 	inner.Parent = card
 
-	-- Accent stripe (rounded capsule with soft glow)
+	-- Accent outline around the entire card (replaces top stripe)
 	local accentColor = themeData.accent or theme.icon
 
-	local accentGlow = Instance.new("ImageLabel")
-	accentGlow.Name = "AccentGlow"
-	accentGlow.BackgroundTransparency = 1
-	accentGlow.Image = "rbxassetid://6015897843"
-	accentGlow.ScaleType = Enum.ScaleType.Slice
-	accentGlow.SliceCenter = Rect.new(49, 49, 450, 450)
-	accentGlow.ImageColor3 = accentColor
-	accentGlow.ImageTransparency = 0.85
-	accentGlow.Size = UDim2.new(1, 36, 0, 36)
-	accentGlow.Position = UDim2.new(0, -18, 0, 2)
-	accentGlow.ZIndex = 14
-	accentGlow.Parent = inner
+	local accentOutline = Instance.new("UIStroke")
+	accentOutline.Name = "AccentOutline"
+	accentOutline.Color = accentColor
+	accentOutline.Thickness = 2
+	accentOutline.Transparency = 0.15
+	accentOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	accentOutline.Parent = card
 
-	local accent = Instance.new("Frame")
-	accent.Name = "Accent"
-	accent.Size = UDim2.new(1, -24, 0, 12)
-	accent.Position = UDim2.new(0, 12, 0, 12)
-	accent.BackgroundColor3 = accentColor
-	accent.ZIndex = 15
-	accent.Parent = inner
-
-	local accentCorner = Instance.new("UICorner")
-	accentCorner.CornerRadius = UDim.new(1, 0)
-	accentCorner.Parent = accent
-
-	local accentStroke = Instance.new("UIStroke")
-	accentStroke.Color = Utils.blendColor(accentColor, Color3.new(1, 1, 1), 0.35)
-	accentStroke.Thickness = 1.5
-	accentStroke.Transparency = 0.35
-	accentStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	accentStroke.Parent = accent
-
-	local accentGradient = Instance.new("UIGradient")
-	accentGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Utils.blendColor(Color3.new(1,1,1), accentColor, 0.75)),
-		ColorSequenceKeypoint.new(1, accentColor)
-	})
-	accentGradient.Rotation = 0
-	accentGradient.Parent = accent
+	-- Subtle halo behind the card for depth
+	local accentHalo = Instance.new("ImageLabel")
+	accentHalo.Name = "AccentHalo"
+	accentHalo.BackgroundTransparency = 1
+	accentHalo.Image = "rbxassetid://6015897843"
+	accentHalo.ScaleType = Enum.ScaleType.Slice
+	accentHalo.SliceCenter = Rect.new(49, 49, 450, 450)
+	accentHalo.ImageColor3 = accentColor
+	accentHalo.ImageTransparency = 0.92
+	accentHalo.Size = UDim2.new(1, 36, 1, 36)
+	accentHalo.Position = UDim2.new(0, -18, 0, -18)
+	accentHalo.ZIndex = card.ZIndex - 1
+	accentHalo.Parent = card
 
 	-- Character badge
 	if themeData.badge and AssetManager.isValidAsset(themeData.badge) then
@@ -1011,7 +993,7 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Size = UDim2.new(0, 170, 0, 48),
 		Position = UDim2.new(0, 14, 1, -60),
 		BackgroundColor3 = Utils.blendColor(accentColor, Color3.new(1,1,1), 0.88),
-		Text = "Purchase",
+		Text = itemType == "pass" and "Purchase" or "Purchase",
 		TextColor3 = accentColor,
 		CornerRadius = UDim.new(1, 0),
 		Stroke = {Color = accentColor, Thickness = 2, Transparency = 0.15},
@@ -1091,7 +1073,7 @@ local function buildHomePage()
 		pattern.Parent = homePage
 	end
 
-	-- Add cute Hello Kitty decoration
+	-- Add cute Hello Kitty decoration (face) + bow sticker
 	if AssetManager.isValidAsset(AssetManager.assets.hkCuteFace) then
 		local hkDecor = UIFactory.createImageLabel({
 			Name = "HelloKittyDecor",
@@ -1104,6 +1086,20 @@ local function buildHomePage()
 			ZIndex = 12
 		})
 		hkDecor.Parent = homePage
+
+		-- Extra bow sticker near the hero title
+		if AssetManager.isValidAsset(AssetManager.assets.hkBowPattern) then
+			local bow = UIFactory.createImageLabel({
+				Name = "HelloKittyBow",
+				Image = AssetManager.assets.hkBowPattern,
+				Size = UDim2.fromOffset(42, 42),
+				Position = UDim2.new(0, 82, 0, 8),
+				BackgroundTransparency = 1,
+				ImageTransparency = 0.08,
+				ZIndex = 14
+			})
+			bow.Parent = homePage
+		end
 
 		-- Bouncing animation
 		task.spawn(function()
@@ -1364,6 +1360,7 @@ local function buildCashPage()
 		Position = UDim2.new(0, 12, 0, 12),
 		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("cinnaSky"), Color3.new(1, 1, 1), 0.7),
 		CornerRadius = UDim.new(0, 18),
+		ClipsDescendants = true,
 		ZIndex = 11
 	})
 	bgOverlay.Parent = cashPage
@@ -1499,8 +1496,8 @@ local function buildCashPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1530,6 +1527,8 @@ local function buildGamepassesPage()
 	local bgFrame = UIFactory.createFrame({
 		Name = "BgFrame",
 		BackgroundColor3 = Color3.fromRGB(22, 22, 26),
+		CornerRadius = UDim.new(0, 18),
+		ClipsDescendants = true,
 		ZIndex = 11
 	})
 	bgFrame.Parent = passPage
@@ -1540,6 +1539,7 @@ local function buildGamepassesPage()
 		Position = UDim2.new(0, 12, 0, 12),
 		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("kuromiLav"), Color3.new(1, 1, 1), 0.85),
 		CornerRadius = UDim.new(0, 18),
+		ClipsDescendants = true,
 		ZIndex = 11
 	})
 	bgOverlay.Parent = passPage
@@ -1560,18 +1560,18 @@ local function buildGamepassesPage()
 		stars.Name = "StarPattern"
 		stars.BackgroundTransparency = 1
 		stars.Image = AssetManager.assets.starPattern
-		stars.ImageTransparency = 0.9
+		stars.ImageTransparency = 0.6
 		stars.ImageColor3 = ThemeManager.getColor("kuromiLav")
 		stars.ScaleType = Enum.ScaleType.Tile
-		stars.TileSize = UDim2.fromOffset(100, 100)
+		stars.TileSize = UDim2.fromOffset(900, 900)
 		stars.Size = UDim2.fromScale(1, 1)
-		stars.ZIndex = 11
-		stars.Parent = passPage
+		stars.ZIndex = 10
+		stars.Parent = bgOverlay
 
 		-- Rotating stars effect
 		task.spawn(function()
 			while stars.Parent do
-				stars.Rotation = stars.Rotation + 0.1
+				stars.Rotation = stars.Rotation + 0
 				task.wait(0.1)
 			end
 		end)
@@ -1613,8 +1613,8 @@ local function buildGamepassesPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1628,8 +1628,8 @@ local function buildGamepassesPage()
 			accent = ThemeManager.getColor("kuromiLav")
 		})
 
-		-- Add slight rotation for visual interest
-		card.Rotation = (idx % 2 == 0) and 2 or -2
+		-- Keep cards straight for clean grid
+		card.Rotation = 0
 		card.Parent = passScroll
 	end
 
