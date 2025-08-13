@@ -195,7 +195,14 @@ local function hydrateMetadata()
 			end
 		end
 	end
-	-- Dev products: names may be updated, price generally not exposed; leave icons default
+	-- Dev products: attempt to assign a thumbnail if none is provided
+	for _, dev in ipairs(ShopData.data.cash) do
+		if not dev.icon or dev.icon == "" or dev.icon == "rbxassetid://0" then
+			-- There is no dedicated DevProduct thumbnail API; use Asset thumbnail as a generic visual placeholder
+			-- You can replace this with your own asset ids to brand bundles
+			dev.icon = "rbxthumb://type=Asset&id="..tostring(dev.id).."&w=420&h=420"
+		end
+	end
 end
 
 -- Sound manager
