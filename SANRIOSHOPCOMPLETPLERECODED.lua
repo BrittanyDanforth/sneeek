@@ -186,11 +186,10 @@ end
 local function hydrateMetadata()
 	-- Gamepasses: pull icon and price
 	for _, gp in ipairs(ShopData.data.gamepasses) do
+		-- Prefer Roblox thumbnail scheme for gamepass icons
+		gp.icon = "rbxthumb://type=GamePass&id="..tostring(gp.id).."&w=420&h=420"
 		local info = ShopData.getGamePassInfo(gp.id)
 		if info then
-			if info.IconImageAssetId and (not AssetManager.isValid(gp.icon) or gp.icon == "rbxassetid://0") then
-				gp.icon = "rbxassetid://"..tostring(info.IconImageAssetId)
-			end
 			if info.PriceInRobux and (not gp.price or gp.price == 0) then
 				gp.price = info.PriceInRobux
 			end
@@ -579,7 +578,15 @@ MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, produc
 	if CTA and CTA.Parent then
 		CTA.Text = wasPurchased and "Purchased!" or "Purchase"
 		CTA.Active = true; CTA.AutoButtonColor = true
-		if wasPurchased then task.delay(1.2, function() if CTA and CTA.Parent then CTA.Text = "Purchase" end end) end
+		if wasPurchased then
+			-- Fire server to grant currency; replace event name to your own
+			local event = game:GetService("ReplicatedStorage"):FindFirstChild("GrantProductCurrency")
+			if event and event:IsA("RemoteEvent") then
+				event:FireServer(productId)
+			end
+			-- reset CTA text after a moment
+			task.delay(1.2, function() if CTA and CTA.Parent then CTA.Text = "Purchase" end end)
+		end
 	end
 	PendingPurchases.product[productId] = nil
 end)
