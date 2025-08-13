@@ -182,6 +182,23 @@ function ShopData.userOwnsGamepass(userId: number, passId: number): boolean
 	return result == true
 end
 
+-- Enrich shop data (icons/prices) from Marketplace
+local function hydrateMetadata()
+	-- Gamepasses: pull icon and price
+	for _, gp in ipairs(ShopData.data.gamepasses) do
+		local info = ShopData.getGamePassInfo(gp.id)
+		if info then
+			if info.IconImageAssetId and (not AssetManager.isValid(gp.icon) or gp.icon == "rbxassetid://0") then
+				gp.icon = "rbxassetid://"..tostring(info.IconImageAssetId)
+			end
+			if info.PriceInRobux and (not gp.price or gp.price == 0) then
+				gp.price = info.PriceInRobux
+			end
+		end
+	end
+	-- Dev products: names may be updated, price generally not exposed; leave icons default
+end
+
 -- Sound manager
 local Sfx = {enabled = true, sounds = {}}
 
@@ -507,6 +524,7 @@ local function createSkeletonCard(accent: Color3): Frame
 end
 
 -- Card component (accent outline + halo)
+local PendingPurchases = {product = {}, pass = {}}
 local function createShopItemCard(item: {[string]: any}, itemType: string, accent: Color3): Frame
 	local card = UI.frame({Name = "ItemCard", Size = UDim2.new(0,360,0,210), BackgroundColor3 = Theme.c("surface"), CornerRadius = UDim.new(0,20), Stroke = {Color = Theme.c("stroke"), Transparency = 0.3}, ZIndex = 12})
 	local inner = UI.frame({Name = "Inner", Size = UDim2.new(1,-18,1,-18), Position = UDim2.new(0,9,0,9), BackgroundColor3 = itemType == "pass" and Color3.fromRGB(34,34,42) or Theme.c("surfaceAlt"), CornerRadius = UDim.new(0,16), Stroke = {Color = itemType == "pass" and Utils.blendColor(Theme.c("kuromiLav"), Color3.new(0.2,0.2,0.25), 0.5) or Theme.c("stroke"), Transparency = 0.25}, ZIndex = 13}); inner.Parent = card
@@ -531,17 +549,16 @@ local function createShopItemCard(item: {[string]: any}, itemType: string, accen
 	-- CTA
 	local CTA = UI.textButton({Name = "CTA", Text = "Purchase", Size = UDim2.new(0,170,0,48), Position = UDim2.new(0,14,1,-60), BackgroundColor3 = Utils.blendColor(accent, Color3.new(1,1,1), 0.88), TextColor3 = accent, CornerRadius = UDim.new(1,0), Stroke = {Color = accent, Thickness = 2, Transparency = 0.15}, FontWeight = Enum.FontWeight.Bold, TextSize = 20, ZIndex = 16}); CTA.Parent = inner
 
-	-- Purchase handler
+	-- Purchase handler (defer re-enable to finished events)
 	CTA.MouseButton1Click:Connect(function()
-		CTA.Active = false; CTA.AutoButtonColor = false; CTA.Text = "Processing…"
-		Utils.safePcall(function()
-			if itemType == "pass" then
-				MarketplaceService:PromptGamePassPurchase(localPlayer, item.id)
-			else
-				MarketplaceService:PromptProductPurchase(localPlayer, item.id)
-			end
-		end)
-		task.delay(1.0, function() if CTA and CTA.Parent then CTA.Text = "Purchase"; CTA.Active = true; CTA.AutoButtonColor = true end end)
+		CTA.Text = "Processing…"; CTA.Active = false; CTA.AutoButtonColor = false
+		if itemType == "pass" then
+			PendingPurchases.pass[item.id] = CTA
+			Utils.safePcall(function() MarketplaceService:PromptGamePassPurchase(localPlayer, item.id) end)
+		else
+			PendingPurchases.product[item.id] = CTA
+			Utils.safePcall(function() MarketplaceService:PromptProductPurchase(localPlayer, item.id) end)
+		end
 	end)
 
 	-- Hover lift
@@ -555,6 +572,36 @@ local function createShopItemCard(item: {[string]: any}, itemType: string, accen
 
 	return card
 end
+
+-- Re-enable CTAs on purchase finished and update states
+MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, productId, wasPurchased)
+	local CTA = PendingPurchases.product[productId]
+	if CTA and CTA.Parent then
+		CTA.Text = wasPurchased and "Purchased!" or "Purchase"
+		CTA.Active = true; CTA.AutoButtonColor = true
+		if wasPurchased then task.delay(1.2, function() if CTA and CTA.Parent then CTA.Text = "Purchase" end end) end
+	end
+	PendingPurchases.product[productId] = nil
+end)
+
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(userId, gamePassId, wasPurchased)
+	local CTA = PendingPurchases.pass[gamePassId]
+	if CTA and CTA.Parent then
+		CTA.Text = wasPurchased and "Owned" or "Purchase"
+		CTA.Active = not wasPurchased; CTA.AutoButtonColor = not wasPurchased
+	end
+	PendingPurchases.pass[gamePassId] = nil
+	-- If owned, try to find and update the card visuals
+	if wasPurchased then
+		for _, gp in ipairs(ShopData.data.gamepasses) do
+			if gp.id == gamePassId then
+				-- Best-effort: update any visible cards
+				-- Ownership refresh occurs when building or next open
+				break
+			end
+		end
+	end
+end)
 
 -- Owned state updater for gamepasses
 local function updateGamepassOwnedState(card: Frame, passItem: {[string]: any}, accent: Color3)
@@ -702,6 +749,7 @@ local function buildPasses()
 end
 
 -- Build pages
+hydrateMetadata()
 buildHome()
 buildCash()
 buildPasses()
