@@ -448,7 +448,9 @@ local function createSparkleEffect(parent: GuiObject)
 	sparkleContainer.Name = "SparkleContainer"
 	sparkleContainer.Size = UDim2.fromScale(1, 1)
 	sparkleContainer.BackgroundTransparency = 1
-	sparkleContainer.ZIndex = 150
+	sparkleContainer.BorderSizePixel = 0
+	sparkleContainer.ClipsDescendants = true
+	sparkleContainer.ZIndex = math.max(1, (parent.ZIndex or 1) - 1)
 	sparkleContainer.Parent = parent
 	
 	-- Create multiple sparkles
@@ -458,7 +460,7 @@ local function createSparkleEffect(parent: GuiObject)
 		sparkle.Size = UDim2.fromOffset(4, 4)
 		sparkle.BackgroundColor3 = Color3.new(1, 1, 1)
 		sparkle.Position = UDim2.fromScale(math.random(), math.random())
-		sparkle.ZIndex = 151
+		sparkle.ZIndex = sparkleContainer.ZIndex + 1
 		sparkle.Parent = sparkleContainer
 		
 		local sparkleCorner = Instance.new("UICorner")
@@ -477,7 +479,7 @@ local function createSparkleEffect(parent: GuiObject)
 					startPos.X.Scale + math.sin(t) * 0.02,
 					(startPos.Y.Scale - t * 0.1 % 1.2) % 1.2
 				)
-				sparkle.BackgroundTransparency = 0.3 + math.sin(t * 2) * 0.3
+				sparkle.BackgroundTransparency = 0.6 + math.sin(t * 2) * 0.2
 				task.wait(0.1)
 			end
 		end)
@@ -853,16 +855,16 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	
 	local theme = cardTheme[itemType] or cardTheme.cash
 	
-	-- Make cash cards bigger
-	local cardSize = itemType == "cash" and UDim2.new(0, 380, 0, 220) or UDim2.new(0, 320, 0, 180)
+	-- Unified card size
+	local cardSize = UDim2.new(0, 360, 0, 210)
 	
 	local card = UIFactory.createFrame({
 		Name = "ItemCard",
 		Size = cardSize,
 		BackgroundColor3 = theme.bg,
 		CornerRadius = UDim.new(0, 20),
-		Stroke = {Color = theme.stroke, Thickness = itemType == "pass" and 3 or 1, Transparency = itemType == "pass" and 0.15 or 0.3},
-		Shadow = {Offset = 30, Transparency = 0.5},
+		Stroke = {Color = theme.stroke, Thickness = itemType == "pass" and 2 or 1, Transparency = 0.3},
+		Shadow = {Offset = 26, Transparency = 0.55},
 		ZIndex = 12
 	})
 	
@@ -873,19 +875,54 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Position = UDim2.new(0, 9, 0, 9),
 		BackgroundColor3 = itemType == "pass" and Color3.fromRGB(34, 34, 42) or ThemeManager.getColor("panelAlt"),
 		CornerRadius = UDim.new(0, 16),
-		Stroke = {Color = itemType == "pass" and Color3.fromRGB(200, 120, 220) or ThemeManager.getColor("stroke")},
+		ClipsDescendants = true,
+		Stroke = {Color = itemType == "pass" and Utils.blendColor(ThemeManager.getColor("kuromiLav"), Color3.new(0.2,0.2,0.25), 0.5) or ThemeManager.getColor("stroke"), Transparency = 0.25},
 		ZIndex = 13
 	})
 	inner.Parent = card
 	
-	-- Accent stripe
-	local stripe = UIFactory.createFrame({
-		Name = "Stripe",
-		Size = UDim2.new(1, 0, 0, 6),
-		BackgroundColor3 = themeData.accent or theme.icon,
-		ZIndex = 14
-	})
-	stripe.Parent = inner
+	-- Accent stripe (rounded capsule with soft glow)
+	local accentColor = themeData.accent or theme.icon
+
+	local accentGlow = Instance.new("ImageLabel")
+	accentGlow.Name = "AccentGlow"
+	accentGlow.BackgroundTransparency = 1
+	accentGlow.Image = "rbxassetid://6015897843"
+	accentGlow.ScaleType = Enum.ScaleType.Slice
+	accentGlow.SliceCenter = Rect.new(49, 49, 450, 450)
+	accentGlow.ImageColor3 = accentColor
+	accentGlow.ImageTransparency = 0.85
+	accentGlow.Size = UDim2.new(1, 36, 0, 36)
+	accentGlow.Position = UDim2.new(0, -18, 0, 2)
+	accentGlow.ZIndex = 14
+	accentGlow.Parent = inner
+
+	local accent = Instance.new("Frame")
+	accent.Name = "Accent"
+	accent.Size = UDim2.new(1, -24, 0, 12)
+	accent.Position = UDim2.new(0, 12, 0, 12)
+	accent.BackgroundColor3 = accentColor
+	accent.ZIndex = 15
+	accent.Parent = inner
+
+	local accentCorner = Instance.new("UICorner")
+	accentCorner.CornerRadius = UDim.new(1, 0)
+	accentCorner.Parent = accent
+
+	local accentStroke = Instance.new("UIStroke")
+	accentStroke.Color = Utils.blendColor(accentColor, Color3.new(1, 1, 1), 0.35)
+	accentStroke.Thickness = 1.5
+	accentStroke.Transparency = 0.35
+	accentStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	accentStroke.Parent = accent
+
+	local accentGradient = Instance.new("UIGradient")
+	accentGradient.Color = ColorSequence.new(
+		ColorSequenceKeypoint.new(0, Utils.blendColor(Color3.new(1,1,1), accentColor, 0.75)),
+		ColorSequenceKeypoint.new(1, accentColor)
+	)
+	accentGradient.Rotation = 0
+	accentGradient.Parent = accent
 	
 	-- Character badge
 	if themeData.badge and AssetManager.isValidAsset(themeData.badge) then
@@ -905,8 +942,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Name = "Icon",
 		Image = iconImage,
 		ImageColor3 = theme.icon,
-		Size = UDim2.new(0, 46, 0, 46),
-		Position = UDim2.new(0, 14, 0, 24),
+		Size = UDim2.new(0, 56, 0, 56),
+		Position = UDim2.new(0, 14, 0, 22),
 		ZIndex = 15
 	})
 	icon.Parent = inner
@@ -917,13 +954,44 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Text = itemData.name,
 		TextColor3 = itemType == "pass" and Color3.fromRGB(240, 240, 250) or ThemeManager.getColor("text"),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 72, 0, 22),
-		Size = UDim2.new(1, -84, 0, 26),
+		Position = UDim2.new(0, 80, 0, 18),
+		Size = UDim2.new(1, -160, 0, 28),
 		FontWeight = Enum.FontWeight.SemiBold,
-		TextSize = 20,
+		TextSize = 21,
+		TextWrapped = false,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		ZIndex = 15
 	})
 	itemName.Parent = inner
+
+	-- Price/amount chip (top-right)
+	local chip = UIFactory.createFrame({
+		Name = "Chip",
+		Size = UDim2.new(0, 120, 0, 30),
+		Position = UDim2.new(1, -132, 0, 10),
+		BackgroundColor3 = Utils.blendColor(accentColor, Color3.new(1,1,1), itemType == "pass" and 0.85 or 0.9),
+		CornerRadius = UDim.new(1, 0),
+		ZIndex = 16
+	})
+	chip.Parent = inner
+	local chipStroke = Instance.new("UIStroke")
+	chipStroke.Color = accentColor
+	chipStroke.Transparency = 0.35
+	chipStroke.Thickness = 1.5
+	chipStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	chipStroke.Parent = chip
+	local chipText = UIFactory.createTextLabel({
+		Name = "ChipText",
+		Text = itemType == "pass" and ("R$ " .. tostring(itemData.price)) or (itemData.amount and (tostring(itemData.amount) .. " Cash") or "Bundle"),
+		TextColor3 = accentColor,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = 16,
+		FontWeight = Enum.FontWeight.Medium,
+		TextWrapped = false,
+		Size = UDim2.fromScale(1,1),
+		ZIndex = 17
+	})
+	chipText.Parent = chip
 	
 	-- Item description
 	local description = UIFactory.createTextLabel({
@@ -931,8 +999,8 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 		Text = itemData.description or (itemType == "pass" and "Gamepass" or "Cash Bundle"),
 		TextColor3 = itemType == "pass" and Color3.fromRGB(200, 200, 220) or ThemeManager.getColor("subtext"),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 72, 0, 52),
-		Size = UDim2.new(1, -84, 0, 40),
+		Position = UDim2.new(0, 80, 0, 50),
+		Size = UDim2.new(1, -160, 0, 44),
 		FontWeight = Enum.FontWeight.Regular,
 		TextSize = 14,
 		TextWrapped = true,
@@ -943,13 +1011,13 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	-- Purchase button
 	local purchaseButton = UIFactory.createTextButton({
 		Name = "PurchaseButton",
-		Size = UDim2.new(0, 146, 0, 42),
-		Position = UDim2.new(0, 14, 1, -54),
-		BackgroundColor3 = theme.button,
-		Text = itemType == "pass" and ("R$ " .. tostring(itemData.price)) or "Purchase",
-		TextColor3 = itemType == "pass" and Color3.fromRGB(240, 240, 255) or (themeData.accent or theme.icon),
+		Size = UDim2.new(0, 170, 0, 48),
+		Position = UDim2.new(0, 14, 1, -60),
+		BackgroundColor3 = Utils.blendColor(accentColor, Color3.new(1,1,1), 0.88),
+		Text = "Purchase",
+		TextColor3 = accentColor,
 		CornerRadius = UDim.new(1, 0),
-		Stroke = {Color = themeData.accent or theme.icon, Thickness = 2, Transparency = 0.15},
+		Stroke = {Color = accentColor, Thickness = 2, Transparency = 0.15},
 		FontWeight = Enum.FontWeight.Bold,
 		TextSize = 20,
 		ZIndex = 16
@@ -1022,7 +1090,7 @@ local function buildHomePage()
 		pattern.ScaleType = Enum.ScaleType.Tile
 		pattern.TileSize = UDim2.fromOffset(120, 120)
 		pattern.Size = UDim2.fromScale(1, 1)
-		pattern.ZIndex = 11
+		pattern.ZIndex = 10
 		pattern.Parent = homePage
 	end
 	
@@ -1299,6 +1367,7 @@ local function buildCashPage()
 		Position = UDim2.new(0, 12, 0, 12),
 		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("cinnaSky"), Color3.new(1, 1, 1), 0.7),
 		CornerRadius = UDim.new(0, 18),
+		ClipsDescendants = true,
 		ZIndex = 11
 	})
 	bgOverlay.Parent = cashPage
@@ -1325,8 +1394,8 @@ local function buildCashPage()
 	whiteCloud1.ImageTransparency = 0.3  -- More visible
 	whiteCloud1.Size = UDim2.fromOffset(120, 80)
 	whiteCloud1.Position = UDim2.new(1, -140, 0, 40)
-	whiteCloud1.ZIndex = 11
-	whiteCloud1.Parent = cashPage
+	whiteCloud1.ZIndex = 10
+	whiteCloud1.Parent = bgOverlay
 	
 	local whiteCloud2 = Instance.new("ImageLabel")
 	whiteCloud2.Name = "WhiteCloud2"
@@ -1336,8 +1405,8 @@ local function buildCashPage()
 	whiteCloud2.ImageTransparency = 0.75
 	whiteCloud2.Size = UDim2.fromOffset(100, 70)
 	whiteCloud2.Position = UDim2.new(1, -80, 0, 120)
-	whiteCloud2.ZIndex = 11
-	whiteCloud2.Parent = cashPage
+	whiteCloud2.ZIndex = 10
+	whiteCloud2.Parent = bgOverlay
 	
 	-- Pink clouds on bottom left
 	local pinkCloud1 = Instance.new("ImageLabel")
@@ -1347,8 +1416,8 @@ local function buildCashPage()
 	pinkCloud1.ImageTransparency = 0.2  -- More visible
 	pinkCloud1.Size = UDim2.fromOffset(130, 85)
 	pinkCloud1.Position = UDim2.new(0, 30, 1, -120)
-	pinkCloud1.ZIndex = 11
-	pinkCloud1.Parent = cashPage
+	pinkCloud1.ZIndex = 10
+	pinkCloud1.Parent = bgOverlay
 	
 	local pinkCloud2 = Instance.new("ImageLabel")
 	pinkCloud2.Name = "PinkCloud2"
@@ -1357,8 +1426,8 @@ local function buildCashPage()
 	pinkCloud2.ImageTransparency = 0.7
 	pinkCloud2.Size = UDim2.fromOffset(110, 75)
 	pinkCloud2.Position = UDim2.new(0, 150, 1, -80)
-	pinkCloud2.ZIndex = 11
-	pinkCloud2.Parent = cashPage
+	pinkCloud2.ZIndex = 10
+	pinkCloud2.Parent = bgOverlay
 	
 	-- One more white cloud in middle-ish area
 	local whiteCloud3 = Instance.new("ImageLabel")
@@ -1369,8 +1438,8 @@ local function buildCashPage()
 	whiteCloud3.ImageTransparency = 0.8
 	whiteCloud3.Size = UDim2.fromOffset(90, 60)
 	whiteCloud3.Position = UDim2.new(0.7, 0, 0.4, 0)
-	whiteCloud3.ZIndex = 11
-	whiteCloud3.Parent = cashPage
+	whiteCloud3.ZIndex = 10
+	whiteCloud3.Parent = bgOverlay
 	
 	-- Additional clouds for better spread
 	-- More white clouds
@@ -1382,8 +1451,8 @@ local function buildCashPage()
 	whiteCloud4.ImageTransparency = 0.5
 	whiteCloud4.Size = UDim2.fromOffset(85, 55)
 	whiteCloud4.Position = UDim2.new(1, -200, 0, 200)
-	whiteCloud4.ZIndex = 11
-	whiteCloud4.Parent = cashPage
+	whiteCloud4.ZIndex = 10
+	whiteCloud4.Parent = bgOverlay
 	
 	local whiteCloud5 = Instance.new("ImageLabel")
 	whiteCloud5.Name = "WhiteCloud5"
@@ -1393,8 +1462,8 @@ local function buildCashPage()
 	whiteCloud5.ImageTransparency = 0.6
 	whiteCloud5.Size = UDim2.fromOffset(75, 50)
 	whiteCloud5.Position = UDim2.new(0.85, 0, 0.25, 0)
-	whiteCloud5.ZIndex = 11
-	whiteCloud5.Parent = cashPage
+	whiteCloud5.ZIndex = 10
+	whiteCloud5.Parent = bgOverlay
 	
 	-- More pink clouds
 	local pinkCloud3 = Instance.new("ImageLabel")
@@ -1404,8 +1473,8 @@ local function buildCashPage()
 	pinkCloud3.ImageTransparency = 0.3
 	pinkCloud3.Size = UDim2.fromOffset(95, 65)
 	pinkCloud3.Position = UDim2.new(0, 20, 1, -200)
-	pinkCloud3.ZIndex = 11
-	pinkCloud3.Parent = cashPage
+	pinkCloud3.ZIndex = 10
+	pinkCloud3.Parent = bgOverlay
 	
 	local pinkCloud4 = Instance.new("ImageLabel")
 	pinkCloud4.Name = "PinkCloud4"
@@ -1414,8 +1483,8 @@ local function buildCashPage()
 	pinkCloud4.ImageTransparency = 0.35
 	pinkCloud4.Size = UDim2.fromOffset(80, 55)
 	pinkCloud4.Position = UDim2.new(0.3, 0, 0.6, 0)
-	pinkCloud4.ZIndex = 11
-	pinkCloud4.Parent = cashPage
+	pinkCloud4.ZIndex = 10
+	pinkCloud4.Parent = bgOverlay
 	
 	local pinkCloud5 = Instance.new("ImageLabel")
 	pinkCloud5.Name = "PinkCloud5"
@@ -1424,8 +1493,8 @@ local function buildCashPage()
 	pinkCloud5.ImageTransparency = 0.4
 	pinkCloud5.Size = UDim2.fromOffset(70, 45)
 	pinkCloud5.Position = UDim2.new(0.15, 0, 0.35, 0)
-	pinkCloud5.ZIndex = 11
-	pinkCloud5.Parent = cashPage
+	pinkCloud5.ZIndex = 10
+	pinkCloud5.Parent = bgOverlay
 	
 	-- Create scrolling frame for cash items
 	local cashScroll = UIFactory.createScrollingFrame({
@@ -1434,8 +1503,8 @@ local function buildCashPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 380, 0, 220),  -- Bigger size for cash cards
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1465,6 +1534,8 @@ local function buildGamepassesPage()
 	local bgFrame = UIFactory.createFrame({
 		Name = "BgFrame",
 		BackgroundColor3 = Color3.fromRGB(22, 22, 26),
+		CornerRadius = UDim.new(0, 18),
+		ClipsDescendants = true,
 		ZIndex = 11
 	})
 	bgFrame.Parent = passPage
@@ -1573,8 +1644,8 @@ local function buildGamepassesPage()
 		Position = UDim2.new(0, 16, 0, 16),
 		Layout = {
 			Type = "Grid",
-			CellSize = UDim2.new(0, 320, 0, 180),
-			CellPadding = UDim2.new(0, 16, 0, 16),
+			CellSize = UDim2.new(0, 360, 0, 210),
+			CellPadding = UDim2.new(0, 18, 0, 18),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center
 		},
 		ZIndex = 12
@@ -1588,8 +1659,8 @@ local function buildGamepassesPage()
 			accent = ThemeManager.getColor("kuromiLav")
 		})
 		
-		-- Add slight rotation for visual interest
-		card.Rotation = (idx % 2 == 0) and 2 or -2
+		-- Keep cards straight for clean grid
+		card.Rotation = 0
 		card.Parent = passScroll
 	end
 	
