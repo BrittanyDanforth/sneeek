@@ -678,6 +678,21 @@ local function buildPasses()
 		local stars = UI.image({Name = "Stars", Image = AssetManager.assets.starPattern, ImageColor3 = Theme.c("kuromiLav"), ImageTransparency = 0.6, ScaleType = Enum.ScaleType.Tile, Size = UDim2.fromScale(1,1), ZIndex = 10}); stars.TileSize = UDim2.fromOffset(720,720); stars.Parent = overlay
 	end
 
+	-- Kuromi character sticker
+	local kuromiId = "rbxassetid://5806227321"
+	local kuromi = UI.image({Name = "Kuromi", Image = kuromiId, Size = UDim2.fromOffset(180,180), Position = UDim2.new(0, -10, 0, 20), AnchorPoint = Vector2.new(0,0), ImageTransparency = 0.12, ZIndex = 13});
+	kuromi.Parent = passPage
+	-- Gentle float animation (paused when not visible by virtue of page visibility)
+	task.spawn(function()
+		local base = kuromi.Position
+		while kuromi and kuromi.Parent do
+			local t = tick()
+			kuromi.Position = UDim2.new(base.X.Scale, base.X.Offset + math.sin(t*0.7)*4, base.Y.Scale, base.Y.Offset + math.cos(t*0.7)*3)
+			kuromi.Rotation = math.sin(t*0.4) * 3
+			task.wait(0.1)
+		end
+	end)
+
 	local grid = UI.scroll({Name = "PassGrid", Size = UDim2.new(1,-32,1,-32), Position = UDim2.new(0,16,0,16), Layout = {Type = "Grid", CellSize = UDim2.new(0,360,0,210), CellPadding = UDim2.new(0,18,0,18), HorizontalAlignment = Enum.HorizontalAlignment.Center}, ZIndex = 12}); grid.Parent = passPage
 	for _, gp in ipairs(ShopData.data.gamepasses) do
 		local card = createShopItemCard(gp, "pass", Theme.c("kuromiLav")); card.Parent = grid
