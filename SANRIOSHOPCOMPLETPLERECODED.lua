@@ -186,8 +186,8 @@ end
 local function hydrateMetadata()
 	-- Gamepasses: pull icon and price
 	for _, gp in ipairs(ShopData.data.gamepasses) do
-		-- Prefer Roblox thumbnail scheme for gamepass icons
-		gp.icon = "rbxthumb://type=GamePass&id="..tostring(gp.id).."&w=420&h=420"
+		-- Prefer Roblox thumbnail scheme for gamepass icons (GamePass requires 150x150)
+		gp.icon = "rbxthumb://type=GamePass&id="..tostring(gp.id).."&w=150&h=150"
 		local info = ShopData.getGamePassInfo(gp.id)
 		if info then
 			if info.PriceInRobux and (not gp.price or gp.price == 0) then
