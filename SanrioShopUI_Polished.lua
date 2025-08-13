@@ -917,10 +917,10 @@ local function createShopItemCard(itemData: {[string]: any}, itemType: string, t
 	accentStroke.Parent = accent
 
 	local accentGradient = Instance.new("UIGradient")
-	accentGradient.Color = ColorSequence.new(
+	accentGradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Utils.blendColor(Color3.new(1,1,1), accentColor, 0.75)),
 		ColorSequenceKeypoint.new(1, accentColor)
-	)
+	})
 	accentGradient.Rotation = 0
 	accentGradient.Parent = accent
 	
