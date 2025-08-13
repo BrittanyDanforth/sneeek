@@ -102,7 +102,7 @@ AssetManager.assets = {
 	-- Additional themed assets
 	hkBowPattern = "rbxassetid://6022668879",  -- Bow pattern
 	cloudTexture = "rbxassetid://7149254641",  -- Cloud texture for Cinnamoroll
-	starPattern = "rbxassetid://6022668898",   -- Star pattern
+	starPattern = "rbxassetid://121915223943271",   -- Star pattern
 	hkCuteFace = "rbxassetid://14978925654",  -- Hello Kitty cute face
 	cinnamorollFly = "rbxassetid://15011356128",  -- Cinnamoroll flying
 	melodyFlower = "rbxassetid://17398525031",  -- My Melody with flower
@@ -1461,6 +1461,14 @@ end
 
 -- Build Gamepasses Page
 local function buildGamepassesPage()
+	-- Add dark themed background
+	local bgFrame = UIFactory.createFrame({
+		Name = "BgFrame",
+		BackgroundColor3 = Color3.fromRGB(22, 22, 26),
+		ZIndex = 11
+	})
+	bgFrame.Parent = passPage
+
 	-- Add Kuromi themed background
 	local bgImage = UIFactory.createImageLabel({
 		Name = "KuromiBackground",
@@ -1478,12 +1486,22 @@ local function buildGamepassesPage()
 		Name = "BgOverlay",
 		Size = UDim2.new(1, -24, 1, -24),
 		Position = UDim2.new(0, 12, 0, 12),
-		BackgroundColor3 = Color3.fromRGB(20, 20, 26),
+		BackgroundColor3 = Utils.blendColor(ThemeManager.getColor("kuromiLav"), Color3.new(1, 1, 1), 0.85),
 		BackgroundTransparency = 0.3,  -- Semi-transparent overlay
 		CornerRadius = UDim.new(0, 18),
 		ZIndex = 11
 	})
 	bgOverlay.Parent = passPage
+
+	-- Add gradient with darker tones
+	local bgGradient = Instance.new("UIGradient")
+	bgGradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 34, 42)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(44, 44, 52)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 28, 34))
+	}
+	bgGradient.Rotation = 135
+	bgGradient.Parent = bgOverlay
 	
 	-- Add edgy star decorations with rounded corners
 	if AssetManager.isValidAsset(AssetManager.assets.starPattern) then
@@ -1524,7 +1542,7 @@ local function buildGamepassesPage()
 		Name = "KuromiCharacter",
 		Image = "rbxassetid://5806227330",  -- Your Kuromi image ID
 		Size = UDim2.fromOffset(180, 180),
-		Position = UDim2.new(0, -50, 0, 20),  -- More to the left
+		Position = UDim2.new(0, -17, 0, 20),  -- More to the left
 		AnchorPoint = Vector2.new(0, 0),
 		BackgroundTransparency = 1,
 		ImageTransparency = 0.15,  -- More visible
