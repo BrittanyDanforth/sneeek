@@ -79,7 +79,13 @@ mainFrame.Size = UDim2.new(0, 800, 0, 600)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Visible = false
+mainFrame.ClipsDescendants = true  -- Prevent content from going outside
 mainFrame.Parent = overlay
+
+-- Add size constraint to prevent it from being too big for screen
+local sizeConstraint = Instance.new("UISizeConstraint")
+sizeConstraint.MaxSize = Vector2.new(800, 600)
+sizeConstraint.Parent = mainFrame
 
 local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 20)
@@ -358,14 +364,15 @@ function ShopManager:open()
 	overlay.Visible = true
 	mainFrame.Visible = true
 	
-	-- Reset position and transparency
-	mainFrame.Position = UDim2.new(0.5, 0, -0.5, 0)
+	-- Start with frame scaled down and centered
+	mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	mainFrame.Size = UDim2.new(0, 0, 0, 0)
 	overlay.BackgroundTransparency = 1
 	
-	-- Animate in
+	-- Animate in with scale effect
 	TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
 	TweenService:Create(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, 0.5, 0)
+		Size = UDim2.new(0, 800, 0, 600)
 	}):Play()
 	
 	-- Load default tab
@@ -380,10 +387,10 @@ function ShopManager:close()
 	if not self.isOpen or self.isAnimating then return end
 	self.isAnimating = true
 	
-	-- Animate out
+	-- Animate out with scale effect
 	TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
 	TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 1.5, 0)
+		Size = UDim2.new(0, 0, 0, 0)
 	}):Play()
 	
 	wait(0.3)
