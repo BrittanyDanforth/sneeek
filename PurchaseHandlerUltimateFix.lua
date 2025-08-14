@@ -95,8 +95,7 @@ local function storeOriginalButtonStates()
 			originalButtonStates[button.Name] = {
 				Transparency = head.Transparency,
 				CanCollide = head.CanCollide,
-				BrickColor = head.BrickColor,
-				CFrame = head.CFrame
+				BrickColor = head.BrickColor
 			}
 		end
 	end
@@ -398,7 +397,7 @@ local function resetTycoonPurchases()
 				head.CanCollide = originalState.CanCollide
 				head.Transparency = originalState.Transparency
 				head.BrickColor = BrickColor.new("Really red")
-				head.CFrame = originalState.CFrame
+				-- DON'T restore CFrame - we'll fix positions after
 
 				-- RE-ADD HOVER EFFECT FOR BASE BUTTONS!
 				addSimpleHoverEffect(button)
@@ -427,6 +426,10 @@ local function resetTycoonPurchases()
 
 	-- Reset steal protection
 	CanSteal = true
+
+	-- FIX BUTTON POSITIONS AFTER RESET!
+	task.wait(0.1) -- Small delay to ensure everything is set
+	fixButtonPositions()
 
 	print("✅ Purchase handler fully reset!")
 end
