@@ -438,6 +438,8 @@ task.defer(function()
 	
 	-- Initial button color update
 	updateButtonColors()
+	
+	print("[HelloKitty] Initialization complete - buttons:", #buttons:GetChildren())
 end)
 
 -- Process each button for touch handling
@@ -447,11 +449,18 @@ for _, button in ipairs(buttons:GetChildren()) do
 		if not head then return end
 
 		head.Touched:Connect(function(hit)
-			if not head.CanCollide or head.Transparency > 0 then return end
-			if not currentOwner then return end
+			if not head.CanCollide or head.Transparency > 0 then 
+				print("[HelloKitty] Button", button.Name, "touched but not clickable (CanCollide:", head.CanCollide, "Transparency:", head.Transparency, ")")
+				return 
+			end
+			if not currentOwner then 
+				print("[HelloKitty] Button touched but no owner")
+				return 
+			end
 
 			local player = game.Players:GetPlayerFromCharacter(hit.Parent)
 			if player ~= nil and player == currentOwner then
+				print("[HelloKitty] Button", button.Name, "touched by owner", player.Name)
 				if hit.Parent:FindFirstChild("Humanoid") then
 					if hit.Parent.Humanoid.Health > 0 then
 						local PlayerStats = ServerStorage.PlayerMoney:FindFirstChild(player.Name)
@@ -460,7 +469,13 @@ for _, button in ipairs(buttons:GetChildren()) do
 							price = price and price.Value or 0
 							
 							if (button:FindFirstChild('Gamepass')) and (button.Gamepass.Value >= 1) then
-								if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId, button.Gamepass.Value) then
+								local hasPass = false
+								local success, result = pcall(function()
+									return game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId, button.Gamepass.Value)
+								end)
+								if success then hasPass = result end
+								
+								if hasPass then
 									Purchase({[1] = price,[2] = button,[3] = PlayerStats})
 								else
 									game:GetService('MarketplaceService'):PromptGamePassPurchase(player, button.Gamepass.Value)
@@ -586,6 +601,9 @@ local initialOwner = script.Parent.Owner.Value
 if initialOwner then
 	currentOwner = initialOwner
 	updateButtonColors()
+	print("[HelloKitty] Initial owner set:", currentOwner.Name)
+else
+	print("[HelloKitty] No initial owner")
 end
 
 print("✅ [HelloKitty] Purchase Handler ULTIMATE FIXED loaded!")

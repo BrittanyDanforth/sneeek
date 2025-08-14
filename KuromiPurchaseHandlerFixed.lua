@@ -460,7 +460,13 @@ for _, button in ipairs(buttons:GetChildren()) do
 							price = price and price.Value or 0
 							
 							if (button:FindFirstChild('Gamepass')) and (button.Gamepass.Value >= 1) then
-								if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId, button.Gamepass.Value) then
+								local hasPass = false
+								local success, result = pcall(function()
+									return game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId, button.Gamepass.Value)
+								end)
+								if success then hasPass = result end
+								
+								if hasPass then
 									Purchase({[1] = price,[2] = button,[3] = PlayerStats})
 								else
 									game:GetService('MarketplaceService'):PromptGamePassPurchase(player, button.Gamepass.Value)
