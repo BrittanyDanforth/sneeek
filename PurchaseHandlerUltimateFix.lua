@@ -120,21 +120,10 @@ local function fixButtonPositions()
 				local buttonHeight = head.Size.Y
 				local properY = groundY + (buttonHeight / 2) + 0.1
 
-				local currentY = head.Position.Y
-				if math.abs(currentY - properY) > 0.5 then
-					local targetPosition = Vector3.new(head.Position.X, properY, head.Position.Z)
-
-					if math.abs(currentY - properY) > 5 then
-						head.CFrame = CFrame.new(targetPosition) * (head.CFrame - head.CFrame.Position)
-						fixedCount = fixedCount + 1
-					else
-						TweenService:Create(head,
-							TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-							{CFrame = CFrame.new(targetPosition) * (head.CFrame - head.CFrame.Position)}
-						):Play()
-						fixedCount = fixedCount + 1
-					end
-				end
+				-- ALWAYS fix position, don't check if it's already close
+				local targetPosition = Vector3.new(head.Position.X, properY, head.Position.Z)
+				head.CFrame = CFrame.new(targetPosition) * (head.CFrame - head.CFrame.Position)
+				fixedCount = fixedCount + 1
 			end
 		end
 	end
