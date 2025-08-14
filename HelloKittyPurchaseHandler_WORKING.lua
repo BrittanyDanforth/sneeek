@@ -142,12 +142,14 @@ function updateButtonColors(buttonFolder, playerMoney)
 
 	for _, button in ipairs(buttonFolder:GetChildren()) do
 		local head = button:FindFirstChild("Head")
-		if not head or head.Transparency > 0 then continue end
+		-- Only update colors for visible, collidable buttons
+		if not head or head.Transparency > 0 or not head.CanCollide then continue end
 
 		local price = button:FindFirstChild("Price")
 		price = price and price.Value or 0
 
-		if head.CanCollide and price > 0 and playerMoney then
+		-- Only color buttons that have a price and are actually purchasable
+		if price > 0 and playerMoney then
 			if playerMoney.Value >= price then
 				head.BrickColor = BrickColor.new("Lime green")
 			else
@@ -773,6 +775,9 @@ function processPurchase(button, playerStats)
 	if head then
 		head.CanCollide = false
 
+		-- Store original position before animation
+		local originalPosition = head.Position
+		
 		TweenService:Create(head,
 			TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 			{
@@ -781,7 +786,13 @@ function processPurchase(button, playerStats)
 			}
 		):Play()
 
-		createMinimalParticles(head.Position)
+		createMinimalParticles(originalPosition)
+		
+		-- After animation completes, reset position to prevent floating on respawn
+		task.wait(0.4)
+		if head and head.Parent then
+			head.CFrame = head.CFrame - Vector3.new(0, 3, 0)
+		end
 	end
 
 	updateButtonColors(buttons, playerStats)
