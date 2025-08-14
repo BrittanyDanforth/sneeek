@@ -250,6 +250,9 @@ local function resetTycoonPurchases()
 
 	-- Clear purchased items tracking
 	purchasedItems = {}
+	
+	-- Clear collected parts table
+	collectedParts = {}
 
 	-- Destroy all existing cash parts
 	local destroyedParts = 0
@@ -275,9 +278,6 @@ local function resetTycoonPurchases()
 		obj:Destroy()
 	end
 	print("  ✓ [HelloKitty] Destroyed", objectCount, "purchased objects")
-
-	-- Clear the collectedParts table
-	collectedParts = {}
 
 	-- Disconnect all dependency connections
 	for button, connections in pairs(dependencyConnections) do
@@ -355,6 +355,7 @@ tycoonOwner.Changed:Connect(function()
 end)
 
 -- PART COLLECTOR
+-- Declare collectedParts in the proper scope (not inside reset function)
 local collectedParts = {}
 
 for _, collector in ipairs(essentials:GetChildren()) do
