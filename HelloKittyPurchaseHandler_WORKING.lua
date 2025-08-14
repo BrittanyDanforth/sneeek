@@ -263,6 +263,9 @@ local function setupButtonDependency(button)
 				head.CFrame = originalButtonStates[button.Name].CFrame
 			end
 
+			-- ALWAYS start with red color to prevent green flash
+			head.BrickColor = BrickColor.new("Really red")
+			
 			if Settings.ButtonsFadeIn then
 				head.Transparency = 0.7
 				TweenService:Create(head,
@@ -274,6 +277,16 @@ local function setupButtonDependency(button)
 			end
 			head.CanCollide = true
 			addSimpleHoverEffect(button)
+			
+			-- Update colors AFTER button is fully set up
+			task.defer(function()
+				if currentOwner then
+					local stats = ServerStorage.PlayerMoney:FindFirstChild(currentOwner.Name)
+					if stats then
+						updateButtonColors(buttons, stats)
+					end
+				end
+			end)
 			return
 		end
 
@@ -289,6 +302,9 @@ local function setupButtonDependency(button)
 					head.CFrame = originalButtonStates[button.Name].CFrame
 				end
 
+				-- ALWAYS start with red color to prevent green flash
+				head.BrickColor = BrickColor.new("Really red")
+				
 				if Settings.ButtonsFadeIn then
 					head.Transparency = 0.7
 					TweenService:Create(head,
@@ -300,15 +316,17 @@ local function setupButtonDependency(button)
 				end
 				head.CanCollide = true
 
-				-- Update colors
-				if currentOwner then
-					local stats = ServerStorage.PlayerMoney:FindFirstChild(currentOwner.Name)
-					if stats then
-						updateButtonColors(buttons, stats)
-					end
-				end
-
 				addSimpleHoverEffect(button)
+				
+				-- Update colors AFTER button is fully visible
+				task.defer(function()
+					if currentOwner then
+						local stats = ServerStorage.PlayerMoney:FindFirstChild(currentOwner.Name)
+						if stats then
+							updateButtonColors(buttons, stats)
+						end
+					end
+				end)
 			end
 		end)
 
@@ -847,7 +865,10 @@ if initialOwner then
 	currentOwner = initialOwner
 	local initialStats = ServerStorage.PlayerMoney:FindFirstChild(initialOwner.Name)
 	if initialStats then
-		updateButtonColors(buttons, initialStats)
+		-- Delay initial color update to prevent green flash
+		task.defer(function()
+			updateButtonColors(buttons, initialStats)
+		end)
 	end
 end
 
