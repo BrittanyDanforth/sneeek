@@ -261,23 +261,10 @@ local function setupButtonDependency(button)
 
 		-- Check if dependency is already met
 		local function checkDependency()
-			-- Get the dependency button
-			local depButton = buttons:FindFirstChild(dependency.Value)
-			if not depButton then 
-				warn("Dependency button not found:", dependency.Value)
-				return false 
-			end
-			
-			-- Get what object the dependency button spawns
-			local depObject = depButton:FindFirstChild("Object")
-			if not depObject or not depObject.Value then 
-				warn("Dependency button has no object:", dependency.Value)
-				return false 
-			end
-			
+			-- The dependency value IS the object name we're looking for
 			-- Check if that object exists in purchasedObjects
 			for _, obj in ipairs(purchasedObjects:GetChildren()) do
-				if obj.Name == depObject.Value then
+				if obj.Name == dependency.Value then
 					return true
 				end
 			end
@@ -304,34 +291,30 @@ local function setupButtonDependency(button)
 		-- Otherwise, wait for dependency
 		local connection = purchasedObjects.ChildAdded:Connect(function(child)
 			-- Check if this child satisfies our dependency
-			local depButton = buttons:FindFirstChild(dependency.Value)
-			if depButton then
-				local depObjName = depButton:FindFirstChild("Object")
-				if depObjName and depObjName.Value == child.Name then
-					-- Dependency met!
-					print("✅ Dependency met for", button.Name, "- Required:", dependency.Value)
-					
-					if Settings.ButtonsFadeIn then
-						head.Transparency = 0.7
-						TweenService:Create(head,
-							TweenInfo.new(Settings.FadeInTime or 0.5, Enum.EasingStyle.Quad),
-							{Transparency = 0}
-						):Play()
-					else
-						head.Transparency = 0
-					end
-					head.CanCollide = true
-
-					-- Update colors
-					if currentOwner then
-						local stats = ServerStorage.PlayerMoney:FindFirstChild(currentOwner.Name)
-						if stats then
-							updateButtonColors(buttons, stats)
-						end
-					end
-
-					addSimpleHoverEffect(button)
+			if child.Name == dependency.Value then
+				-- Dependency met!
+				print("✅ Dependency met for", button.Name, "- Required object spawned:", dependency.Value)
+				
+				if Settings.ButtonsFadeIn then
+					head.Transparency = 0.7
+					TweenService:Create(head,
+						TweenInfo.new(Settings.FadeInTime or 0.5, Enum.EasingStyle.Quad),
+						{Transparency = 0}
+					):Play()
+				else
+					head.Transparency = 0
 				end
+				head.CanCollide = true
+
+				-- Update colors
+				if currentOwner then
+					local stats = ServerStorage.PlayerMoney:FindFirstChild(currentOwner.Name)
+					if stats then
+						updateButtonColors(buttons, stats)
+					end
+				end
+
+				addSimpleHoverEffect(button)
 			end
 		end)
 
@@ -873,10 +856,8 @@ for _, button in ipairs(buttons:GetChildren()) do
 	local dep = button:FindFirstChild("Dependency")
 	local obj = button:FindFirstChild("Object")
 	if dep and dep.Value and dep.Value ~= "" then
-		local depButton = buttons:FindFirstChild(dep.Value)
-		local depObj = depButton and depButton:FindFirstChild("Object")
-		print("  " .. button.Name .. " → waits for '" .. (depObj and depObj.Value or "???") .. "' from button '" .. dep.Value .. "'")
+		print("  " .. button.Name .. " → waits for object: '" .. dep.Value .. "' | spawns: '" .. (obj and obj.Value or "nothing") .. "'")
 	else
-		print("  " .. button.Name .. " → no dependency (spawns: " .. (obj and obj.Value or "nothing") .. ")")
+		print("  " .. button.Name .. " → no dependency (first button) | spawns: '" .. (obj and obj.Value or "nothing") .. "'")
 	end
 end
