@@ -273,6 +273,20 @@ local function setupButtonDependency(button)
 
 		-- If dependency already met, show button
 		if checkDependency() then
+			-- FIX BUTTON POSITION BEFORE SHOWING IT!
+			local raycast = workspace:Raycast(
+				head.Position + Vector3.new(0, 10, 0),
+				Vector3.new(0, -50, 0),
+				RaycastParams.new()
+			)
+
+			if raycast then
+				local groundY = raycast.Position.Y
+				local buttonHeight = head.Size.Y
+				local properY = groundY + (buttonHeight / 2) + 0.1
+				head.CFrame = CFrame.new(head.Position.X, properY, head.Position.Z) * (head.CFrame - head.CFrame.Position)
+			end
+			
 			if Settings.ButtonsFadeIn then
 				head.Transparency = 0.7
 				TweenService:Create(head,
@@ -293,6 +307,20 @@ local function setupButtonDependency(button)
 			if child.Name == dependency.Value then
 				-- Dependency met!
 				print("✅ Dependency met for", button.Name, "- Required object spawned:", dependency.Value)
+				
+				-- FIX BUTTON POSITION BEFORE SHOWING IT!
+				local raycast = workspace:Raycast(
+					head.Position + Vector3.new(0, 10, 0),
+					Vector3.new(0, -50, 0),
+					RaycastParams.new()
+				)
+
+				if raycast then
+					local groundY = raycast.Position.Y
+					local buttonHeight = head.Size.Y
+					local properY = groundY + (buttonHeight / 2) + 0.1
+					head.CFrame = CFrame.new(head.Position.X, properY, head.Position.Z) * (head.CFrame - head.CFrame.Position)
+				end
 				
 				if Settings.ButtonsFadeIn then
 					head.Transparency = 0.7
