@@ -98,7 +98,8 @@ local function storeOriginalButtonStates()
 			originalButtonStates[button.Name] = {
 				Transparency = head.Transparency,
 				CanCollide = head.CanCollide,
-				BrickColor = head.BrickColor
+				BrickColor = head.BrickColor,
+				CFrame = head.CFrame  -- Store original position
 			}
 		end
 	end
@@ -107,49 +108,22 @@ end
 
 -- Fix button positions
 local function fixButtonPositions()
+	-- Simply restore all buttons to their original stored positions
 	local fixedCount = 0
-	local failedCount = 0
 
 	for _, button in ipairs(buttons:GetChildren()) do
 		local head = button:FindFirstChild("Head")
-		if head and head:IsA("BasePart") then
-			-- Try multiple times with a longer raycast
-			local fixed = false
-			for attempt = 1, 3 do
-				local raycast = workspace:Raycast(
-					head.Position + Vector3.new(0, 50, 0),  -- Start much higher
-					Vector3.new(0, -100, 0),  -- Cast much longer
-					RaycastParams.new()
-				)
-
-				if raycast then
-					local groundY = raycast.Position.Y
-					local buttonHeight = head.Size.Y
-					local properY = groundY + (buttonHeight / 2) + 0.1
-
-					-- Force position update
-					local targetPosition = Vector3.new(head.Position.X, properY, head.Position.Z)
-					head.CFrame = CFrame.new(targetPosition) * (head.CFrame.Rotation)
-					fixedCount = fixedCount + 1
-					fixed = true
-					break
-				else
-					task.wait(0.05)  -- Small delay between attempts
-				end
-			end
-			
-			if not fixed then
-				-- Fallback to a default height if raycast fails
-				failedCount = failedCount + 1
-				local defaultY = 0.5 + (head.Size.Y / 2)
-				head.CFrame = CFrame.new(Vector3.new(head.Position.X, defaultY, head.Position.Z)) * (head.CFrame.Rotation)
-				warn("⚠️ [MyMelody] Could not find ground for button:", button.Name, "- using default height")
+		if head and head:IsA("BasePart") and originalButtonStates[button.Name] then
+			local originalState = originalButtonStates[button.Name]
+			if originalState.CFrame then
+				head.CFrame = originalState.CFrame
+				fixedCount = fixedCount + 1
 			end
 		end
 	end
 
-	if fixedCount > 0 or failedCount > 0 then
-		print("✅ [MyMelody] Fixed", fixedCount, "button positions,", failedCount, "used fallback")
+	if fixedCount > 0 then
+		print("✅ [MyMelody] Restored", fixedCount, "buttons to original positions")
 	end
 end
 
@@ -284,36 +258,9 @@ local function setupButtonDependency(button)
 
 		-- If dependency already met, show button
 		if checkDependency() then
-			-- FIX BUTTON POSITION BEFORE SHOWING IT!
-			-- Use a more robust position fix with multiple attempts
-			local fixed = false
-			for attempt = 1, 3 do
-				local raycast = workspace:Raycast(
-					head.Position + Vector3.new(0, 50, 0),  -- Start higher
-					Vector3.new(0, -100, 0),  -- Cast longer
-					RaycastParams.new()
-				)
-
-				if raycast then
-					local groundY = raycast.Position.Y
-					local buttonHeight = head.Size.Y
-					local properY = groundY + (buttonHeight / 2) + 0.1
-					
-					-- Force the button to the correct position
-					head.CFrame = CFrame.new(Vector3.new(head.Position.X, properY, head.Position.Z)) * (head.CFrame.Rotation)
-					fixed = true
-					print("📍 [MyMelody] Fixed position for", button.Name, "at Y =", properY)
-					break
-				else
-					-- If raycast fails, try from a different position
-					task.wait(0.1)
-				end
-			end
-			
-			if not fixed then
-				-- Fallback: Use a default ground height
-				warn("⚠️ [MyMelody] Could not find ground for", button.Name, "- using default height")
-				head.CFrame = CFrame.new(Vector3.new(head.Position.X, 0.5 + (head.Size.Y / 2), head.Position.Z)) * (head.CFrame.Rotation)
+			-- Simply ensure button is at its original position
+			if originalButtonStates[button.Name] and originalButtonStates[button.Name].CFrame then
+				head.CFrame = originalButtonStates[button.Name].CFrame
 			end
 
 			if Settings.ButtonsFadeIn then
@@ -337,36 +284,9 @@ local function setupButtonDependency(button)
 				-- Dependency met!
 				print("✅ [MyMelody] Dependency met for", button.Name, "- Required object spawned:", dependency.Value)
 
-				-- FIX BUTTON POSITION BEFORE SHOWING IT!
-				-- Use a more robust position fix with multiple attempts
-				local fixed = false
-				for attempt = 1, 3 do
-					local raycast = workspace:Raycast(
-						head.Position + Vector3.new(0, 50, 0),  -- Start higher
-						Vector3.new(0, -100, 0),  -- Cast longer
-						RaycastParams.new()
-					)
-
-					if raycast then
-						local groundY = raycast.Position.Y
-						local buttonHeight = head.Size.Y
-						local properY = groundY + (buttonHeight / 2) + 0.1
-						
-						-- Force the button to the correct position
-						head.CFrame = CFrame.new(Vector3.new(head.Position.X, properY, head.Position.Z)) * (head.CFrame.Rotation)
-						fixed = true
-						print("📍 [MyMelody] Fixed position for", button.Name, "at Y =", properY)
-						break
-					else
-						-- If raycast fails, try from a different position
-						task.wait(0.1)
-					end
-				end
-				
-				if not fixed then
-					-- Fallback: Use a default ground height
-					warn("⚠️ [MyMelody] Could not find ground for", button.Name, "- using default height")
-					head.CFrame = CFrame.new(Vector3.new(head.Position.X, 0.5 + (head.Size.Y / 2), head.Position.Z)) * (head.CFrame.Rotation)
+				-- Simply ensure button is at its original position
+				if originalButtonStates[button.Name] and originalButtonStates[button.Name].CFrame then
+					head.CFrame = originalButtonStates[button.Name].CFrame
 				end
 
 				if Settings.ButtonsFadeIn then
@@ -826,11 +746,11 @@ function processPurchase(button, playerStats)
 
 	local head = button:FindFirstChild("Head")
 	if head then
+		-- Get the original position from stored state
+		local originalCFrame = originalButtonStates[button.Name] and originalButtonStates[button.Name].CFrame or head.CFrame
+		
 		head.CanCollide = false
 
-		-- Store original position before animation
-		local originalPosition = head.Position
-		
 		TweenService:Create(head,
 			TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 			{
@@ -839,12 +759,13 @@ function processPurchase(button, playerStats)
 			}
 		):Play()
 
-		createMinimalParticles(originalPosition)
+		createMinimalParticles(head.Position)
 		
-		-- After animation completes, reset position to prevent floating on respawn
+		-- After animation, instantly snap back to original position
 		task.wait(0.4)
 		if head and head.Parent then
-			head.CFrame = head.CFrame - Vector3.new(0, 3, 0)
+			-- Snap back to EXACT original position while staying invisible
+			head.CFrame = originalCFrame
 		end
 	end
 
