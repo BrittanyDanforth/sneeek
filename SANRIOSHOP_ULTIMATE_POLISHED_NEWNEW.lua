@@ -874,7 +874,8 @@ local screenGui = Utils.createElement("ScreenGui", {
 local animatedBg = Utils.createElement("Frame", {
 	BackgroundColor3 = Theme.shared.background,
 	Size = UDim2.new(1, 0, 1, 0),
-	ZIndex = 0
+	ZIndex = 0,
+	Visible = false  -- Hidden by default
 })
 
 -- Gradient animation
@@ -904,7 +905,8 @@ local bgDecorations = Utils.createElement("Frame", {
 	BackgroundTransparency = 1,
 	Size = UDim2.new(1, 0, 1, 0),
 	ZIndex = 1,
-	Name = "BackgroundDecorations"
+	Name = "BackgroundDecorations",
+	Visible = false  -- Hidden by default
 })
 
 -- Add floating elements
@@ -991,7 +993,11 @@ function ShopManager:open()
 	self.isAnimating = true
 	self.isOpen = true
 	
+	-- Show all UI elements
 	overlay.Visible = true
+	animatedBg.Visible = true
+	bgDecorations.Visible = true
+	
 	SoundSystem:play("open")
 	SoundSystem:play("sparkle")
 	
@@ -1032,6 +1038,54 @@ function ShopManager:open()
 	task.wait(0.6)
 	self.isAnimating = false
 end
+
+function ShopManager:close()
+	if not self.isOpen or self.isAnimating then return end
+	self.isAnimating = true
+	
+	SoundSystem:play("close")
+	
+	-- Fancy closing animation
+	Utils.tween(overlay, ANIM.MEDIUM, {
+		BackgroundTransparency = 1
+	})
+	
+	Utils.tween(mainPanel, ANIM.SMOOTH, {
+		Position = UDim2.new(0.5, 0, 1.5, 0)
+	})
+	
+	task.wait(0.4)
+	
+	-- Hide all UI elements
+	overlay.Visible = false
+	animatedBg.Visible = false
+	bgDecorations.Visible = false
+	
+	self.isOpen = false
+	self.isAnimating = false
+end
+
+function ShopManager:toggle()
+	if self.isOpen then
+		self:close()
+	else
+		self:open()
+	end
+end
+
+-- Keyboard controls
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	
+	if input.KeyCode == Enum.KeyCode.M then
+		ShopManager:toggle()
+	elseif input.KeyCode == Enum.KeyCode.Escape and ShopManager.isOpen then
+		ShopManager:close()
+	end
+end)
+
+-- Close button functionality (add this to header when created)
+-- Example: closeButton.MouseButton1Click:Connect(function() ShopManager:close() end)
 
 -- Initialize
 SoundSystem:init()
