@@ -35,6 +35,9 @@ local originalButtonStates = {}
 -- Track dependency connections
 local dependencyConnections = {}
 
+-- Track collected parts to prevent double collection
+local collectedParts = {}
+
 -- Set spawn colors
 local essentials = script.Parent:WaitForChild("Essentials")
 local spawn = essentials:WaitForChild("Spawn")
@@ -355,9 +358,6 @@ tycoonOwner.Changed:Connect(function()
 end)
 
 -- PART COLLECTOR
--- Declare collectedParts in the proper scope (not inside reset function)
-local collectedParts = {}
-
 for _, collector in ipairs(essentials:GetChildren()) do
 	if collector.Name == "PartCollector" then
 		collector.Touched:Connect(function(part)
