@@ -108,31 +108,48 @@ end
 -- Fix button positions
 local function fixButtonPositions()
 	local fixedCount = 0
+	local failedCount = 0
 
 	for _, button in ipairs(buttons:GetChildren()) do
 		local head = button:FindFirstChild("Head")
 		if head and head:IsA("BasePart") then
-			local raycast = workspace:Raycast(
-				head.Position + Vector3.new(0, 10, 0),
-				Vector3.new(0, -50, 0),
-				RaycastParams.new()
-			)
+			-- Try multiple times with a longer raycast
+			local fixed = false
+			for attempt = 1, 3 do
+				local raycast = workspace:Raycast(
+					head.Position + Vector3.new(0, 50, 0),  -- Start much higher
+					Vector3.new(0, -100, 0),  -- Cast much longer
+					RaycastParams.new()
+				)
 
-			if raycast then
-				local groundY = raycast.Position.Y
-				local buttonHeight = head.Size.Y
-				local properY = groundY + (buttonHeight / 2) + 0.1
+				if raycast then
+					local groundY = raycast.Position.Y
+					local buttonHeight = head.Size.Y
+					local properY = groundY + (buttonHeight / 2) + 0.1
 
-				-- ALWAYS fix position, don't check if it's already close
-				local targetPosition = Vector3.new(head.Position.X, properY, head.Position.Z)
-				head.CFrame = CFrame.new(targetPosition) * (head.CFrame - head.CFrame.Position)
-				fixedCount = fixedCount + 1
+					-- Force position update
+					local targetPosition = Vector3.new(head.Position.X, properY, head.Position.Z)
+					head.CFrame = CFrame.new(targetPosition) * (head.CFrame.Rotation)
+					fixedCount = fixedCount + 1
+					fixed = true
+					break
+				else
+					task.wait(0.05)  -- Small delay between attempts
+				end
+			end
+			
+			if not fixed then
+				-- Fallback to a default height if raycast fails
+				failedCount = failedCount + 1
+				local defaultY = 0.5 + (head.Size.Y / 2)
+				head.CFrame = CFrame.new(Vector3.new(head.Position.X, defaultY, head.Position.Z)) * (head.CFrame.Rotation)
+				warn("⚠️ [HelloKitty] Could not find ground for button:", button.Name, "- using default height")
 			end
 		end
 	end
 
-	if fixedCount > 0 then
-		print("✅ [HelloKitty] Fixed", fixedCount, "button positions")
+	if fixedCount > 0 or failedCount > 0 then
+		print("✅ [HelloKitty] Fixed", fixedCount, "button positions,", failedCount, "used fallback")
 	end
 end
 
@@ -268,17 +285,35 @@ local function setupButtonDependency(button)
 		-- If dependency already met, show button
 		if checkDependency() then
 			-- FIX BUTTON POSITION BEFORE SHOWING IT!
-			local raycast = workspace:Raycast(
-				head.Position + Vector3.new(0, 10, 0),
-				Vector3.new(0, -50, 0),
-				RaycastParams.new()
-			)
+			-- Use a more robust position fix with multiple attempts
+			local fixed = false
+			for attempt = 1, 3 do
+				local raycast = workspace:Raycast(
+					head.Position + Vector3.new(0, 50, 0),  -- Start higher
+					Vector3.new(0, -100, 0),  -- Cast longer
+					RaycastParams.new()
+				)
 
-			if raycast then
-				local groundY = raycast.Position.Y
-				local buttonHeight = head.Size.Y
-				local properY = groundY + (buttonHeight / 2) + 0.1
-				head.CFrame = CFrame.new(head.Position.X, properY, head.Position.Z) * (head.CFrame - head.CFrame.Position)
+				if raycast then
+					local groundY = raycast.Position.Y
+					local buttonHeight = head.Size.Y
+					local properY = groundY + (buttonHeight / 2) + 0.1
+					
+					-- Force the button to the correct position
+					head.CFrame = CFrame.new(Vector3.new(head.Position.X, properY, head.Position.Z)) * (head.CFrame.Rotation)
+					fixed = true
+					print("📍 [HelloKitty] Fixed position for", button.Name, "at Y =", properY)
+					break
+				else
+					-- If raycast fails, try from a different position
+					task.wait(0.1)
+				end
+			end
+			
+			if not fixed then
+				-- Fallback: Use a default ground height
+				warn("⚠️ [HelloKitty] Could not find ground for", button.Name, "- using default height")
+				head.CFrame = CFrame.new(Vector3.new(head.Position.X, 0.5 + (head.Size.Y / 2), head.Position.Z)) * (head.CFrame.Rotation)
 			end
 
 			if Settings.ButtonsFadeIn then
@@ -303,17 +338,35 @@ local function setupButtonDependency(button)
 				print("✅ [HelloKitty] Dependency met for", button.Name, "- Required object spawned:", dependency.Value)
 
 				-- FIX BUTTON POSITION BEFORE SHOWING IT!
-				local raycast = workspace:Raycast(
-					head.Position + Vector3.new(0, 10, 0),
-					Vector3.new(0, -50, 0),
-					RaycastParams.new()
-				)
+				-- Use a more robust position fix with multiple attempts
+				local fixed = false
+				for attempt = 1, 3 do
+					local raycast = workspace:Raycast(
+						head.Position + Vector3.new(0, 50, 0),  -- Start higher
+						Vector3.new(0, -100, 0),  -- Cast longer
+						RaycastParams.new()
+					)
 
-				if raycast then
-					local groundY = raycast.Position.Y
-					local buttonHeight = head.Size.Y
-					local properY = groundY + (buttonHeight / 2) + 0.1
-					head.CFrame = CFrame.new(head.Position.X, properY, head.Position.Z) * (head.CFrame - head.CFrame.Position)
+					if raycast then
+						local groundY = raycast.Position.Y
+						local buttonHeight = head.Size.Y
+						local properY = groundY + (buttonHeight / 2) + 0.1
+						
+						-- Force the button to the correct position
+						head.CFrame = CFrame.new(Vector3.new(head.Position.X, properY, head.Position.Z)) * (head.CFrame.Rotation)
+						fixed = true
+						print("📍 [HelloKitty] Fixed position for", button.Name, "at Y =", properY)
+						break
+					else
+						-- If raycast fails, try from a different position
+						task.wait(0.1)
+					end
+				end
+				
+				if not fixed then
+					-- Fallback: Use a default ground height
+					warn("⚠️ [HelloKitty] Could not find ground for", button.Name, "- using default height")
+					head.CFrame = CFrame.new(Vector3.new(head.Position.X, 0.5 + (head.Size.Y / 2), head.Position.Z)) * (head.CFrame.Rotation)
 				end
 
 				if Settings.ButtonsFadeIn then
