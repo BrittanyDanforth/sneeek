@@ -551,6 +551,27 @@ end
 local function loadAllObjects()
 	local criticalErrors = {}
 	
+	-- First, check if purchases folder exists and has items
+	if not purchases or #purchases:GetChildren() == 0 then
+		warn("⚠️ Purchases folder is empty or missing! Looking for objects in PurchasedObjects...")
+		
+		-- Alternative: Load from a different location if purchases is empty
+		local alternativeSources = {
+			ServerStorage:FindFirstChild("TycoonObjects"),
+			ServerStorage:FindFirstChild("Purchases"),
+			script.Parent:FindFirstChild("Objects"),
+			workspace:FindFirstChild("TycoonObjects")
+		}
+		
+		for _, source in ipairs(alternativeSources) do
+			if source and #source:GetChildren() > 0 then
+				purchases = source
+				print("  ✓ Found objects in:", source:GetFullName())
+				break
+			end
+		end
+	end
+	
 	for _, button in ipairs(buttons:GetChildren()) do
 		local objectName = button:FindFirstChild("Object")
 		objectName = objectName and objectName.Value
@@ -559,7 +580,10 @@ local function loadAllObjects()
 			local purchaseObject = purchases:FindFirstChild(objectName)
 			if purchaseObject then
 				Objects[objectName] = purchaseObject:Clone()
-				purchaseObject:Destroy()
+				-- Don't destroy the original if it's our only source
+				if purchases.Parent ~= ServerStorage then
+					purchaseObject:Destroy()
+				end
 			else
 				-- Check if this is a critical error
 				local isCritical = false
