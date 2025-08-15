@@ -48,9 +48,9 @@ Default raycasting hits the FIRST object in its path, which could be:
 
 ### The Fix Implementation
 ```lua
--- Collision Group System
+-- Collision Group System (using new API)
 local TYCOON_FLOOR_GROUP = "TycoonFloor"
-PhysicsService:CreateCollisionGroup(TYCOON_FLOOR_GROUP)
+PhysicsService:RegisterCollisionGroup(TYCOON_FLOOR_GROUP)
 
 -- Filtered Raycast
 local raycastParams = RaycastParams.new()

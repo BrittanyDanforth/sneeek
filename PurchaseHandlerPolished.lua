@@ -72,10 +72,10 @@ local CONFIG = {
 local TYCOON_FLOOR_GROUP = "TycoonFloor"
 local BUTTON_GROUP = "TycoonButtons"
 
--- Create collision groups if they don't exist
+-- Register collision groups if they don't exist (using new API)
 pcall(function()
-	PhysicsService:CreateCollisionGroup(TYCOON_FLOOR_GROUP)
-	PhysicsService:CreateCollisionGroup(BUTTON_GROUP)
+	PhysicsService:RegisterCollisionGroup(TYCOON_FLOOR_GROUP)
+	PhysicsService:RegisterCollisionGroup(BUTTON_GROUP)
 end)
 
 -- ========================================
