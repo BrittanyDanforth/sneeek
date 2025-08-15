@@ -161,11 +161,29 @@ end
 
 -- Get references
 local buttons = script.Parent:WaitForChild("Buttons")
-local purchases = script.Parent:WaitForChild("Purchases")
+local purchases = script.Parent:WaitForChild("Purchases", 5) -- Add timeout
 local purchasedObjects = script.Parent:WaitForChild("PurchasedObjects")
 local tycoonOwner = script.Parent:WaitForChild("Owner")
 local essentials = script.Parent:WaitForChild("Essentials")
 local spawn = essentials:WaitForChild("Spawn")
+
+-- If purchases folder not found, try alternative locations
+if not purchases then
+	warn("⚠️ Purchases folder not found in tycoon! Checking alternative locations...")
+	purchases = ServerStorage:FindFirstChild("TycoonPurchases") or 
+	           ServerStorage:FindFirstChild("Purchases") or
+	           workspace:FindFirstChild("TycoonPurchases")
+	           
+	if purchases then
+		print("✅ Found purchases at:", purchases:GetFullName())
+	else
+		-- Create empty folder as fallback
+		purchases = Instance.new("Folder")
+		purchases.Name = "Purchases"
+		purchases.Parent = script.Parent
+		warn("⚠️ Created empty Purchases folder - objects may need to be added manually")
+	end
+end
 
 -- Set spawn colors
 spawn.TeamColor = TeamColor
@@ -572,6 +590,20 @@ local function loadAllObjects()
 		end
 	end
 	
+	-- If still no purchases, try to extract from PurchasedObjects
+	if (not purchases or #purchases:GetChildren() == 0) and #purchasedObjects:GetChildren() > 0 then
+		print("  🔄 Attempting to extract objects from PurchasedObjects...")
+		purchases = Instance.new("Folder")
+		purchases.Name = "ExtractedPurchases"
+		purchases.Parent = script.Parent
+		
+		for _, obj in ipairs(purchasedObjects:GetChildren()) do
+			local clone = obj:Clone()
+			clone.Parent = purchases
+			print("    ✓ Extracted:", obj.Name)
+		end
+	end
+	
 	for _, button in ipairs(buttons:GetChildren()) do
 		local objectName = button:FindFirstChild("Object")
 		objectName = objectName and objectName.Value
@@ -581,7 +613,7 @@ local function loadAllObjects()
 			if purchaseObject then
 				Objects[objectName] = purchaseObject:Clone()
 				-- Don't destroy the original if it's our only source
-				if purchases.Parent ~= ServerStorage then
+				if purchases.Parent ~= ServerStorage and purchases.Name ~= "ExtractedPurchases" then
 					purchaseObject:Destroy()
 				end
 			else
@@ -1269,6 +1301,72 @@ end
 -- INITIALIZATION
 -- ========================================
 task.defer(function()
+	-- CRITICAL: Check if tycoon is pre-built and reset it
+	local needsReset = false
+	
+	-- Check if PurchasedObjects has items (pre-built tycoon)
+	if purchasedObjects and #purchasedObjects:GetChildren() > 0 then
+		print("⚠️ Pre-built tycoon detected! Found", #purchasedObjects:GetChildren(), "objects")
+		needsReset = true
+	end
+	
+	-- Check if there's already an owner (shouldn't be on fresh start)
+	if tycoonOwner.Value ~= nil then
+		print("⚠️ Tycoon already has owner:", tycoonOwner.Value.Name)
+		needsReset = true
+	end
+	
+	-- Check if money is not zero
+	if Money.Value > 0 then
+		print("⚠️ Tycoon has money:", Money.Value)
+		needsReset = true
+	end
+	
+	-- If tycoon needs reset, do it before initialization
+	if needsReset then
+		print("🔄 Resetting pre-built tycoon...")
+		
+		-- Clear all purchased objects
+		for _, obj in pairs(purchasedObjects:GetChildren()) do
+			obj:Destroy()
+		end
+		
+		-- Reset money
+		Money.Value = 0
+		
+		-- Clear owner
+		tycoonOwner.Value = nil
+		
+		-- Reset all buttons to initial state
+		for _, button in ipairs(buttons:GetChildren()) do
+			local head = button:FindFirstChild("Head")
+			if head then
+				local dependency = button:FindFirstChild("Dependency")
+				if dependency and dependency.Value and dependency.Value ~= "" then
+					-- Hide dependent buttons
+					head.Transparency = 1
+					head.CanCollide = false
+				else
+					-- Show base buttons
+					head.Transparency = 0
+					head.CanCollide = true
+					head.BrickColor = CONFIG.CANNOT_AFFORD_COLOR
+				end
+			end
+		end
+		
+		print("✅ Pre-built tycoon reset complete!")
+		
+		-- Fire TycoonReady signal after reset
+		if tycoonReadySignal then
+			task.wait(0.1) -- Let physics settle
+			tycoonReadySignal:Fire()
+			print("🚀 Fired TycoonReady signal after reset")
+		end
+	end
+	
+	-- Now proceed with normal initialization
+	
 	-- Store states and wait for ready signal
 	storeOriginalButtonStates()
 	
@@ -1286,7 +1384,7 @@ task.defer(function()
 		setupButtonDependency(button)
 	end
 	
-	-- Check for initial owner
+	-- Check for initial owner (should be nil after reset)
 	local initialOwner = script.Parent.Owner.Value
 	if initialOwner then
 		currentOwner = initialOwner
