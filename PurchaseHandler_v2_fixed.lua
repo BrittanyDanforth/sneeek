@@ -55,6 +55,8 @@ local CONFIG = {
 	BUTTON_PRESS_DEPTH = 0.05,       -- How far button moves when pressed
 	BUTTON_FADE_TIME = 0.4,          -- Purchase fade animation time
 	HOVER_SCALE = 1.02,              -- Button scale on hover
+	OBJECT_FADE_IN_ENABLED = true,   -- Fade new objects in instead of popping
+	OBJECT_FADE_IN_TIME = 0.5,       -- Time to fade new objects in
 
 	-- Price Tiers for Optimization (Fix #3)
 	PRICE_TIERS = {
@@ -252,6 +254,67 @@ local function createMinimalParticles(position, isSuccess)
 	task.wait(0.1)
 	emitter.Enabled = false
 	Debris:AddItem(attachment, 1)
+end
+
+-- Fade-in helpers for purchased models
+local function captureAndHideVisuals(model)
+	local originalPropsByInstance = {}
+	for _, inst in ipairs(model:GetDescendants()) do
+		if inst:IsA("BasePart") then
+			originalPropsByInstance[inst] = {
+				Transparency = inst.Transparency,
+				CanCollide = inst.CanCollide,
+				Anchored = inst.Anchored
+			}
+			inst.Transparency = 1
+			inst.CanCollide = false
+		elseif inst:IsA("Decal") or inst:IsA("Texture") then
+			originalPropsByInstance[inst] = { Transparency = inst.Transparency }
+			inst.Transparency = 1
+		elseif inst:IsA("ParticleEmitter") then
+			originalPropsByInstance[inst] = { Enabled = inst.Enabled }
+			inst.Enabled = false
+		elseif inst:IsA("PointLight") or inst:IsA("SpotLight") or inst:IsA("SurfaceLight") then
+			originalPropsByInstance[inst] = { Brightness = inst.Brightness }
+			inst.Brightness = 0
+		end
+	end
+	return originalPropsByInstance
+end
+
+local function fadeInVisuals(model, originalPropsByInstance)
+	local tweens = {}
+	for inst, props in pairs(originalPropsByInstance) do
+		if not inst or inst.Parent == nil then continue end
+		if inst:IsA("BasePart") then
+			local target = props.Transparency or 0
+			local tween = TweenService:Create(inst, TweenInfo.new(CONFIG.OBJECT_FADE_IN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = target})
+			tween:Play()
+			table.insert(tweens, tween)
+		elseif inst:IsA("Decal") or inst:IsA("Texture") then
+			local target = props.Transparency or 0
+			local tween = TweenService:Create(inst, TweenInfo.new(CONFIG.OBJECT_FADE_IN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = target})
+			tween:Play()
+			table.insert(tweens, tween)
+		elseif inst:IsA("PointLight") or inst:IsA("SpotLight") or inst:IsA("SurfaceLight") then
+			local target = props.Brightness or 1
+			local tween = TweenService:Create(inst, TweenInfo.new(CONFIG.OBJECT_FADE_IN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Brightness = target})
+			tween:Play()
+			table.insert(tweens, tween)
+		end
+	end
+	-- Restore collisions and particles after fade
+	task.delay(CONFIG.OBJECT_FADE_IN_TIME, function()
+		for inst, props in pairs(originalPropsByInstance) do
+			if not inst or inst.Parent == nil then continue end
+			if inst:IsA("BasePart") then
+				if props.CanCollide ~= nil then inst.CanCollide = props.CanCollide end
+				if props.Anchored ~= nil then inst.Anchored = props.Anchored end
+			elseif inst:IsA("ParticleEmitter") then
+				if props.Enabled ~= nil then inst.Enabled = props.Enabled end
+			end
+		end
+	end)
 end
 
 -- ========================================
@@ -1103,9 +1166,15 @@ function processPurchase(button, playerStats)
 		purchasedItems[objectName] = true
 	end
 
-	-- Spawn object
+	-- Spawn object with proper fade-in
 	if objectName and Objects[objectName] then
 		local newObject = Objects[objectName]:Clone()
+
+		local visuals
+		if CONFIG.OBJECT_FADE_IN_ENABLED then
+			visuals = captureAndHideVisuals(newObject)
+		end
+
 		newObject.Parent = purchasedObjects
 
 		print("🎁 Spawned: " .. objectName)
@@ -1113,27 +1182,23 @@ function processPurchase(button, playerStats)
 		-- Success effects
 		playSound(button:FindFirstChild("Head") or button, "success", 0.4)
 
-		-- Spawn animation
-		if newObject:IsA("Model") and newObject.PrimaryPart then
-			for _, part in ipairs(newObject:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.Size = part.Size * 0.95
-				end
-			end
+		-- Unified fade-in of the whole model (avoids piece-by-piece pop-in)
+		if CONFIG.OBJECT_FADE_IN_ENABLED then
+			fadeInVisuals(newObject, visuals or {})
 
-			for _, part in ipairs(newObject:GetDescendants()) do
-				if part:IsA("BasePart") then
-					TweenService:Create(part,
-						TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						{Size = part.Size / 0.95}
-					):Play()
-				end
+			local pos
+			if newObject:IsA("Model") then
+				pos = (newObject.PrimaryPart and newObject.PrimaryPart.Position) or newObject:GetPivot().Position
+			elseif newObject:IsA("BasePart") then
+				pos = newObject.Position
+			else
+				local head = button:FindFirstChild("Head")
+				pos = head and head.Position or script.Parent:GetPivot().Position
 			end
-
-			createMinimalParticles(newObject.PrimaryPart.Position, true)
+			createMinimalParticles(pos, true)
 		end
 
-		-- Enable scripts
+		-- Enable scripts last so visuals are consistent while fading in
 		for _, descendant in ipairs(newObject:GetDescendants()) do
 			if descendant:IsA("Script") or descendant:IsA("LocalScript") then
 				descendant.Disabled = false
